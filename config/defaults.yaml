@@ -1,0 +1,28 @@
+providers:
+  lxc:
+    supported_operating_systems:
+      - "bionic"
+    dns-nameserver: 8.8.8.8
+    require_host_packages:
+      - lxd
+      - lxc
+      - git
+      - screen
+      - tmux
+      - bridge-utils
+      - tcpdump
+      - net-tools
+      - man
+      - curl
+      - btrfs-tools
+    guest_packages:
+      - man
+      - net-tools
+      - traceroute
+      - nano
+      - vim
+      - bridge-utils
+      - radvd
+      - frr
+      - frr-pythontools
+    base_image_name: "vnet-manager-lxc-base"

@@ -1,5 +1,6 @@
 import sys
 from unipath import Path
+from os.path import join
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
 PROJECT_DIR = Path(__file__).absolute().ancestor(3)
@@ -27,4 +28,7 @@ LOGGING = {
     "root": {"handlers": ["console", "syslog"], "level": "DEBUG",},
 }
 
+# VNet Manager static settings / config
 VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
+CONFIG_DEFAULTS_LOCATION = join(PROJECT_DIR, "config/defaults.yaml")
+VNET_BRIDGE_NAME = PYTHON_PACKAGE_NAME + "-br"

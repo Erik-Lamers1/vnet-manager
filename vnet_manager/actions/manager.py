@@ -13,6 +13,11 @@ def action_manager(action, force=False):
     :param bool force: Do not ask for user input on dangerous actions, just do it
     """
     logger.debug("Initiating {} action".format(action))
+    if action == "version":
+        show_version()
+        return
+
+    # For these actions we need the config
     if action not in settings.VALID_ACTIONS:
         raise NotImplementedError("{} is not a valid action".format(action))
     if action == "list":
@@ -25,5 +30,3 @@ def action_manager(action, force=False):
         raise NotImplementedError("The list action has not been made yet, sorry.")
     if action == "destroy":
         raise NotImplementedError("The list action has not been made yet, sorry.")
-    if action == "version":
-        show_version()
