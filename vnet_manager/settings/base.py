@@ -26,3 +26,5 @@ LOGGING = {
     },
     "root": {"handlers": ["console", "syslog"], "level": "DEBUG",},
 }
+
+VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
