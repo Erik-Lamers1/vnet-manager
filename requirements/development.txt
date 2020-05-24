@@ -1,0 +1,5 @@
+-r test.txt
+
+# These requirements are only used for testing and development purposes
+black==19.10b0
+pre-commit==2.4.0
