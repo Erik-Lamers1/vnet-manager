@@ -1,2 +1,3 @@
 Unipath==1.1
 six==1.15.0
+colorama==0.4.3

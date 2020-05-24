@@ -1,7 +1,9 @@
 import sys
 from argparse import ArgumentParser
+from logging import INFO, DEBUG
 
 from vnet_manager.utils.version import show_version
+from vnet_manager.log import setup_console_logging
 
 
 def parse_args(args=None):
@@ -34,6 +36,7 @@ def main(args=None):
     if args.version:
         show_version()
         sys.exit(0)
+    setup_console_logging(verbosity=DEBUG if args.verbose else INFO)
 
 
 if __name__ == "__main__":
