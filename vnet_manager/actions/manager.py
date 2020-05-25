@@ -4,7 +4,7 @@ from os import EX_OK, EX_USAGE
 from vnet_manager.conf import settings
 from vnet_manager.config import get_config, validate_config
 from vnet_manager.utils.version import show_version
-from vnet_manager.operations.show_status import show_status
+from vnet_manager.operations.status import show_status
 
 logger = getLogger(__name__)
 
