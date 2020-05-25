@@ -32,3 +32,4 @@ LOGGING = {
 VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
 CONFIG_DEFAULTS_LOCATION = join(PROJECT_DIR, "config/defaults.yaml")
 VNET_BRIDGE_NAME = PYTHON_PACKAGE_NAME + "-br"
+SUPPORTED_MACHINE_TYPES = ["host", "router"]

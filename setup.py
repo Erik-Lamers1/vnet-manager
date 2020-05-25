@@ -13,6 +13,6 @@ setup(
     url="https://github.com/Erik-Lamers1/vnet-manager",
     packages=find_packages(exclude=["tests", "tests.*", "vnet_manager.tests", "vnet_manager.tests.*"]),
     author="Erik Lamers",
-    install_requires=["colorama", "unipath", "six"],
+    install_requires=["colorama", "unipath", "six", "PyYAML", "tabulate"],
     entry_points={"console_scripts": ["vnet-manager = vnet_manager.vnet_manager:main",],},
 )

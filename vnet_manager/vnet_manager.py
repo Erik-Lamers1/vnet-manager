@@ -28,11 +28,12 @@ def main(args=None):
     """
     Program entry point
     :param list args: The pre-cooked arguments to pass to the ArgParser
+    :return int: exit_code
     """
     args = parse_args(args)
     setup_console_logging(verbosity=DEBUG if args.verbose else INFO)
-    action_manager(args.action)
+    return action_manager(args.action, args.config, force=args.yes)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
