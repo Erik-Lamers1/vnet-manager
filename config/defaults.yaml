@@ -3,7 +3,7 @@ providers:
     supported_operating_systems:
       - "bionic"
     dns-nameserver: 8.8.8.8
-    require_host_packages:
+    required_host_packages:
       - lxd
       - lxc
       - git

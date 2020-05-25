@@ -1,32 +1,32 @@
 switches: 2
 
 machines:
-  - host1:
-      type: host
-      interfaces:
-        - eth12:
-            ipv4: 10.0.12.1/24
-            ipv6: 2001:0db8::1/64
-            mac: 00:00:00:00:00:12
-            bridge: 0
-  - router1:
-      type: router
-      interfaces:
-        - eth12:
-            ipv4: 10.0.12.2/24
-            ipv6: 2001:0db8:12::2/64
-            mac: 00:00:00:00:00:12
-            bridge: 0
-        - eth23:
-            ipv4: 10.0.23.2/24
-            ipv6: 2001:0db8:23::2/64
-            mac: 00:00:00:00:00:23
-            bridge: 1
-  - host3:
-      type: host
-      interfaces:
-        - eth23:
-            ipv4: 10.0.23.3/24
-            ipv6: 2001:0db8:23::3/64
-            mac: 00:00:00:00:00:23
-            bridge: 1
+  host1:
+    type: host
+    interfaces:
+      eth12:
+        ipv4: 10.0.12.1/24
+        ipv6: 2001:0db8::1/64
+        mac: 00:00:00:00:00:12
+        bridge: 0
+  router1:
+    type: router
+    interfaces:
+      eth12:
+        ipv4: 10.0.12.2/24
+        ipv6: 2001:0db8:12::2/64
+        mac: 00:00:00:00:00:12
+        bridge: 0
+      eth23:
+        ipv4: 10.0.23.2/24
+        ipv6: 2001:0db8:23::2/64
+        mac: 00:00:00:00:00:23
+        bridge: 1
+  host3:
+    type: host
+    interfaces:
+      eth23:
+        ipv4: 10.0.23.3/24
+        ipv6: 2001:0db8:23::3/64
+        mac: 00:00:00:00:00:23
+        bridge: 1
