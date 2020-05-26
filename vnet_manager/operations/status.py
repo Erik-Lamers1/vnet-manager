@@ -41,7 +41,7 @@ def get_lxc_machine_status(name, _):
 
 def wait_for_lxc_machine_status(container, status):
     """
-    Waits for a LXC machine to start up
+    Waits for a LXC machine to converge to the requested status
     :param pylxd.client.Client.container() container: The container to wait for
     :param str status: The status to wait for
     :raise TimeoutError if wait time expires
@@ -62,10 +62,10 @@ def wait_for_lxc_machine_status(container, status):
 
 def change_machine_status(config, status="stop", machines=None):
     """
-    Starts the provider start procedure for the passed machine names
+    Change the status of the passed machines to the requested state
     :param dict config: The config provided by get_config()
     :param str status: The status to change the machine to
-    :param list machines: A list of machine names to start, if None all will be started
+    :param list machines: A list of machine names to stop/start, if None all will be changed
     """
     # Check for valid status change
     if status not in settings.VALID_STATUSES:
@@ -77,14 +77,14 @@ def change_machine_status(config, status="stop", machines=None):
     # For each machine get the provider and execute the relevant status change function
     for machine in machines:
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][machine]["type"]]
-        logger.info("Starting machine {} with provider {}".format(machine, provider))
+        logger.info("{} machine {} with provider {}".format("Starting" if status == "start" else "Stopping", machine, provider))
         getattr(modules[__name__], "change_{}_machine_status".format(provider))(machine, status=status)
 
 
 def change_lxc_machine_status(machine, status="stop"):
     """
     Start a LXC machine
-    :param str machine: The name of the machine to start
+    :param str machine: The name of the machine to change the status of
     :param str status: The status to change the LXC machine to
     """
     client = get_lxd_client()
