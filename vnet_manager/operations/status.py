@@ -58,3 +58,49 @@ def wait_for_lxc_machine_status(container, status):
             )
             sleep(settings.LXC_STATUS_WAIT_SLEEP)
     raise TimeoutError("Wait time for container {} to converge to {} status expired, giving up".format(container.name, status))
+
+
+def change_machine_status(config, status="stop", machines=None):
+    """
+    Starts the provider start procedure for the passed machine names
+    :param dict config: The config provided by get_config()
+    :param str status: The status to change the machine to
+    :param list machines: A list of machine names to start, if None all will be started
+    """
+    # Check for valid status change
+    if status not in settings.VALID_STATUSES:
+        raise NotImplementedError("Requested machine status change {} unknown".format(status))
+
+    # Get all the machines from the config if not already provided
+    machines = machines if machines else config["machines"].keys()
+
+    # For each machine get the provider and execute the relevant status change function
+    for machine in machines:
+        provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][machine]["type"]]
+        logger.info("Starting machine {} with provider {}".format(machine, provider))
+        getattr(modules[__name__], "change_{}_machine_status".format(provider))(machine, status=status)
+
+
+def change_lxc_machine_status(machine, status="stop"):
+    """
+    Start a LXC machine
+    :param str machine: The name of the machine to start
+    :param str status: The status to change the LXC machine to
+    """
+    client = get_lxd_client()
+    try:
+        machine = client.containers.get(machine)
+    except NotFound:
+        logger.error("Tried to change machine status of LXC container {}, but it doesn't exist!")
+        return
+    # Change the status
+    if status == "stop":
+        machine.stop()
+    elif status == "start":
+        machine.start()
+    try:
+        required_state = "Stopped" if status == "stop" else "Running"
+        wait_for_lxc_machine_status(machine, required_state)
+        logger.debug("LXC container {} is running".format(machine.name))
+    except TimeoutError:
+        logger.error("Unable to change LXC status container {}, got timeout after issuing {} command".format(machine.name, status))

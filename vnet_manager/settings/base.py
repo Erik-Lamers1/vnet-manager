@@ -38,5 +38,6 @@ MACHINE_TYPE_PROVIDER_MAPPING = {
     "host": "lxc",
     "router": "lxc",
 }
+VALID_STATUSES = ["start", "stop"]
 LXC_MAX_STATUS_WAIT_ATTEMPTS = 15
 LXC_STATUS_WAIT_SLEEP = 4
