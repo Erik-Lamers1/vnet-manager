@@ -6,19 +6,26 @@ from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
 from vnet_manager.operations.status import show_status
+from vnet_manager.operations.start import start_machines
 
 logger = getLogger(__name__)
 
 
-def action_manager(action, config, force=False):
+def action_manager(action, config, force=False, machines=None):
     """
     Initiate an action
     :param str action: The action to preform
     :param str config: The path to the user config file
     :param bool force: Do not ask for user input on dangerous actions, just do it
+    :param list machines: The specific container to execute actions on
     :return int: exit_code
     """
+    # Check for valid action
+    if action not in settings.VALID_ACTIONS:
+        raise NotImplementedError("{} is not a valid action".format(action))
     logger.debug("Initiating {} action".format(action))
+
+    # These actions do not require the config
     if action == "version":
         show_version()
         return EX_OK
@@ -33,12 +40,10 @@ def action_manager(action, config, force=False):
         logger.critical("The config seems to have unrecoverable issues, please fix them before proceeding")
         return EX_USAGE
 
-    if action not in settings.VALID_ACTIONS:
-        raise NotImplementedError("{} is not a valid action".format(action))
     if action == "list":
         show_status(config)
     if action == "start":
-        raise NotImplementedError("The list action has not been made yet, sorry.")
+        start_machines(config, machines=machines)
     if action == "stop":
         raise NotImplementedError("The list action has not been made yet, sorry.")
     if action == "create":

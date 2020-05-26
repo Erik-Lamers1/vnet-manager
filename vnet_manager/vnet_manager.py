@@ -14,9 +14,9 @@ def parse_args(args=None):
 
     # Options
     parser.add_argument(
-        "--containers",
+        "--machines",
         nargs="*",
-        help="Just apply the actions on the following container names " "(default is all containers defined in the config file)",
+        help="Just apply the actions on the following machine names " "(default is all machines defined in the config file)",
     )
     parser.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print debug messages")
@@ -32,7 +32,7 @@ def main(args=None):
     """
     args = parse_args(args)
     setup_console_logging(verbosity=DEBUG if args.verbose else INFO)
-    return action_manager(args.action, args.config, force=args.yes)
+    return action_manager(args.action, args.config, force=args.yes, machines=args.machines)
 
 
 if __name__ == "__main__":
