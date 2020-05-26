@@ -14,6 +14,6 @@ setup(
     packages=find_packages(exclude=["tests", "tests.*", "vnet_manager.tests", "vnet_manager.tests.*"]),
     author="Erik Lamers",
     license="MIT",
-    install_requires=["colorama", "unipath", "six", "PyYAML", "tabulate"],
+    install_requires=["colorama", "unipath", "six", "PyYAML", "tabulate", "pylxd"],
     entry_points={"console_scripts": ["vnet-manager = vnet_manager.vnet_manager:main",],},
 )

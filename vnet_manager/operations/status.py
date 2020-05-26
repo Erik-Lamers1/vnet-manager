@@ -1,9 +1,10 @@
-from lxc import Container
+from pylxd.exceptions import NotFound
 from sys import modules
 from logging import getLogger
 from tabulate import tabulate
 
 from vnet_manager.conf import settings
+from vnet_manager.providers.lxc import get_lxd_client
 
 logger = getLogger(__name__)
 
@@ -29,6 +30,9 @@ def get_lxc_machine_status(name, _):
     :param name: str: The name of the machine
     :return: list: [name, state, provider]
     """
-    machine = Container(name)
-    state = machine.state if machine.defined else "NA"
-    return [name, state, "LXC"]
+    client = get_lxd_client()
+    try:
+        status = client.containers.get(name).status
+    except NotFound:
+        status = "NA"
+    return [name, status, "LXC"]
