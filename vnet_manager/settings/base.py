@@ -1,6 +1,7 @@
 import sys
 from unipath import Path
 from os.path import join
+from os import getenv
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
 PROJECT_DIR = Path(__file__).absolute().ancestor(3)
@@ -30,7 +31,7 @@ LOGGING = {
 
 # VNet Manager static settings / config
 VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
-CONFIG_DEFAULTS_LOCATION = join(PROJECT_DIR, "config/defaults.yaml")
+CONFIG_DEFAULTS_LOCATION = getenv("DEFAULT_CONFIG_PATH", join(PROJECT_DIR, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = PYTHON_PACKAGE_NAME + "-br"
 SUPPORTED_MACHINE_TYPES = ["host", "router"]
 MACHINE_TYPE_PROVIDER_MAPPING = {
