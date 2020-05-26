@@ -5,7 +5,7 @@ from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
-from vnet_manager.operations.status import show_status, change_machine_status
+from vnet_manager.operations.machine import show_status, change_machine_status
 
 logger = getLogger(__name__)
 
