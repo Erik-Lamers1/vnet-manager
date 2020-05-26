@@ -21,11 +21,11 @@ def show_status(config):
     for name, info in config["machines"].items():
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[info["type"]]
         # Call the relevant provider get_%s_machine_status function
-        statuses.append(getattr(modules[__name__], "get_{}_machine_status".format(provider))(name, info))
+        statuses.append(getattr(modules[__name__], "get_{}_machine_status".format(provider))(name))
     print(tabulate(statuses, headers=header, tablefmt="pretty"))
 
 
-def get_lxc_machine_status(name, _):
+def get_lxc_machine_status(name):
     """
     Gets the LXC machine state and returns a list
     :param name: str: The name of the machine
@@ -76,7 +76,13 @@ def change_machine_status(config, status="stop", machines=None):
 
     # For each machine get the provider and execute the relevant status change function
     for machine in machines:
+        # First check if the machine exists
+        if machine not in config["machines"]:
+            logger.error("Tried to {} machine {}, but there is no config entry for it, skipping...".format(status, machine))
+            continue
+        # Get the provider
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][machine]["type"]]
+        # Call the provider change_status function
         logger.info("{} machine {} with provider {}".format("Starting" if status == "start" else "Stopping", machine, provider))
         getattr(modules[__name__], "change_{}_machine_status".format(provider))(machine, status=status)
 
