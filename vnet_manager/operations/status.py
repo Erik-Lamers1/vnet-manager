@@ -98,6 +98,8 @@ def change_lxc_machine_status(machine, status="stop"):
         machine.stop()
     elif status == "start":
         machine.start()
+    # Take a short nap after issuing the start/stop command, so we might pass the first status check
+    sleep(1)
     try:
         required_state = "Stopped" if status == "stop" else "Running"
         wait_for_lxc_machine_status(machine, required_state)
