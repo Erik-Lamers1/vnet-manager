@@ -5,7 +5,7 @@ from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
-from vnet_manager.operations.machine import show_status, change_machine_status
+from vnet_manager.operations.machine import show_status, change_machine_status, create_machines
 
 logger = getLogger(__name__)
 
@@ -46,7 +46,7 @@ def action_manager(action, config, force=False, machines=None):
     if action == "stop":
         change_machine_status(config, machines=machines, status="stop")
     if action == "create":
-        raise NotImplementedError("The list action has not been made yet, sorry.")
+        create_machines(config, machines=machines)
     if action == "destroy":
         raise NotImplementedError("The list action has not been made yet, sorry.")
 
