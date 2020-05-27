@@ -206,7 +206,7 @@ def destroy_machines(config, machines=None, force=False):
     # Ask the user if he is sure
     if not force:
         request_confirmation(
-            message="Requesting confirmation of deletion for the following machines".format(" ".join(machines)),
+            message="Requesting confirmation of deletion for the following machines: {}".format(", ".join(machines)),
             prompt="This operation cannot be undone. Are you sure?! ",
         )
     else:
@@ -233,7 +233,7 @@ def destroy_lxc_machine(machine):
     try:
         container = client.containers.get(machine)
     except NotFound:
-        logger.warning("Tried to delete LXC machine {}, but it does not exist. Maybe it was already deleted?")
+        logger.warning("Tried to delete LXC machine {}, but it does not exist. Maybe it was already deleted?".format(machine))
         return
     # Check if the container is still running
     if container.status.lower() == "running":
