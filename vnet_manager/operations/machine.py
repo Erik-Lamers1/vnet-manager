@@ -153,7 +153,7 @@ def create_lxc_machines_from_base_image(config, containers):
         elif check_if_lxc_machine_exists(container):
             logger.error("A LXC container with the name {} already exists, skipping".format(container))
         # Check if LXC is the provider
-        elif settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][container]].lower() == "lxc":
+        elif settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][container]["type"]].lower() == "lxc":
             logger.debug("Selecting LXC machine {} for creation".format(container))
             containers_to_create.append(container)
         else:
@@ -167,7 +167,7 @@ def create_lxc_machines_from_base_image(config, containers):
         # First add eth0 (default), which does nothing
         device_config = {"eth0": {"type": "none"}}
         # Then for each interface in the config add the configuration for that interface to the interfaces_config dict
-        for inet_name, inet_config in config["machines"][container]["interface"].items():
+        for inet_name, inet_config in config["machines"][container]["interfaces"].items():
             device_config[inet_name] = {
                 "name": inet_name,  # The name of the interface inside the instance
                 "host_name": "{}-{}".format(container, inet_name),  # The name of the interface inside the host
