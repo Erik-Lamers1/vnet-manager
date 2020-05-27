@@ -18,6 +18,7 @@ def parse_args(args=None):
 
     # Options
     parser.add_argument(
+        "-m",
         "--machines",
         nargs="*",
         help="Just apply the actions on the following machine names " "(default is all machines defined in the config file)",
