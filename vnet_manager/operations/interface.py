@@ -43,5 +43,6 @@ def check_vnet_interface_status(config):
     for bridge in range(0, config["switches"]):
         ifname = settings.VNET_BRIDGE_NAME + str(bridge)
         if not check_if_interface_exists(ifname):
-            # TODO
-            pass
+            create_vnet_interface(ifname)
+        # Make sure the interface is up
+        IPRoute().link("set", ifname=ifname, state="up")
