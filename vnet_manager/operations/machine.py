@@ -1,4 +1,4 @@
-from pylxd.exceptions import NotFound
+from pylxd.exceptions import NotFound, LXDAPIException
 from sys import modules
 from logging import getLogger
 from tabulate import tabulate
@@ -112,7 +112,12 @@ def change_lxc_machine_status(machine, status="stop"):
     if status == "stop":
         machine.stop()
     elif status == "start":
-        machine.start()
+        try:
+            # On start we wait, as we might catch invalid configs
+            machine.start(wait=True)
+        except LXDAPIException as e:
+            logger.error("Unable to start LXC container {}, got error: {}".format(machine.name, e))
+            return
     # Take a short nap after issuing the start/stop command, so we might pass the first status check
     sleep(1)
     try:
