@@ -13,9 +13,9 @@ def get_config(path):
     :param str path: The path to load the user config from (overwrites the default config)
     :return: dict: The merged user and default configs
     """
-    logger.info("Getting user config")
+    logger.debug("Getting user config")
     user_config = get_yaml_content(path)
-    logger.info("Getting default config")
+    logger.debug("Getting default config")
     defaults = get_yaml_content(settings.CONFIG_DEFAULTS_LOCATION)
     logger.debug("Merging configs")
     # This statement requires Python3.5+

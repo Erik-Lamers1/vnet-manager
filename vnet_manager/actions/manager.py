@@ -23,7 +23,7 @@ def action_manager(action, config, force=False, machines=None):
     # Check for valid action
     if action not in settings.VALID_ACTIONS:
         raise NotImplementedError("{} is not a valid action".format(action))
-    logger.debug("Initiating {} action".format(action))
+    logger.info("Initiating {} action".format(action))
 
     # These actions do not require the config
     if action == "version":

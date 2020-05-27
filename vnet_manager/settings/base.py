@@ -27,6 +27,8 @@ LOGGING = {
         },
     },
     "root": {"handlers": ["console", "syslog"], "level": "DEBUG",},
+    # Silence debug heavy loggers here
+    "loggers": {"urllib3": {"level": "INFO",},},
 }
 
 # VNet Manager static settings / config
