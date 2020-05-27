@@ -1,10 +1,14 @@
 import sys
 from argparse import ArgumentParser
-from logging import INFO, DEBUG
+from logging import INFO, DEBUG, getLogger
+from os import EX_NOPERM
 
 from vnet_manager.conf import settings
 from vnet_manager.log import setup_console_logging
 from vnet_manager.actions.manager import action_manager
+from vnet_manager.utils.user import check_for_root_user
+
+logger = getLogger(__name__)
 
 
 def parse_args(args=None):
@@ -32,6 +36,9 @@ def main(args=None):
     """
     args = parse_args(args)
     setup_console_logging(verbosity=DEBUG if args.verbose else INFO)
+    if not check_for_root_user():
+        logger.critical("This program should only be run as root")
+        return EX_NOPERM
     return action_manager(args.action, args.config, force=args.yes, machines=args.machines)
 
 
