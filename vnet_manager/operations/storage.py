@@ -28,6 +28,7 @@ def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings
         raise RuntimeError("LXC storage pool {} already exists, cannot create duplicate".format(name))
 
     # Make it
+    logger.info("Creating LXC storage pool {} with driver {}".format(name, driver))
     client = get_lxd_client()
     try:
         client.storage_pools.create({"name": name, "driver": driver})
