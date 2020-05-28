@@ -16,7 +16,7 @@ def show_status(config):
     Print a table with the current machine statuses
     :param dict config: The config provided by vnet_manager.config.get_config()
     """
-    logger.info("Listing machine statuses")
+    logger.info("Listing VNet machine statuses")
     header = ["Name", "Status", "Provider"]
     statuses = []
     for name, info in config["machines"].items():

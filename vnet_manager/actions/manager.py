@@ -6,7 +6,12 @@ from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
 from vnet_manager.operations.machine import show_status, change_machine_status, create_machines, destroy_machines
-from vnet_manager.operations.interface import bring_up_vnet_interfaces, bring_down_vnet_interfaces, delete_vnet_interfaces
+from vnet_manager.operations.interface import (
+    bring_up_vnet_interfaces,
+    bring_down_vnet_interfaces,
+    delete_vnet_interfaces,
+    show_vnet_interface_status,
+)
 
 logger = getLogger(__name__)
 
@@ -43,6 +48,7 @@ def action_manager(action, config, force=False, machines=None, sniffer=False):
 
     if action == "list":
         show_status(config)
+        show_vnet_interface_status(config)
     if action == "start":
         bring_up_vnet_interfaces(config, sniffer=sniffer)
         change_machine_status(config, machines=machines, status="start")
