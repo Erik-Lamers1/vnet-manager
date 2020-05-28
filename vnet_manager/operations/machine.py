@@ -107,7 +107,7 @@ def change_lxc_machine_status(machine, status="stop"):
     try:
         machine = client.containers.get(machine)
     except NotFound:
-        logger.error("Tried to change machine status of LXC container {}, but it doesn't exist!")
+        logger.error("Tried to change machine status of LXC container {}, but it doesn't exist!".format(machine))
         return
     # Change the status
     if status == "stop":

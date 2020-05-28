@@ -54,12 +54,20 @@ def action_manager(action, config, force=False, machines=None, sniffer=False):
         change_machine_status(config, machines=machines, status="start")
     if action == "stop":
         change_machine_status(config, machines=machines, status="stop")
-        bring_down_vnet_interfaces(config)
+        # If specific machines are specified, we don't want to mess with the interfaces
+        if machines:
+            logger.warning("Not bringing down VNet interfaces as we are only stopping specific machines, this may leave lingering sniffers")
+        else:
+            bring_down_vnet_interfaces(config)
     if action == "create":
         create_machines(config, machines=machines)
     if action == "destroy":
         destroy_machines(config, machines=machines, force=force)
-        delete_vnet_interfaces(config)
+        # If specific machines are specified, we don't want to mess with the interfaces
+        if machines:
+            logger.warning("Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers")
+        else:
+            delete_vnet_interfaces(config)
 
     # Finally return all OK
     return EX_OK
