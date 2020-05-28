@@ -1,8 +1,7 @@
-from yaml import safe_load
-from os.path import isfile
 from logging import getLogger
 
 from vnet_manager.conf import settings
+from vnet_manager.utils.files import get_yaml_content
 
 logger = getLogger(__name__)
 
@@ -20,19 +19,3 @@ def get_config(path):
     logger.debug("Merging configs")
     # This statement requires Python3.5+
     return {**defaults, **user_config}
-
-
-def get_yaml_content(path):
-    """
-    Loads a YAML config file and returns the contents
-    :param str path: The YAML file to load
-    :return: dict: The YAML file contents
-    """
-    if not isfile(path):
-        logger.error("File {} does not exist".format(path))
-        raise IOError("File {} does not exist".format(path))
-
-    logger.debug("Loading YAML values from {}".format(path))
-    with open(path, "r") as fh:
-        content = safe_load(fh)
-    return content

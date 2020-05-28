@@ -1,7 +1,7 @@
 import shlex
 from pyroute2 import IPRoute
 from logging import getLogger
-from subprocess import check_call, CalledProcessError, Popen
+from subprocess import check_call, CalledProcessError, Popen, DEVNULL
 from os.path import join
 from psutil import process_iter
 from tabulate import tabulate
@@ -79,8 +79,6 @@ def create_vnet_interface(ifname):
     logger.info("Creating VNet bridge interface {}".format(ifname))
     ip = IPRoute()
     ip.link("add", ifname=ifname, kind="bridge")
-    # Block traffic to the outside world
-    create_vnet_interface_iptables_rules(ifname)
     # Bring up the interface
     configure_vnet_interface(ifname)
 
@@ -94,7 +92,7 @@ def create_vnet_interface_iptables_rules(ifname):
     rule = "OUTPUT -o {} -j DROP".format(ifname)
     # First we check if the rule already exists
     try:
-        check_call(shlex.split("iptables -C {}".format(rule)))
+        check_call(shlex.split("iptables -C {}".format(rule)), stderr=DEVNULL)
         logger.debug("IPtables DROP rule for VNet interface {} already exists, skipping creation".format(ifname))
     except CalledProcessError:
         logger.info("Creating IPtables DROP rule to the outside world for VNet interface {}".format(ifname))
@@ -129,6 +127,8 @@ def bring_up_vnet_interfaces(config, sniffer=False):
     for ifname in get_vnet_interface_names_from_config(config):
         if not check_if_interface_exists(ifname):
             create_vnet_interface(ifname)
+        # Block traffic to the outside world
+        create_vnet_interface_iptables_rules(ifname)
         # Make sure the interface is up
         ip.link("set", ifname=ifname, state="up")
         if sniffer and not check_if_sniffer_exists(ifname):
