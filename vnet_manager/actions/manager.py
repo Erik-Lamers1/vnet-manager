@@ -6,7 +6,7 @@ from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
 from vnet_manager.operations.machine import show_status, change_machine_status, create_machines, destroy_machines
-from vnet_manager.operations.interface import check_vnet_interface_status, start_tcpdump_on_vnet_interface
+from vnet_manager.operations.interface import bring_up_vnet_interfaces, bring_down_vnet_interfaces, delete_vnet_interfaces
 
 logger = getLogger(__name__)
 
@@ -44,14 +44,16 @@ def action_manager(action, config, force=False, machines=None, sniffer=False):
     if action == "list":
         show_status(config)
     if action == "start":
-        check_vnet_interface_status(config, sniffer=sniffer)
+        bring_up_vnet_interfaces(config, sniffer=sniffer)
         change_machine_status(config, machines=machines, status="start")
     if action == "stop":
         change_machine_status(config, machines=machines, status="stop")
+        bring_down_vnet_interfaces(config)
     if action == "create":
         create_machines(config, machines=machines)
     if action == "destroy":
         destroy_machines(config, machines=machines, force=force)
+        delete_vnet_interfaces(config)
 
     # Finally return all OK
     return EX_OK
