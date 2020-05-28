@@ -159,8 +159,12 @@ def bring_down_vnet_interfaces(config):
     ip = IPRoute()
     for ifname in get_vnet_interface_names_from_config(config):
         # Set the interface to down status
-        logger.info("Bringing down VNet interface {}".format(ifname))
-        ip.link("set", ifname=ifname, state="down")
+        if check_if_interface_exists(ifname):
+            logger.info("Bringing down VNet interface {}".format(ifname))
+            ip.link("set", ifname=ifname, state="down")
+        else:
+            # Device doesn't exist
+            logger.warning("Tried to bring down VNet interface {}, but the interface doesn't exist".format(ifname))
 
 
 def delete_vnet_interfaces(config):
@@ -172,8 +176,12 @@ def delete_vnet_interfaces(config):
     ip = IPRoute()
     for ifname in get_vnet_interface_names_from_config(config):
         # Delete the interface
-        logger.info("Deleting VNet interface {}".format(ifname))
-        ip.link("del", ifname=ifname)
+        if check_if_interface_exists(ifname):
+            logger.info("Deleting VNet interface {}".format(ifname))
+            ip.link("del", ifname=ifname)
+        else:
+            # Device doesn't exist
+            logger.info("Tried to delete VNet interface {}, but it is already gone. That's okay".format(ifname))
 
 
 def start_tcpdump_on_vnet_interface(ifname):
