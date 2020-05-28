@@ -23,10 +23,13 @@ def parse_args(args=None):
         nargs="*",
         help="Just apply the actions on the following machine names " "(default is all machines defined in the config file)",
     )
+    parser.add_argument("-s", "--sniffer", action="store_true", help="Start a TCPdump sniffer on the VNet interfaces")
     parser.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print debug messages")
-
-    return parser.parse_args(args=args)
+    args = parser.parse_args(args=args)
+    if args.sniffer and not args.action == "start":
+        parser.error("The sniffer option only makes sense with the 'start' action")
+    return args
 
 
 def main(args=None):
@@ -40,7 +43,7 @@ def main(args=None):
     if not check_for_root_user():
         logger.critical("This program should only be run as root")
         return EX_NOPERM
-    return action_manager(args.action, args.config, force=args.yes, machines=args.machines)
+    return action_manager(args.action, args.config, force=args.yes, machines=args.machines, sniffer=args.sniffer)
 
 
 if __name__ == "__main__":

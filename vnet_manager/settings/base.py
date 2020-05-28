@@ -35,6 +35,7 @@ LOGGING = {
 VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
 CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(PROJECT_DIR, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
+VNET_SNIFFER_PCAP_DIR = getenv("VNET_SNIFFER_PCAP_DIR", "/tmp")
 SUPPORTED_MACHINE_TYPES = ["host", "router"]
 MACHINE_TYPE_PROVIDER_MAPPING = {
     "host": "lxc",

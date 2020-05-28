@@ -6,18 +6,19 @@ from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
 from vnet_manager.operations.machine import show_status, change_machine_status, create_machines, destroy_machines
-from vnet_manager.operations.interface import check_vnet_interface_status
+from vnet_manager.operations.interface import check_vnet_interface_status, start_tcpdump_on_vnet_interface
 
 logger = getLogger(__name__)
 
 
-def action_manager(action, config, force=False, machines=None):
+def action_manager(action, config, force=False, machines=None, sniffer=False):
     """
     Initiate an action
     :param str action: The action to preform
     :param str config: The path to the user config file
     :param bool force: Do not ask for user input on dangerous actions, just do it
     :param list machines: The specific container to execute actions on
+    :param bool sniffer: Start a sniffer on the VNet interfaces on start
     :return int: exit_code
     """
     # Check for valid action
@@ -43,7 +44,7 @@ def action_manager(action, config, force=False, machines=None):
     if action == "list":
         show_status(config)
     if action == "start":
-        check_vnet_interface_status(config)
+        check_vnet_interface_status(config, sniffer=sniffer)
         change_machine_status(config, machines=machines, status="start")
     if action == "stop":
         change_machine_status(config, machines=machines, status="stop")
