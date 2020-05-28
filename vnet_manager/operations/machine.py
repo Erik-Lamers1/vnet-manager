@@ -124,7 +124,7 @@ def change_lxc_machine_status(machine, status="stop"):
     try:
         required_state = "Stopped" if status == "stop" else "Running"
         wait_for_lxc_machine_status(machine, required_state)
-        logger.debug("LXC container {} is running".format(machine.name))
+        logger.debug("LXC container {} is {}".format(machine.name, machine.state().status))
     except TimeoutError:
         logger.error("Unable to change LXC status container {}, got timeout after issuing {} command".format(machine.name, status))
 
