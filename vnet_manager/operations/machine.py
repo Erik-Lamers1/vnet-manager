@@ -5,8 +5,9 @@ from tabulate import tabulate
 from time import sleep
 
 from vnet_manager.conf import settings
-from vnet_manager.providers.lxc import get_lxd_client, create_vnet_lxc_environment
+from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.utils.user import request_confirmation
+from vnet_manager.environment.lxc import create_vnet_lxc_environment
 
 logger = getLogger(__name__)
 
