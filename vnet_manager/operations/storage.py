@@ -7,7 +7,7 @@ from vnet_manager.conf import settings
 logger = getLogger(__name__)
 
 
-def check_for_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME):
+def check_if_lxc_storage_pool_exists(name=settings.LXC_STORAGE_POOL_NAME):
     """
     Check for the existence of the LXC storage pool defined in the settings
     :param str name: The name of the storage pool to check for (default from the settings)
@@ -24,7 +24,7 @@ def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings
     :param str driver: The driver to use (default from settings)
     """
     # Sanity check, we don't want to create duplicate pools
-    if check_for_lxc_storage_pool(name):
+    if check_if_lxc_storage_pool_exists(name):
         raise RuntimeError("LXC storage pool {} already exists, cannot create duplicate".format(name))
 
     # Make it
