@@ -255,16 +255,19 @@ def create_lxc_base_image_container(config):
 
     # Now create the base image machine
     client = get_lxd_client()
+
     machine_config = {
         "name": settings.LXC_BASE_IMAGE_MACHINE_NAME,
-        "ephemeral": True,
         "architecture": "x86_64",
         "profiles": [settings.LXC_VNET_PROFILE],
+        "ephemeral": True,
+        "config": {},
+        "devices": {},
         "source": {
             "type": "image",
             "properties": {
-                "os": config["providers"]["lxc"]["base_img"]["os"],
-                "release": config["providers"]["lxc"]["base_img"]["release"],
+                "os": config["providers"]["lxc"]["base_image"]["os"],
+                "release": config["providers"]["lxc"]["base_image"]["release"],
                 "architecture": "x86_64",
             },
         },
