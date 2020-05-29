@@ -5,6 +5,7 @@ from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
+from vnet_manager.environment.lxc import create_vnet_lxc_environment
 from vnet_manager.operations.machine import show_status, change_machine_status, create_machines, destroy_machines
 from vnet_manager.operations.interface import (
     bring_up_vnet_interfaces,
@@ -59,6 +60,7 @@ def action_manager(action, config, machines=None, sniffer=False):
         else:
             bring_down_vnet_interfaces(config)
     if action == "create":
+        create_vnet_lxc_environment(config)
         create_machines(config, machines=machines)
     if action == "destroy":
         destroy_machines(config, machines=machines)

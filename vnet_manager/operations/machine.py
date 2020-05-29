@@ -7,7 +7,6 @@ from time import sleep
 from vnet_manager.conf import settings
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.utils.user import request_confirmation
-from vnet_manager.environment.lxc import create_vnet_lxc_environment
 
 logger = getLogger(__name__)
 
@@ -165,10 +164,6 @@ def create_lxc_machines_from_base_image(config, containers):
             containers_to_create.append(container)
         else:
             logger.debug("Machine {} is not provided by LXC, skipping LXC container creation".format(container))
-
-    # If there is any LXC machines to create, make sure the VNet environment is setup
-    if containers_to_create:
-        create_vnet_lxc_environment()
 
     # Create it
     client = get_lxd_client()

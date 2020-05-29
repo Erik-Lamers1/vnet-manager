@@ -14,6 +14,11 @@ def create_vnet_lxc_environment(config):
     Checks and creates the LXC environment
     param: dict config: The config created by get_config()
     """
+    # Check if there are any LXC machines in the config
+    if "lxc" not in [settings.MACHINE_TYPE_PROVIDER_MAPPING[machine["type"]] for machine in config["machines"].values()]:
+        logger.debug("Skipping LXC environment creation, no LXC machines in config")
+        return
+
     # Check if the storage pool exists
     if not check_if_lxc_storage_pool_exists(settings.LXC_STORAGE_POOL_NAME):
         logger.info("VNet LXC storage pool does not exist, creating it")
