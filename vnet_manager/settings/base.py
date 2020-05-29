@@ -49,3 +49,4 @@ LXC_STATUS_WAIT_SLEEP = 4
 LXC_STORAGE_POOL_NAME = "vnet-pool"
 LXC_STORAGE_POOL_DRIVER = "btrfs"
 LXC_BASE_IMAGE_ALIAS = getenv("VNET_LXC_BASE_IMAGE", "vnet-base-image")
+LXC_BASE_IMAGE_MACHINE_NAME = "vnet-base-machine"

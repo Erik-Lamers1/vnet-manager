@@ -46,9 +46,10 @@ def validate_config(config):
             if "base_image_name" not in values:
                 logger.error("No base_image_name found for provider {}".format(name) + default_message)
                 all_ok = False
-            elif not isinstance(values["base_image_name"], str):
+            elif not isinstance(values["base_image_name"], dict):
                 logger.error("base_image_name for provider {} is not a string.".format(name) + default_message)
                 all_ok = False
+            # TODO: Validate base image parameters
 
     # Switches
     if "switches" not in config:

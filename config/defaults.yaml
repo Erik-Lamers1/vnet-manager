@@ -25,4 +25,6 @@ providers:
       - radvd
       - frr
       - frr-pythontools
-    base_image_name: "vnet-manager-lxc-base"
+    base_image_name:
+      os: ubuntu
+      release: 18.04
