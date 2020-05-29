@@ -265,11 +265,9 @@ def create_lxc_base_image_container(config):
         "devices": {},
         "source": {
             "type": "image",
-            "properties": {
-                "os": config["providers"]["lxc"]["base_image"]["os"],
-                "release": config["providers"]["lxc"]["base_image"]["release"],
-                "architecture": "x86_64",
-            },
+            "protocol": str(config["providers"]["lxc"]["base_image"]["protocol"]),
+            "server": config["providers"]["lxc"]["base_image"]["server"],
+            "alias": str(config["providers"]["lxc"]["base_image"]["os"]),
         },
     }
     logger.info("Creating LXC base image container")
