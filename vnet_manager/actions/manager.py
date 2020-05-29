@@ -16,12 +16,11 @@ from vnet_manager.operations.interface import (
 logger = getLogger(__name__)
 
 
-def action_manager(action, config, force=False, machines=None, sniffer=False):
+def action_manager(action, config, machines=None, sniffer=False):
     """
     Initiate an action
     :param str action: The action to preform
     :param str config: The path to the user config file
-    :param bool force: Do not ask for user input on dangerous actions, just do it
     :param list machines: The specific container to execute actions on
     :param bool sniffer: Start a sniffer on the VNet interfaces on start
     :return int: exit_code
@@ -62,7 +61,7 @@ def action_manager(action, config, force=False, machines=None, sniffer=False):
     if action == "create":
         create_machines(config, machines=machines)
     if action == "destroy":
-        destroy_machines(config, machines=machines, force=force)
+        destroy_machines(config, machines=machines)
         # If specific machines are specified, we don't want to mess with the interfaces
         if machines:
             logger.warning("Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers")

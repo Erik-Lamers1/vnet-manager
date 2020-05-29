@@ -1,7 +1,7 @@
 import sys
 from argparse import ArgumentParser
 from logging import INFO, DEBUG, getLogger
-from os import EX_NOPERM
+from os import EX_NOPERM, environ
 
 from vnet_manager.conf import settings
 from vnet_manager.log import setup_console_logging
@@ -39,11 +39,16 @@ def main(args=None):
     :return int: exit_code
     """
     args = parse_args(args)
+    # Set the VNET_FORCE variable, if --yes is given this will answer yes to all questions
+    environ[settings.VNET_FORCE_ENV_VAR] = "true" if args.yes else "false"
+    # Setup logging
     setup_console_logging(verbosity=DEBUG if args.verbose else INFO)
+    # Most VNet operation require root. So, do a root check
     if not check_for_root_user():
         logger.critical("This program should only be run as root")
         return EX_NOPERM
-    return action_manager(args.action, args.config, force=args.yes, machines=args.machines, sniffer=args.sniffer)
+    # Let the action manager handle the rest
+    return action_manager(args.action, args.config, machines=args.machines, sniffer=args.sniffer)
 
 
 if __name__ == "__main__":

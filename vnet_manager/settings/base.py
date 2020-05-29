@@ -42,6 +42,7 @@ MACHINE_TYPE_PROVIDER_MAPPING = {
     "router": "lxc",
 }
 VALID_STATUSES = ["start", "stop"]
+VNET_FORCE_ENV_VAR = "VNET_FORCE"
 
 # LXC specific settings
 LXC_MAX_STATUS_WAIT_ATTEMPTS = 15

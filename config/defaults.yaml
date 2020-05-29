@@ -25,6 +25,6 @@ providers:
       - radvd
       - frr
       - frr-pythontools
-    base_image_name:
+    base_image:
       os: ubuntu
       release: 18.04

@@ -43,10 +43,10 @@ def validate_config(config):
             if "guest_packages" not in values or not isinstance(values["guest_packages"], list):
                 logger.warning("Guest packages not correctly set for provider {}. Defaulting to empty list".format(name))
                 values["guest_packages"] = list()
-            if "base_image_name" not in values:
+            if "base_image" not in values:
                 logger.error("No base_image_name found for provider {}".format(name) + default_message)
                 all_ok = False
-            elif not isinstance(values["base_image_name"], dict):
+            elif not isinstance(values["base_image"], dict):
                 logger.error("base_image_name for provider {} is not a string.".format(name) + default_message)
                 all_ok = False
             # TODO: Validate base image parameters

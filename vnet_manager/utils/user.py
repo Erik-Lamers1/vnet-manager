@@ -1,6 +1,8 @@
 import sys
-from os import geteuid
+from os import geteuid, getenv
 from logging import getLogger
+
+from vnet_manager.conf import settings
 
 logger = getLogger(__name__)
 
@@ -28,6 +30,11 @@ def request_confirmation(message=None, prompt="Continue? (yes/no) ", func=sys.ex
     :param kwargs:
         Keyword arguments passed to the above function.
     """
+    # Check if the force env var is set
+    if getenv(settings.VNET_FORCE_ENV_VAR) == "true":
+        logger.debug("Yes argument passed, skipping user confirmation")
+        return
+
     if args is None and func == sys.exit:
         args = [1]
     elif args is None:
