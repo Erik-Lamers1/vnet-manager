@@ -1,3 +1,4 @@
+import shlex
 from logging import getLogger
 
 from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_image_from_container
@@ -54,25 +55,31 @@ def configure_lxc_base_machine(config):
     client = get_lxd_client()
     machine = client.containers.get(settings.LXC_BASE_IMAGE_MACHINE_NAME)
     # Set the FRR routing source and key
-    machine.execute("curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add")
+    machine.execute(shlex.split("curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add"))
     machine.execute(
-        "echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} > /etc/apt/sources.list.d/frr.list".format(settings.FRR_RELEASE)
+        shlex.split(
+            "echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} > /etc/apt/sources.list.d/frr.list".format(settings.FRR_RELEASE)
+        )
     )
     # Update and install packages
-    machine.execute("apt-get update")
+    machine.execute(shlex.split("apt-get update"))
     machine.execute(
-        "DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'"
+        shlex.split(
+            "DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'"
+        )
     )
     machine.execute(
-        "DEBIAN_FRONTEND=noninteractive apt-get install -y -o "
-        "Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
-            " ".join(config["providers"]["lxc"]["guest_packages"])
+        shlex.split(
+            "DEBIAN_FRONTEND=noninteractive apt-get install -y -o "
+            "Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
+                " ".join(config["providers"]["lxc"]["guest_packages"])
+            )
         )
     )
     # Disable radvd by default
-    machine.execute("systemctl disable radvd")
+    machine.execute(shlex.split("systemctl disable radvd"))
     # Set the default VTYSH_PAGER
-    machine.execute("export VTYSH_PAGER=more >> ~/.bashrc")
+    machine.execute(shlex.split("export VTYSH_PAGER=more >> ~/.bashrc"))
     # All done, stop the container
     machine.stop(wait=True)
     logger.debug("LXC base machine {} successfully configured".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))
