@@ -263,7 +263,15 @@ def create_lxc_base_image_container(config):
         "profiles": [settings.LXC_VNET_PROFILE],
         "ephemeral": True,
         "config": {},
-        "devices": {},
+        "devices": {
+            "eth0": {
+                "name": "eth0",
+                "parent": "lxdbr0",
+                "type": "nic",
+                "nictype": "bridged",
+                "host_name": "{}-eth0".format(settings.LXC_BASE_IMAGE_MACHINE_NAME),
+            }
+        },
         "source": {
             "type": "image",
             "protocol": str(config["providers"]["lxc"]["base_image"]["protocol"]),
