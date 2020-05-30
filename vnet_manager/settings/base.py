@@ -1,6 +1,6 @@
 import sys
 from unipath import Path
-from os.path import join
+from os.path import join, expanduser
 from os import getenv
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
@@ -33,7 +33,7 @@ LOGGING = {
 
 # VNet Manager static settings / config
 VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
-CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(PROJECT_DIR, "config/defaults.yaml"))
+CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(expanduser("~"), PYTHON_PACKAGE_NAME, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
 VNET_SNIFFER_PCAP_DIR = getenv("VNET_SNIFFER_PCAP_DIR", "/tmp")
 SUPPORTED_MACHINE_TYPES = ["host", "router"]
