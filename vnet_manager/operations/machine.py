@@ -261,7 +261,7 @@ def create_lxc_base_image_container(config):
         "name": settings.LXC_BASE_IMAGE_MACHINE_NAME,
         "architecture": "x86_64",
         "profiles": [settings.LXC_VNET_PROFILE],
-        "ephemeral": True,
+        "ephemeral": False,
         "config": {},
         "devices": {
             "eth0": {
