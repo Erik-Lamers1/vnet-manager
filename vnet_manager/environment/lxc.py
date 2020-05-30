@@ -9,7 +9,7 @@ from vnet_manager.conf import settings
 logger = getLogger(__name__)
 
 
-def create_vnet_lxc_environment(config):
+def ensure_vnet_lxc_environment(config):
     """
     Checks and creates the LXC environment
     param: dict config: The config created by get_config()
@@ -37,6 +37,6 @@ def create_vnet_lxc_environment(config):
     if not check_if_lxc_image_exists(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True):
         logger.info("Base image does not exist, creating it")
         create_lxc_base_image_container(config)
-        create_lxc_image_from_container(settings.LXC_BASE_IMAGE_MACHINE_NAME)
+        create_lxc_image_from_container(settings.LXC_BASE_IMAGE_MACHINE_NAME, alias=settings.LXC_BASE_IMAGE_ALIAS)
     else:
         logger.debug("Base image {} found".format(settings.LXC_BASE_IMAGE_ALIAS))
