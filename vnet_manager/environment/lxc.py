@@ -54,34 +54,36 @@ def configure_lxc_base_machine(config):
     logger.info("Configuring LXC base machine {}, this might take a while".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))
     client = get_lxd_client()
     machine = client.containers.get(settings.LXC_BASE_IMAGE_MACHINE_NAME)
+
+    def execute_and_log(command, **kwargs):
+        result = machine.execute(shlex.split(command), **kwargs)
+        logger.debug(result)
+
     # Set the FRR routing source and key
-    machine.execute(shlex.split("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'"))
-    machine.execute(
-        shlex.split(
-            "bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} > /etc/apt/sources.list.d/frr.list'".format(
-                settings.FRR_RELEASE
-            )
+    execute_and_log("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'")
+    execute_and_log(
+        "bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} | tee -a /etc/apt/sources.list.d/frr.list'".format(
+            settings.FRR_RELEASE
         )
     )
+
     # Update and install packages
-    machine.execute(shlex.split("apt-get update"))
-    machine.execute(
-        shlex.split("apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'",),
+    execute_and_log("apt-get update")
+    execute_and_log(
+        "apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'",
         environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
-    machine.execute(
-        shlex.split(
-            "DEBIAN_FRONTEND=noninteractive apt-get install -y -o "
-            "Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
-                " ".join(config["providers"]["lxc"]["guest_packages"])
-            )
+    execute_and_log(
+        "apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
+            " ".join(config["providers"]["lxc"]["guest_packages"])
         ),
         environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
+
     # Disable radvd by default
-    machine.execute(shlex.split("systemctl disable radvd"))
+    execute_and_log("systemctl disable radvd")
     # Set the default VTYSH_PAGER
-    machine.execute(shlex.split("export VTYSH_PAGER=more >> ~/.bashrc"))
+    execute_and_log("bash -c 'export VTYSH_PAGER=more >> ~/.bashrc'")
     # All done, stop the container
     machine.stop(wait=True)
     logger.debug("LXC base machine {} successfully configured".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))
