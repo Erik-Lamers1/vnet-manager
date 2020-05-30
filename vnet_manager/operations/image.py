@@ -35,7 +35,6 @@ def create_lxc_image_from_container(container, alias=None, description=None):
     """
     # Stop it first
     change_lxc_machine_status(container, status="stop")
-    wait_for_lxc_machine_status(container, status="Stopped")
 
     # Create the image
     logger.info("Creating image from LXC container {}".format(container))

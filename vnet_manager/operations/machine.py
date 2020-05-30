@@ -221,10 +221,11 @@ def destroy_machines(config, machines=None):
         getattr(modules[__name__], "destroy_{}_machine".format(provider))(machine)
 
 
-def destroy_lxc_machine(machine):
+def destroy_lxc_machine(machine, wait=False):
     """
     Deletes an LXC machine
     :param str machine: The name of the machine to delete
+    :param bool wait: Wait for the deletion to be complete before returning
     :return:
     """
     client = get_lxd_client()
@@ -238,7 +239,7 @@ def destroy_lxc_machine(machine):
         logger.info("Stopping LXC container {}".format(machine))
         container.stop(wait=True)
     logger.info("Deleting LXC container {}".format(machine))
-    container.delete()
+    container.delete(wait=wait)
 
 
 def create_lxc_base_image_container(config):
@@ -251,7 +252,7 @@ def create_lxc_base_image_container(config):
     if check_if_lxc_machine_exists(settings.LXC_BASE_IMAGE_MACHINE_NAME):
         logger.warning("LXC base image machine already exists")
         request_confirmation(message="Recreating it will destroy any local changes", prompt="Recreate the LXC base image machine? ")
-        destroy_lxc_machine(settings.LXC_BASE_IMAGE_MACHINE_NAME)
+        destroy_lxc_machine(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=True)
 
     # Now create the base image machine
     client = get_lxd_client()
