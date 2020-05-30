@@ -55,18 +55,19 @@ def configure_lxc_base_machine(config):
     client = get_lxd_client()
     machine = client.containers.get(settings.LXC_BASE_IMAGE_MACHINE_NAME)
     # Set the FRR routing source and key
-    machine.execute(shlex.split("curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add"))
+    machine.execute(shlex.split("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'"))
     machine.execute(
         shlex.split(
-            "echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} > /etc/apt/sources.list.d/frr.list".format(settings.FRR_RELEASE)
+            "bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} > /etc/apt/sources.list.d/frr.list'".format(
+                settings.FRR_RELEASE
+            )
         )
     )
     # Update and install packages
     machine.execute(shlex.split("apt-get update"))
     machine.execute(
-        shlex.split(
-            "DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'"
-        )
+        shlex.split("apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'",),
+        environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
     machine.execute(
         shlex.split(
@@ -74,7 +75,8 @@ def configure_lxc_base_machine(config):
             "Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
                 " ".join(config["providers"]["lxc"]["guest_packages"])
             )
-        )
+        ),
+        environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
     # Disable radvd by default
     machine.execute(shlex.split("systemctl disable radvd"))
