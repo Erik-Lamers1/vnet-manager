@@ -5,7 +5,7 @@ from time import sleep
 from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_image_from_container
 from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_vnet_lxc_profile
 from vnet_manager.operations.storage import check_if_lxc_storage_pool_exists, create_lxc_storage_pool
-from vnet_manager.operations.machine import create_lxc_base_image_container, change_lxc_machine_status
+from vnet_manager.operations.machine import create_lxc_base_image_container, change_lxc_machine_status, destroy_lxc_machine
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.conf import settings
 
@@ -43,6 +43,7 @@ def ensure_vnet_lxc_environment(config):
         change_lxc_machine_status(settings.LXC_BASE_IMAGE_MACHINE_NAME, status="start")
         configure_lxc_base_machine(config)
         create_lxc_image_from_container(settings.LXC_BASE_IMAGE_MACHINE_NAME, alias=settings.LXC_BASE_IMAGE_ALIAS)
+        destroy_lxc_machine(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=False)
     else:
         logger.debug("Base image {} found".format(settings.LXC_BASE_IMAGE_ALIAS))
 
@@ -66,7 +67,11 @@ def configure_lxc_base_machine(config):
     logger.debug("Checking for DNS connectivity")
     dns = False
     for i in range(0, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
-        dns = True if execute_and_log("host -t A google.com")[0] == 0 else sleep(2)
+        if execute_and_log("host -t A google.com")[0] == 0:
+            dns = True
+            break
+        else:
+            sleep(2)
     if not dns:
         raise RuntimeError("Base machine started without working DNS, unable to continue")
 
@@ -93,6 +98,8 @@ def configure_lxc_base_machine(config):
 
     # Disable radvd by default
     execute_and_log("systemctl disable radvd")
+    # Disable cloud init messing with our networking
+    execute_and_log("bash -c 'echo network: {config: disabled} > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg'")
     # Set the default VTYSH_PAGER
     execute_and_log("bash -c 'export VTYSH_PAGER=more >> ~/.bashrc'")
     # All done, stop the container
