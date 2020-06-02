@@ -1,6 +1,7 @@
 from ipaddress import IPv4Interface, IPv6Interface
 from re import fullmatch
 from logging import getLogger
+from os.path import isdir, isfile
 
 from vnet_manager.utils.mac import random_mac_generator
 from vnet_manager.conf import settings
@@ -79,6 +80,20 @@ def validate_config(config):
                     + default_message
                 )
                 all_ok = False
+
+            # Files
+            if "files" in values:
+                if not isinstance(values["files"], dict):
+                    logger.error("Files directive for machine {} is not a dict".format(name) + default_message)
+                    all_ok = False
+                else:
+                    # Check the files
+                    for host_file in values["files"].keys():
+                        if not isdir(host_file) or not isfile(host_file):
+                            logger.error(
+                                "Host file {} for machine {} does not seem to be a dir or a file".format(host_file, name) + default_message
+                            )
+                            all_ok = False
 
             # Interfaces
             if "interfaces" not in values:
