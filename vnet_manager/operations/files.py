@@ -2,7 +2,7 @@ from logging import getLogger
 from yaml import safe_dump
 from pylxd.exceptions import NotFound
 from os.path import isfile, isdir, join, basename
-from os import walk
+from os import listdir
 from sys import modules
 
 from vnet_manager.providers.lxc import get_lxd_client
@@ -15,7 +15,7 @@ def put_files_on_machine(config):
     for name, data in config["machines"].items():
         if "files" in data:
             provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[data["type"]]
-            logger.debug("Putting requested files on machine {}".format(name))
+            logger.info("Putting requested files on machine {}".format(name))
             select_files_and_put_on_machine(name, data["files"], provider)
 
 
@@ -26,15 +26,16 @@ def select_files_and_put_on_machine(machine, files, provider):
     :param dict files: The machines file dict from the config
     :param str provider: The provider of the machine
     """
-    file_paths = {}
     # Get the files
     for host_path, guest_path in files.items():
         if isdir(host_path):
-            logger.debug("Walking file dir {}".format(host_path))
-            _, _, host_files = walk(host_path)
-            for file_name in host_files:
+            logger.debug("Getting files from file dir {}".format(host_path))
+            files = [join(host_path, f) for f in listdir(host_path)]
+            for file_path in files:
                 # Place the file on the machine
-                getattr(modules[__name__], "place_file_on_{}_machine".format(provider))(machine, file_name, join(guest_path, file_name))
+                getattr(modules[__name__], "place_file_on_{}_machine".format(provider))(
+                    machine, file_path, join(guest_path, basename(file_path))
+                )
         elif isfile(host_path):
             getattr(modules[__name__], "place_file_on_{}_machine".format(provider))(
                 machine, host_path, join(guest_path, basename(host_path))
@@ -64,6 +65,7 @@ def place_file_on_lxc_machine(container, host_file_path, guest_file_path):
     with open(host_file_path, "r") as fh:
         file_data = fh.read()
     # Place the file content
+    logger.debug("Copying {} to container {} at path {}".format(host_file_path, container, guest_file_path))
     machine.files.put(guest_file_path, file_data)
 
 

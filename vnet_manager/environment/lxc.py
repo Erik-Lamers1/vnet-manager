@@ -102,6 +102,8 @@ def configure_lxc_base_machine(config):
     execute_and_log("bash -c 'echo network: {config: disabled} > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg'")
     # Set the default VTYSH_PAGER
     execute_and_log("bash -c 'export VTYSH_PAGER=more >> ~/.bashrc'")
+    # Make all files in the FRR dir owned by the frr user
+    execute_and_log("bash -c 'echo -e \"#!/bin/bash\nchown -R frr:frr /etc/frr\" > /etc/rc.local; chmod +x /etc/rc.local'")
     # All done, stop the container
     machine.stop(wait=True)
     logger.debug("LXC base machine {} successfully configured".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))

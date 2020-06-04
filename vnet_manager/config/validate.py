@@ -1,7 +1,7 @@
 from ipaddress import IPv4Interface, IPv6Interface
 from re import fullmatch
 from logging import getLogger
-from os.path import isdir, isfile
+from os.path import isdir, isfile, join
 
 from vnet_manager.utils.mac import random_mac_generator
 from vnet_manager.conf import settings
@@ -89,7 +89,16 @@ def validate_config(config):
                 else:
                     # Check the files
                     for host_file in values["files"].keys():
-                        if not isdir(host_file) or not isfile(host_file):
+                        # First check if the user gave a relative dir from the config dir
+                        if isdir(join(config["config_dir"], host_file)) or isfile(join(config["config_dir"], host_file)):
+                            logger.debug(
+                                "Updating relative host_file path {} to full path {}".format(
+                                    host_file, join(config["config_dir"], host_file)
+                                )
+                            )
+                            values["files"][join(config["config_dir"], host_file)] = values["files"].pop(host_file)
+                        # Check for absolute paths
+                        elif not isdir(host_file) or not isfile(host_file):
                             logger.error(
                                 "Host file {} for machine {} does not seem to be a dir or a file".format(host_file, name) + default_message
                             )

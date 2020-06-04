@@ -3,7 +3,6 @@ from pylxd.exceptions import NotFound
 
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.operations.machine import change_lxc_machine_status
-from vnet_manager.utils.user import request_confirmation
 
 logger = getLogger(__name__)
 

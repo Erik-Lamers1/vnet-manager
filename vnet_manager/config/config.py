@@ -1,4 +1,5 @@
 from logging import getLogger
+from os.path import realpath, dirname
 
 from vnet_manager.conf import settings
 from vnet_manager.utils.files import get_yaml_content
@@ -18,4 +19,7 @@ def get_config(path):
     defaults = get_yaml_content(settings.CONFIG_DEFAULTS_LOCATION)
     logger.debug("Merging configs")
     # This statement requires Python3.5+
-    return {**defaults, **user_config}
+    config = {**defaults, **user_config}
+    # Add the config directory
+    config["config_dir"] = dirname(realpath(path))
+    return config
