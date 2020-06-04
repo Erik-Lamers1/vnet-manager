@@ -23,12 +23,20 @@ def parse_args(args=None):
         nargs="*",
         help="Just apply the actions on the following machine names " "(default is all machines defined in the config file)",
     )
-    parser.add_argument("-s", "--sniffer", action="store_true", help="Start a TCPdump sniffer on the VNet interfaces")
     parser.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print debug messages")
+
+    start_group = parser.add_argument_group("Start options", "These options can be specified for the start action")
+    start_group.add_argument("-s", "--sniffer", action="store_true", help="Start a TCPdump sniffer on the VNet interfaces")
+    destroy_group = parser.add_argument_group("Destroy options", "These options can be specified for the destroy action")
+    destroy_group.add_argument("-b", "--base-image", action="store_true", help="Destroy the base image instead of the machines")
     args = parser.parse_args(args=args)
+
+    # User input sanity checks
     if args.sniffer and not args.action == "start":
         parser.error("The sniffer option only makes sense with the 'start' action")
+    if args.base_image and not args.action == "destroy":
+        parser.error("The base_image option only makes sense with the 'destroy' action")
     return args
 
 
@@ -48,7 +56,7 @@ def main(args=None):
         logger.critical("This program should only be run as root")
         return EX_NOPERM
     # Let the action manager handle the rest
-    return action_manager(args.action, args.config, machines=args.machines, sniffer=args.sniffer)
+    return action_manager(args.action, args.config, machines=args.machines, sniffer=args.sniffer, base_image=args.base_image)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,8 @@ from logging import getLogger
 from pylxd.exceptions import NotFound
 
 from vnet_manager.providers.lxc import get_lxd_client
-from vnet_manager.operations.machine import change_lxc_machine_status, wait_for_lxc_machine_status
+from vnet_manager.operations.machine import change_lxc_machine_status
+from vnet_manager.utils.user import request_confirmation
 
 logger = getLogger(__name__)
 
@@ -47,3 +48,20 @@ def create_lxc_image_from_container(container, alias=None, description=None):
     if alias:
         logger.info("Adding alias {} to newly created image".format(alias))
         img.add_alias(alias, description)
+
+
+def destroy_lxc_image(image, by_alias=True):
+    """
+    Destroy a LXC image
+    :param str image: The fingerprint or alias of the image to destroy
+    :param bool by_alias: Search by alias instead of fingerprint
+    """
+    # Check if it even exists
+    if not check_if_lxc_image_exists(image, by_alias=by_alias):
+        logger.warning("Tried to destroy LXC image {}, but it is already gone".format(image))
+        return
+    # Delete it
+    logger.info("Deleting LXC image {}".format(image))
+    client = get_lxd_client()
+    image = client.images.get_by_alias(image) if by_alias else client.images.get(image)
+    image.delete()

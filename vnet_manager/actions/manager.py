@@ -5,7 +5,10 @@ from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import validate_config
 from vnet_manager.utils.version import show_version
+from vnet_manager.utils.user import request_confirmation
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment
+from vnet_manager.operations.image import destroy_lxc_image
+from vnet_manager.operations.files import put_files_on_machine
 from vnet_manager.operations.machine import show_status, change_machine_status, create_machines, destroy_machines
 from vnet_manager.operations.interface import (
     bring_up_vnet_interfaces,
@@ -17,13 +20,14 @@ from vnet_manager.operations.interface import (
 logger = getLogger(__name__)
 
 
-def action_manager(action, config, machines=None, sniffer=False):
+def action_manager(action, config, machines=None, sniffer=False, base_image=False):
     """
     Initiate an action
     :param str action: The action to preform
     :param str config: The path to the user config file
     :param list machines: The specific container to execute actions on
     :param bool sniffer: Start a sniffer on the VNet interfaces on start
+    :param bool base_image: Destroy the image image instead of the machines
     :return int: exit_code
     """
     # Check for valid action
@@ -62,13 +66,20 @@ def action_manager(action, config, machines=None, sniffer=False):
     if action == "create":
         ensure_vnet_lxc_environment(config)
         create_machines(config, machines=machines)
+        put_files_on_machine(config)
     if action == "destroy":
-        destroy_machines(config, machines=machines)
-        # If specific machines are specified, we don't want to mess with the interfaces
-        if machines:
-            logger.warning("Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers")
+        if base_image:
+            request_confirmation(prompt="Are you sure you want to delete the VNet base images (y/n)? ")
+            destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
         else:
-            delete_vnet_interfaces(config)
+            destroy_machines(config, machines=machines)
+            # If specific machines are specified, we don't want to mess with the interfaces
+            if machines:
+                logger.warning(
+                    "Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers"
+                )
+            else:
+                delete_vnet_interfaces(config)
 
     # Finally return all OK
     return EX_OK
