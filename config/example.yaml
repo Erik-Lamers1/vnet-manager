@@ -22,8 +22,6 @@ machines:
         ipv6: 2001:0db8:23::2/64
         mac: 00:00:00:00:00:22
         bridge: 1
-    files:
-      /root/blaap/: /root/blaap/
   host3:
     type: host
     interfaces:

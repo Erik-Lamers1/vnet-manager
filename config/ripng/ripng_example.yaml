@@ -1,0 +1,38 @@
+switches: 2
+
+machines:
+  router100:
+    type: router
+    interfaces:
+      eth12:
+        ipv4: 192.168.0.2/24
+        ipv6: 2001:0db8:0:f101::2/64
+        mac: 00:00:00:00:01:11
+        bridge: 0
+    files:
+      router100: /etc/frr/
+  router101:
+    type: router
+    interfaces:
+      eth12:
+        ipv4: 192.168.0.1/24
+        ipv6: 2001:0db8:0:f101::1/64
+        mac: 00:00:00:00:02:12
+        bridge: 0
+      eth23:
+        ipv4: 10.0.0.1/8
+        ipv6: 2001:0db8:0:f102::1/64
+        mac: 00:00:00:00:02:22
+        bridge: 1
+    files:
+      router101: /etc/frr/
+  router102:
+    type: router
+    interfaces:
+      eth23:
+        ipv4: 10.0.0.2/8
+        ipv6: 2001:0db8:0:f102::2/64
+        mac: 00:00:00:00:03:23
+        bridge: 1
+    files:
+      router102: /etc/frr/
