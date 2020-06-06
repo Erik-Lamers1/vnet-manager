@@ -103,7 +103,9 @@ def configure_lxc_base_machine(config):
     # Set the default VTYSH_PAGER
     execute_and_log("bash -c 'export VTYSH_PAGER=more >> ~/.bashrc'")
     # Make all files in the FRR dir owned by the frr user
-    execute_and_log("bash -c 'echo -e \"#!/bin/bash\nchown -R frr:frr /etc/frr\" > /etc/rc.local; chmod +x /etc/rc.local'")
+    execute_and_log(
+        "bash -c 'echo -e \"#!/bin/bash\nchown -R frr:frr /etc/frr\nsystemctl restart frr\" > /etc/rc.local; chmod +x /etc/rc.local'"
+    )
     # All done, stop the container
     machine.stop(wait=True)
     logger.debug("LXC base machine {} successfully configured".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))
