@@ -107,8 +107,8 @@ def generate_vnet_hosts_file(config):
                 vnet_hosts.append("{}   {}".format(int_data["ipv4"].split("/")[0], machine_name))
             if "ipv6" in int_data:
                 vnet_hosts.append("{}   {}".format(int_data["ipv6"].split("/")[0], machine_name))
-    vnet_etc_hosts_data = settings.VNET_STATIC_HOST_FILE_PART + "\n".join(vnet_hosts)
-    with open(settings.VNET_ETC_HOST_FILE_PATH, "w") as fh:
+    vnet_etc_hosts_data = settings.VNET_STATIC_HOSTS_FILE_PART + "\n".join(vnet_hosts)
+    with open(settings.VNET_ETC_HOSTS_FILE_PATH, "w") as fh:
         fh.write(vnet_etc_hosts_data)
 
 
@@ -120,4 +120,4 @@ def place_vnet_hosts_file_on_machines(config):
     logger.info("Placing VNet /etc/hosts file on machines")
     for name, data in config["machines"].items():
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[data["type"]]
-        select_files_and_put_on_machine(name, {settings.VNET_ETC_HOST_FILE_PATH: "/etc/hosts"}, provider)
+        select_files_and_put_on_machine(name, {settings.VNET_ETC_HOSTS_FILE_PATH: "/etc/hosts"}, provider)
