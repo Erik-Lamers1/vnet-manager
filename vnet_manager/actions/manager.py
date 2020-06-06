@@ -9,7 +9,13 @@ from vnet_manager.utils.user import request_confirmation
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
 from vnet_manager.operations.files import put_files_on_machine
-from vnet_manager.operations.machine import show_status, change_machine_status, create_machines, destroy_machines
+from vnet_manager.operations.machine import (
+    show_status,
+    change_machine_status,
+    create_machines,
+    destroy_machines,
+    enable_type_specific_machine_configuration,
+)
 from vnet_manager.operations.interface import (
     bring_up_vnet_interfaces,
     bring_down_vnet_interfaces,
@@ -67,6 +73,7 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
         ensure_vnet_lxc_environment(config)
         create_machines(config, machines=machines)
         put_files_on_machine(config)
+        enable_type_specific_machine_configuration(config)
     if action == "destroy":
         if base_image:
             request_confirmation(prompt="Are you sure you want to delete the VNet base images (y/n)? ")

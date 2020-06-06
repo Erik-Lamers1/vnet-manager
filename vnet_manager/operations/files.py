@@ -55,7 +55,7 @@ def place_file_on_lxc_machine(container, host_file_path, guest_file_path):
     try:
         machine = get_lxd_client().containers.get(container)
     except NotFound:
-        logger.error("Tried to copy {} to LXC container {}, but the container doesn't exists".format(host_file_path, container))
+        logger.warning("Tried to copy {} to LXC container {}, but the container doesn't exists".format(host_file_path, container))
         return
     if not isfile(host_file_path):
         logger.error("Tried to copy {} to LXC container {}, but the file doesn't exists".format(host_file_path, container))
