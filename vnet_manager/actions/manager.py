@@ -8,7 +8,7 @@ from vnet_manager.utils.version import show_version
 from vnet_manager.utils.user import request_confirmation
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
-from vnet_manager.operations.files import put_files_on_machine
+from vnet_manager.operations.files import put_files_on_machine, generate_vnet_hosts_file, place_vnet_hosts_file_on_machines
 from vnet_manager.operations.machine import (
     show_status,
     change_machine_status,
@@ -70,9 +70,16 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
         else:
             bring_down_vnet_interfaces(config)
     if action == "create":
+        # Make sure the provider environments are correct
         ensure_vnet_lxc_environment(config)
+        # Make the machines
         create_machines(config, machines=machines)
+        # Put user requested file on the machines
         put_files_on_machine(config)
+        # Put /etc/hosts on the machines
+        generate_vnet_hosts_file(config)
+        place_vnet_hosts_file_on_machines(config)
+        # Configure type specific stuff
         enable_type_specific_machine_configuration(config)
     if action == "destroy":
         if base_image:

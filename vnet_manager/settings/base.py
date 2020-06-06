@@ -48,6 +48,21 @@ MACHINE_TYPE_CONFIG_FUNCTION_MAPPING = {
 }
 VALID_STATUSES = ["start", "stop"]
 VNET_FORCE_ENV_VAR = "VNET_FORCE"
+VNET_ETC_HOST_FILE_PATH = "/tmp/vnet_etc_hosts"
+VNET_STATIC_HOST_FILE_PART = """
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+
+# VNet hosts
+
+"""
 
 # LXC specific settings
 LXC_MAX_STATUS_WAIT_ATTEMPTS = 15
