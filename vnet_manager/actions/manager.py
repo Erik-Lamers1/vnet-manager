@@ -3,7 +3,7 @@ from os import EX_OK, EX_USAGE
 
 from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
-from vnet_manager.config.validate import validate_config
+from vnet_manager.config.validate import ValidateConfig
 from vnet_manager.utils.version import show_version
 from vnet_manager.utils.user import request_confirmation
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment
@@ -49,12 +49,14 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     # For these actions we need the config
     config = get_config(config)
     # Validate the config
-    config_ok, config = validate_config(config)
-    if config_ok:
+    validator = ValidateConfig(config)
+    if validator.config_validation_successful:
         logger.debug("Config successfully validated")
     else:
         logger.critical("The config seems to have unrecoverable issues, please fix them before proceeding")
         return EX_USAGE
+    # Use the updated values from the config validator
+    config = validator.updated_config
 
     if action == "list":
         show_status(config)
