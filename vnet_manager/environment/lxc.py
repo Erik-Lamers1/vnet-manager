@@ -7,6 +7,7 @@ from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_
 from vnet_manager.operations.storage import check_if_lxc_storage_pool_exists, create_lxc_storage_pool
 from vnet_manager.operations.machine import create_lxc_base_image_container, change_lxc_machine_status, destroy_lxc_machine
 from vnet_manager.providers.lxc import get_lxd_client
+from vnet_manager.environment.host import check_for_supported_os
 from vnet_manager.conf import settings
 
 logger = getLogger(__name__)
@@ -16,11 +17,17 @@ def ensure_vnet_lxc_environment(config):
     """
     Checks and creates the LXC environment
     param: dict config: The config created by get_config()
+    :raises RuntimeError: If unsupported OS
     """
     # Check if there are any LXC machines in the config
     if "lxc" not in [settings.MACHINE_TYPE_PROVIDER_MAPPING[machine["type"]] for machine in config["machines"].values()]:
         logger.debug("Skipping LXC environment creation, no LXC machines in config")
         return
+
+    # Check if we are on a supported OS
+    if not check_for_supported_os(config, "lxc"):
+        logger.critical("Unable to create LXC environment on your machine, OS not supported")
+        raise RuntimeError("OS not supported for provider LXC")
 
     # Check if the storage pool exists
     if not check_if_lxc_storage_pool_exists(settings.LXC_STORAGE_POOL_NAME):
