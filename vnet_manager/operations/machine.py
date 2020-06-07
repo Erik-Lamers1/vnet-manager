@@ -149,6 +149,7 @@ def create_lxc_machines_from_base_image(config, containers):
     :param list containers: A list of machines to create
     """
     containers_to_create = []
+    containers_already_created = False
 
     # Get all the LXC machines to create
     for container in containers:
@@ -160,6 +161,7 @@ def create_lxc_machines_from_base_image(config, containers):
         # Quick check if the machine already exists
         elif check_if_lxc_machine_exists(container):
             logger.error("A LXC container with the name {} already exists, skipping".format(container))
+            containers_already_created = True
         # Check if LXC is the provider
         elif settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][container]["type"]].lower() == "lxc":
             logger.debug("Selecting LXC machine {} for creation".format(container))
@@ -196,6 +198,13 @@ def create_lxc_machines_from_base_image(config, containers):
         # TODO: Make this nicer by not waiting here but doing the configuration after we've created all containers
         client.containers.create(container_config, wait=True)
         place_lxc_interface_configuration_on_container(config, container)
+
+    # Check with the user if it is okay to overwrite config files
+    if containers_already_created:
+        request_confirmation(
+            message="Some containers already existed, the next operation will overwrite network, "
+            "host and user config files on those containers",
+        )
 
 
 def destroy_machines(config, machines=None):
