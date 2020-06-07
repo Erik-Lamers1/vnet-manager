@@ -50,6 +50,7 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     config = get_config(config)
     # Validate the config
     validator = ValidateConfig(config)
+    validator.validate()
     if validator.config_validation_successful:
         logger.debug("Config successfully validated")
     else:
