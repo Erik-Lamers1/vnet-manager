@@ -18,7 +18,7 @@ def check_for_supported_os(config, provider):
     :return: bool: True if the current OS is supported, False otherwise
     """
     logger.debug("Checking if your os is supported for provider {}".format(provider))
-    return codename().lower() in config["providers"][provider]["supported_operating_systems"].lower()
+    return codename().lower() in config["providers"][provider]["supported_operating_systems"]
 
 
 def check_for_installed_packages(config, provider):
