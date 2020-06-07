@@ -25,6 +25,11 @@ class ValidateConfig:
         self.default_message = ". Please check your settings"
         self.config = config
 
+    def __str__(self):
+        return "VNet config validator, current_state: {}, amount of validators run: {}".format(
+            "OK" if self._all_ok else "NOT OK", self._validators_ran
+        )
+
     @property
     def config_validation_successful(self):
         """
