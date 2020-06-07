@@ -3,6 +3,12 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+try:
+    from apt import Cache
+except ImportError:
+    logger.critical("Python apt module not installed, please 'apt-get install python3-apt' first")
+    raise ModuleNotFoundError("Python apt module missing")
+
 
 def check_for_supported_os(config, provider):
     """
@@ -13,3 +19,20 @@ def check_for_supported_os(config, provider):
     """
     logger.debug("Checking if your os is supported for provider {}".format(provider))
     return codename().lower() in config["providers"][provider]["supported_operating_systems"].lower()
+
+
+def check_for_installed_packages(config, provider):
+    """
+    Checks if the required host packages have been installed
+    :param dict config: The config provided by get_config()
+    :param str provider: The provider to check the required host packages for
+    :return bool: True if all required packages have been installed, False otherwise
+    """
+    logger.debug("Checking if all required host packages have been install for provider {}".format(provider))
+    cache = Cache()
+    all_installed = True
+    for package in config["providers"][provider]["required_host_packages"]:
+        if not cache[package].is_installed:
+            logger.error("Required host package {} for provider {} is not installed".format(package, provider))
+            all_installed = False
+    return all_installed

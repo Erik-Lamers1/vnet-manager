@@ -42,6 +42,7 @@ def get_lxc_machine_status(name):
     :param name: str: The name of the machine
     :return: list: [name, state, provider]
     """
+    # TODO: Let's not return a list here, simply the status
     client = get_lxd_client()
     try:
         status = client.containers.get(name).status

@@ -6,7 +6,6 @@ providers:
     required_host_packages:
       - lxd
       - lxc
-      - git
       - screen
       - tmux
       - bridge-utils
