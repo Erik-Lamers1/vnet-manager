@@ -26,6 +26,6 @@ providers:
       - frr
       - frr-pythontools
     base_image:
-      os: 18.04
+      os: "18.04"
       server: "https://cloud-images.ubuntu.com/daily"
       protocol: simplestreams
