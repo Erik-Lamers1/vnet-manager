@@ -4,3 +4,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 VNet-manager a virtual network manager - manages containers and VMs to create virtual networks
+
+## Setup
+```bash
+apt-get update
+apt-get install gcc python3-dev git lxd lxc bridge-utils tcpdump net-tools curl
+git clone https://github.com/Erik-Lamers1/vnet-manager.git
+cd vnet-manager
+python3 setup.py install
+# The following is only needed on Xenial
+apt-get install btrfs-tools
+```

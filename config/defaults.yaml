@@ -7,13 +7,10 @@ providers:
     required_host_packages:
       - lxd
       - lxc
-      - screen
-      - tmux
       - bridge-utils
       - tcpdump
       - net-tools
       - curl
-      - btrfs-tools
     guest_packages:
       - man
       - net-tools
