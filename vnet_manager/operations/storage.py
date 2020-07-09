@@ -31,7 +31,7 @@ def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings
     logger.info("Creating LXC storage pool {} with driver {}".format(name, driver))
     client = get_lxd_client()
     try:
-        client.storage_pools.create({"name": name, "driver": driver})
+        client.storage_pools.create({"name": name, "driver": driver, "config": {"size": settings.LXC_STORAGE_POOL_SIZE}})
         logger.info("Storage pool {} with driver {} successfully created".format(name, driver))
     except LXDAPIException as e:
         logger.error("Got API error while creating storage pool {}. Error: {}".format(name, e))
