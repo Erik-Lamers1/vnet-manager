@@ -5,6 +5,10 @@
 
 VNet-manager a virtual network manager - manages containers and VMs to create virtual networks
 
+## What is it?
+VNet-manager allows you to create quick virtual network setups using LXC containers.
+VNet-manager will create and manage the containers you need to create a virtual network.
+This is done in combination with [FRRouting](https://frrouting.org/).
 ## Setup
 ```bash
 apt-get update
@@ -16,4 +20,21 @@ cd vnet-manager
 python3 setup.py install
 # The following is only needed on Xenial
 apt-get install btrfs-tools
+```
+## How to use it
+First you need to create a config file for VNet-manager to work with.
+In your config file you define the topology of your network. See the [config](config) directory for examples.  
+
+There are two important config files. First off the config file you use to create your topology (the user config file).
+The second config file is the defaults config, which stores generic information you might want to edit if you are an advanced user.
+The user config file should always be passed to VNet-manager as an argument. This allows for multiple topologies to exist at once.
+The defaults config file can be set using the `VNET_DEFAULT_CONFIG_PATH` environment variable. If this variable does not exist VNet-manager will assume `~/vnet-manager/config/defaults.yaml`, which is usually fine.
+
+### Advanced usage
+There are a couple of things that can be tweaked when using VNet-manager. This can be done using specific environment variables.
+```yaml
+VNET_DEFAULT_CONFIG_PATH - Sets the absolute location of the defaults.yaml config
+VNET_SNIFFER_PCAP_DIR    - Sets the directory where the sniffer PCAP files will be created
+VNET_LXC_BASE_IMAGE      - Sets the alias for the LXC base image, only set when using a custom base image
+VNET_FORCE               - Internal env var, used with --yes. Do not set manually
 ```
