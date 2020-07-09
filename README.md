@@ -8,7 +8,9 @@ VNet-manager a virtual network manager - manages containers and VMs to create vi
 ## Setup
 ```bash
 apt-get update
-apt-get install gcc python3-dev git lxd lxc bridge-utils tcpdump net-tools curl
+apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
+# LXD defaults are fine
+echo -e "\n\n\n\n\n\n\n\n\n\n\n\n" | lxd init
 git clone https://github.com/Erik-Lamers1/vnet-manager.git
 cd vnet-manager
 python3 setup.py install
