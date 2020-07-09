@@ -2,6 +2,7 @@ providers:
   lxc:
     supported_operating_systems:
       - "bionic"
+      - "focal"
     dns-nameserver: 8.8.8.8
     required_host_packages:
       - lxd
