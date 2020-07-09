@@ -20,6 +20,16 @@ cd vnet-manager
 python3 setup.py install
 # The following is only needed on Xenial
 apt-get install btrfs-tools
+# Now you are able to use
+vnet-manager --help
+```
+
+#### Quick start
+```bash
+cd ~/vnet-manager
+vnet-manager create config/example.yaml
+vnet-manager start config/example.yaml
+lxc exec host1 -- ping -c 2 router1
 ```
 ## How to use it
 First you need to create a config file for VNet-manager to work with.
