@@ -21,6 +21,7 @@ from vnet_manager.operations.interface import (
     bring_down_vnet_interfaces,
     delete_vnet_interfaces,
     show_vnet_interface_status,
+    show_vnet_veth_interface_status,
 )
 
 logger = getLogger(__name__)
@@ -62,6 +63,8 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     if action == "list":
         show_status(config)
         show_vnet_interface_status(config)
+        if "veths" in config:
+            show_vnet_veth_interface_status(config)
     if action == "start":
         bring_up_vnet_interfaces(config, sniffer=sniffer)
         change_machine_status(config, machines=machines, status="start")
