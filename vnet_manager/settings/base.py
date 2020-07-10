@@ -28,7 +28,7 @@ LOGGING = {
     },
     "root": {"handlers": ["console", "syslog"], "level": "DEBUG",},
     # Silence debug heavy loggers here
-    "loggers": {"urllib3": {"level": "INFO",}, "ws4py": {"level": "WARNING",},},
+    "loggers": {"urllib3": {"level": "INFO",}, "ws4py": {"level": "WARNING",}, "pyroute2.netlink": {"level": "INFO"}},
 }
 
 # VNet Manager static settings / config

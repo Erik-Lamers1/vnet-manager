@@ -93,7 +93,6 @@ def create_veth_interface(name, data):
     # We only create the interface if it has a peer
     if "peer" in data:
         ip.link("add", ifname=name, kind="veth", peer=data["peer"])
-    configure_veth_interface(name, data)
 
 
 def create_vnet_interface_iptables_rules(ifname):
@@ -142,7 +141,6 @@ def configure_veth_interface(name, data):
     bridge = ip.link_lookup(ifname=data["bridge"])[0]
     # Connect the veth interface to the bridge
     ip.link("set", index=dev, master=bridge)
-    configure_vnet_interface(name)
 
 
 def bring_up_vnet_interfaces(config, sniffer=False):
@@ -169,13 +167,14 @@ def bring_up_vnet_interfaces(config, sniffer=False):
             if "stp" in data:
                 logger.info("{} STP on VNet interface {}".format("Enabling" if data["stp"] else "Disabling", data["bridge"]))
                 state = 1 if data["stp"] else 0
-                nbd = NDB(log="on")
+                nbd = NDB(log="off")
                 with nbd.interfaces[data["bridge"]] as bridge:
                     bridge.set("br_stp_state", state)
             if not check_if_interface_exists(name):
                 create_veth_interface(name, data)
-            # Make sure the interface is up
-            ip.link("set", ifname=name, state="up")
+            # Always configure a VNet veth interface to make sure it is connected to its master bridge
+            configure_veth_interface(name, data)
+            configure_vnet_interface(name)
 
 
 def check_if_sniffer_exists(ifname):
