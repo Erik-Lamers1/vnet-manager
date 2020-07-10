@@ -59,6 +59,8 @@ class ValidateConfig:
         self.validate_provider_config()
         self.validate_switch_config()
         self.validate_machine_config()
+        if "veth" in self.config:
+            self.validate_veth_config()
 
     def validate_provider_config(self):
         """
@@ -254,3 +256,38 @@ class ValidateConfig:
                     "(starting at iface number 0)".format(int_name, machine)
                 )
                 self._all_ok = False
+
+    def validate_veth_config(self):
+        """
+        Validates the veth config if present
+        """
+        if "veth" not in self.config:
+            logger.warning("Tried to validate veth config, but no veth config present, skipping...")
+            return
+        if not isinstance(self.config["veth"], dict):
+            logger.error("Config item: 'veth' does not seem to be a dict {}".format(self.default_message))
+            self._all_ok = False
+        for name, values in self.config["veth"].items():
+            if not isinstance(name, str):
+                logger.error("veth interface name: {} does not seem to be a string{}".format(name, self.default_message))
+                self._all_ok = False
+            elif not isinstance(values, dict):
+                logger.error("veth interface {} data does not seem to be a dict{}".format(name, self.default_message))
+                self._all_ok = False
+            else:
+                if "bridge" not in values:
+                    logger.error("veth interface {} is missing the bridge parameter{}".format(name, self.default_message))
+                    self._all_ok = False
+                if not isinstance(values["bridge"], str):
+                    logger.error("veth interface {} bridge parameter does not seem to be a str{}".format(name, self.default_message))
+                    self._all_ok = False
+                if "peer" not in values:
+                    logger.debug("veth interface {} does not have a peer, that's ok, assuming it's peer is defined elsewhere")
+                elif not isinstance(values["peer"], str):
+                    logger.error("veth interface {} peer parameter does not seem to be a string{}".format(name, self.default_message))
+                    self._all_ok = False
+                if "stp" not in values:
+                    logger.debug("veth interface {} as no STP parameter, that's okay")
+                elif not isinstance(values["stp"], bool):
+                    logger.error("veth interface {} stp parameter does not seem to be a boolean{}".format(name, self.default_message))
+                    self._all_ok = False

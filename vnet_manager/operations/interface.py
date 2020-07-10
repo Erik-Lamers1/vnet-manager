@@ -1,5 +1,5 @@
 import shlex
-from pyroute2 import IPRoute
+from pyroute2 import IPRoute, NDB
 from logging import getLogger
 from subprocess import check_call, CalledProcessError, Popen, DEVNULL
 from os.path import join
@@ -83,6 +83,19 @@ def create_vnet_interface(ifname):
     configure_vnet_interface(ifname)
 
 
+def create_veth_interface(name, data):
+    """
+    Creates a veth interface pair
+    :param str name: The name of the veth interface to create
+    :param dict data: The bridge and peer data
+    """
+    ip = IPRoute()
+    # We only create the interface if it has a peer
+    if "peer" in data:
+        ip.link("add", ifname=name, kind="veth", peer=data["peer"])
+    configure_veth_interface(name, data)
+
+
 def create_vnet_interface_iptables_rules(ifname):
     """
     VNet interfaces should act as dump bridges and should not have any connectivity to the outside world
@@ -117,6 +130,21 @@ def configure_vnet_interface(ifname):
     ip.link("set", index=dev, state="up")
 
 
+def configure_veth_interface(name, data):
+    """
+    Configures a veth interface, connects to the correct bridge
+    :param str name: The name of the veth interface
+    :param dict data: The veth interface data (bridge name)
+    """
+    logger.info("Creating VNet veth interface {}".format(name))
+    ip = IPRoute()
+    dev = ip.link_lookup(ifname=name)[0]
+    bridge = ip.link_lookup(ifname=data["bridge"])[0]
+    # Connect the veth interface to the bridge
+    ip.link("set", index=dev, master=bridge)
+    configure_vnet_interface(name)
+
+
 def bring_up_vnet_interfaces(config, sniffer=False):
     """
     Check the status of the vnet interfaces defined in the config and brings up the interfaces if needed
@@ -134,6 +162,20 @@ def bring_up_vnet_interfaces(config, sniffer=False):
         if sniffer and not check_if_sniffer_exists(ifname):
             # Create it
             start_tcpdump_on_vnet_interface(ifname)
+    if "veth" in config:
+        logger.info("VNet veth config found, ensuring interfaces")
+        for name, data in config["veth"]:
+            # Set STP on the master if required
+            if "stp" in data:
+                logger.info("{} STP on VNet interface {}".format("Enabling" if data["stp"] else "Disabling", data["bridge"]))
+                state = 1 if data["stp"] else 0
+                nbd = NDB(log="on")
+                with nbd.interfaces[data["bridge"]] as bridge:
+                    bridge.set("br_stp_state", state)
+            if not check_if_interface_exists(name):
+                create_veth_interface(name, data)
+            # Make sure the interface is up
+            ip.link("set", ifname=name, state="up")
 
 
 def check_if_sniffer_exists(ifname):

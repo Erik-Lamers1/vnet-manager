@@ -1,3 +1,7 @@
+#
+# host1 --- router1 -- host3
+#
+
 switches: 2
 
 machines:

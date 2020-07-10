@@ -1,0 +1,60 @@
+# Based on https://sunnynetwork.wordpress.com/2017/02/06/lab-37-linux-bridge-with-linux-containers-lxc/
+#
+#  host1 --- vnet-br0 - vnet-veth0 --- vnet-veth1 - vnet-br1 --- host2
+#                |                                       |
+#           vnet-veth2                              vnet-veth4
+#                |                                       |
+#                |                                       |
+#                |                                       |
+#            vnet-veth3 --- vnet-br2--- vnet-veth5 ---- |
+#                               |
+#                             host3
+
+switches: 3
+
+veths:
+  # Peer should only be defined once for a veth pair. But each veth needs a bridge to attach to.
+  vnet-veth0:
+    peer: vnet-veth1
+    bridge: vnet-br0
+    stp: true
+  vnet-veth1:
+    bridge: vnet-br1
+  vnet-veth2:
+    peer: vnet-veth3
+    bridge: vnet-br0
+    stp: true
+  vnet-veth3:
+    bridge: vnet-br2
+  vnet-veth4:
+    peer: vnet-veth5
+    bridge: vnet-br1
+    stp: true
+  vnet-veth5:
+    bridge: vnet-br2
+
+machines:
+  host1:
+    type: host
+    interfaces:
+      eth1:
+        ipv4: 10.0.1.1/24
+        ipv6: fd00:12::1/64
+        mac: 00:00:00:00:00:11
+        bridge: 0
+  host2:
+    type: host
+    interfaces:
+      eth2:
+        ipv4: 10.0.1.2/24
+        ipv6: fd00:12::2/64
+        mac: 00:00:00:00:00:22
+        bridge: 1
+  host3:
+    type: host
+    interfaces:
+      eth3:
+        ipv4: 10.0.1.3/24
+        ipv6: fd00:12::3/64
+        mac: 00:00:00:00:00:33
+        bridge: 2
