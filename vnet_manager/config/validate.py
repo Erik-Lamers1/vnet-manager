@@ -261,13 +261,13 @@ class ValidateConfig:
         """
         Validates the veth config if present
         """
-        if "veth" not in self.config:
+        if "veths" not in self.config:
             logger.warning("Tried to validate veth config, but no veth config present, skipping...")
             return
-        if not isinstance(self.config["veth"], dict):
+        if not isinstance(self.config["veths"], dict):
             logger.error("Config item: 'veth' does not seem to be a dict {}".format(self.default_message))
             self._all_ok = False
-        for name, values in self.config["veth"].items():
+        for name, values in self.config["veths"].items():
             if not isinstance(name, str):
                 logger.error("veth interface name: {} does not seem to be a string{}".format(name, self.default_message))
                 self._all_ok = False

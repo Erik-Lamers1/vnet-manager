@@ -162,9 +162,9 @@ def bring_up_vnet_interfaces(config, sniffer=False):
         if sniffer and not check_if_sniffer_exists(ifname):
             # Create it
             start_tcpdump_on_vnet_interface(ifname)
-    if "veth" in config:
+    if "veths" in config:
         logger.info("VNet veth config found, ensuring interfaces")
-        for name, data in config["veth"]:
+        for name, data in config["veths"]:
             # Set STP on the master if required
             if "stp" in data:
                 logger.info("{} STP on VNet interface {}".format("Enabling" if data["stp"] else "Disabling", data["bridge"]))
@@ -216,8 +216,8 @@ def delete_vnet_interfaces(config):
     :return:
     """
     ip = IPRoute()
-    if "veth" in config:
-        for name, data in config["veth"]:
+    if "veths" in config:
+        for name, data in config["veths"]:
             # Veth interfaces are deleted in pairs, so we only delete the ones with a peer
             if data["peer"]:
                 logger.info("Deleting VNet veth interface {}".format(name))
