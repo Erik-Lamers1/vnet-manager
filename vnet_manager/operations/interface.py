@@ -164,7 +164,7 @@ def bring_up_vnet_interfaces(config, sniffer=False):
             start_tcpdump_on_vnet_interface(ifname)
     if "veths" in config:
         logger.info("VNet veth config found, ensuring interfaces")
-        for name, data in config["veths"]:
+        for name, data in config["veths"].items():
             # Set STP on the master if required
             if "stp" in data:
                 logger.info("{} STP on VNet interface {}".format("Enabling" if data["stp"] else "Disabling", data["bridge"]))
@@ -217,9 +217,9 @@ def delete_vnet_interfaces(config):
     """
     ip = IPRoute()
     if "veths" in config:
-        for name, data in config["veths"]:
+        for name, data in config["veths"].items():
             # Veth interfaces are deleted in pairs, so we only delete the ones with a peer
-            if data["peer"]:
+            if "peer" in data and check_if_interface_exists(name):
                 logger.info("Deleting VNet veth interface {}".format(name))
                 ip.link("del", ifname=name)
     for ifname in get_vnet_interface_names_from_config(config):
