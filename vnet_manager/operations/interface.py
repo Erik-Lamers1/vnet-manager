@@ -216,6 +216,12 @@ def delete_vnet_interfaces(config):
     :return:
     """
     ip = IPRoute()
+    if "veth" in config:
+        for name, data in config["veth"]:
+            # Veth interfaces are deleted in pairs, so we only delete the ones with a peer
+            if data["peer"]:
+                logger.info("Deleting VNet veth interface {}".format(name))
+                ip.link("del", ifname=name)
     for ifname in get_vnet_interface_names_from_config(config):
         # Delete the interface
         if check_if_interface_exists(ifname):
