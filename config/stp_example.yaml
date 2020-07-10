@@ -14,6 +14,7 @@ switches: 3
 
 veths:
   # Peer should only be defined once for a veth pair. But each veth needs a bridge to attach to.
+  # Enabling STP can be done per vnet-br. It doesn't matter to duplicate, as the operation is idempotent
   vnet-veth0:
     peer: vnet-veth1
     bridge: vnet-br0
