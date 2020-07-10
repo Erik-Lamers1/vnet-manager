@@ -20,16 +20,16 @@ veths:
     stp: true
   vnet-veth1:
     bridge: vnet-br1
+    stp: true
   vnet-veth2:
     peer: vnet-veth3
     bridge: vnet-br0
-    stp: true
   vnet-veth3:
     bridge: vnet-br2
+    stp: true
   vnet-veth4:
     peer: vnet-veth5
     bridge: vnet-br1
-    stp: true
   vnet-veth5:
     bridge: vnet-br2
 
