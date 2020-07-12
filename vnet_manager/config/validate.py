@@ -68,18 +68,20 @@ class ValidateConfig:
         """
         self._validators_ran += 1
         if "providers" not in self.config:
-            logger.error("Providers dict not found in config, this usually means the default config is not correct" + self.default_message)
+            logger.error(
+                "Providers dict not found in config, this usually means the default config is not correct{}".format(self.default_message)
+            )
             self._all_ok = False
         elif not isinstance(self.config["providers"], dict):
-            logger.error("Providers is not a dict, this means the default config is corrupt" + self.default_message)
+            logger.error("Providers is not a dict, this means the default config is corrupt{}".format(self.default_message))
             self._all_ok = False
         else:
             for name, values in self.config["providers"].items():
                 if "supported_operating_systems" not in values:
-                    logger.error("No supported operating systems found for provider {}".format(name) + self.default_message)
+                    logger.error("No supported operating systems found for provider {}{}".format(name, self.default_message))
                     self._all_ok = False
                 elif not isinstance(values["supported_operating_systems"], list):
-                    logger.error("supported_operating_systems for provider {} is not a list".format(name) + self.default_message)
+                    logger.error("supported_operating_systems for provider {} is not a list{}".format(name, self.default_message))
                     self._all_ok = False
                 if "dns-nameserver" not in values or not isinstance(values["dns-nameserver"], str):
                     logger.warning("DNS nameserver not correctly set for provider {}. Defaulting to 8.8.8.8".format(name))
@@ -91,10 +93,10 @@ class ValidateConfig:
                     logger.warning("Guest packages not correctly set for provider {}. Defaulting to empty list".format(name))
                     self._new_config["providers"][name]["guest_packages"] = list()
                 if "base_image" not in values:
-                    logger.error("No base_image found for provider {}".format(name) + self.default_message)
+                    logger.error("No base_image found for provider {}{}".format(name, self.default_message))
                     self._all_ok = False
                 elif not isinstance(values["base_image"], dict):
-                    logger.error("base_image for provider {} is not a string.".format(name) + self.default_message)
+                    logger.error("base_image for provider {} is not a string{}".format(name, self.default_message))
                     self._all_ok = False
                 # Validate the base image
                 self.validate_base_image_parameters(name)
@@ -131,10 +133,12 @@ class ValidateConfig:
         """
         self._validators_ran += 1
         if "switches" not in self.config:
-            logger.error("Config item 'switches' missing" + self.default_message)
+            logger.error("Config item 'switches' missing{}".format(self.default_message))
             self._all_ok = False
         elif not isinstance(self.config["switches"], int):
-            logger.error("Config item 'switches: {}' does not seem to be an integer".format(self.config["switches"]) + self.default_message)
+            logger.error(
+                "Config item 'switches: {}' does not seem to be an integer{}".format(self.config["switches"], self.default_message)
+            )
             self._all_ok = False
 
     def validate_machine_config(self):
@@ -143,29 +147,28 @@ class ValidateConfig:
         """
         self._validators_ran += 1
         if "machines" not in self.config:
-            logger.error("Config item 'machines' missing" + self.default_message)
+            logger.error("Config item 'machines' missing{}".format(self.default_message))
             self._all_ok = False
         elif not isinstance(self.config["machines"], dict):
-            logger.error("Machines config is not a dict, this means the user config is incorrect" + self.default_message)
+            logger.error("Machines config is not a dict, this means the user config is incorrect{}".format(self.default_message))
             self._all_ok = False
         else:
             for name, values in self.config["machines"].items():
                 if "type" not in values:
-                    logger.error("Type not found for machine {}".format(name) + self.default_message)
+                    logger.error("Type not found for machine {}{}".format(name, self.default_message))
                     self._all_ok = False
                 elif values["type"] not in settings.SUPPORTED_MACHINE_TYPES:
                     logger.error(
-                        "Type {} for machine {} unsupported. I only support the following types: {}".format(
-                            values["type"], name, settings.SUPPORTED_MACHINE_TYPES
+                        "Type {} for machine {} unsupported. I only support the following types: {}{}".format(
+                            values["type"], name, settings.SUPPORTED_MACHINE_TYPES, self.default_message
                         )
-                        + self.default_message
                     )
                     self._all_ok = False
 
                 # Files
                 if "files" in values:
                     if not isinstance(values["files"], dict):
-                        logger.error("Files directive for machine {} is not a dict".format(name) + self.default_message)
+                        logger.error("Files directive for machine {} is not a dict{}".format(name, self.default_message))
                         self._all_ok = False
                     else:
                         # Check the files
@@ -173,12 +176,13 @@ class ValidateConfig:
 
                 # Interfaces
                 if "interfaces" not in values:
-                    logger.error("Machine {} does not appear to have any interfaces".format(name) + self.default_message)
+                    logger.error("Machine {} does not appear to have any interfaces{}".format(name, self.default_message))
                     self._all_ok = False
                 elif not isinstance(values["interfaces"], dict):
                     logger.error(
-                        "The interfaces for machine {} are not given as a dict, this usually means a typo in the config".format(name)
-                        + self.default_message
+                        "The interfaces for machine {} are not given as a dict, this usually means a typo in the config{}".format(
+                            name, self.default_message
+                        )
                     )
                     self._all_ok = False
                 else:
@@ -203,7 +207,7 @@ class ValidateConfig:
             # Check for absolute paths
             elif not isdir(host_file) or not isfile(host_file):
                 logger.error(
-                    "Host file {} for machine {} does not seem to be a dir or a file".format(host_file, machine) + self.default_message
+                    "Host file {} for machine {} does not seem to be a dir or a file{}".format(host_file, machine, self.default_message)
                 )
                 self._all_ok = False
 
@@ -216,7 +220,7 @@ class ValidateConfig:
         interfaces = self.config["machines"][machine]["interfaces"]
         for int_name, int_vals in interfaces.items():
             if "ipv4" not in int_vals:
-                logger.error("ipv4 not found for interface {} on machine {}".format(int_name, machine) + self.default_message)
+                logger.error("ipv4 not found for interface {} on machine {}{}".format(int_name, machine, self.default_message))
                 self._all_ok = False
             else:
                 # Validate the given IP
@@ -242,12 +246,13 @@ class ValidateConfig:
             # From: https://stackoverflow.com/a/7629690/8632038
             elif not fullmatch(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", int_vals["mac"]):
                 logger.error(
-                    "MAC {} for interface {} on machine {}, does not seem to be valid".format(int_vals["mac"], int_name, machine)
-                    + self.default_message
+                    "MAC {} for interface {} on machine {}, does not seem to be valid{}".format(
+                        int_vals["mac"], int_name, machine, self.default_message
+                    )
                 )
                 self._all_ok = False
             if "bridge" not in int_vals:
-                logger.error("bridge keyword missing on interface {} for machine {}".format(int_name, machine) + self.default_message)
+                logger.error("bridge keyword missing on interface {} for machine {}{}".format(int_name, machine, self.default_message))
                 self._all_ok = False
             elif not isinstance(int_vals["bridge"], int) or int_vals["bridge"] > self.config["switches"] - 1:
                 logger.error(

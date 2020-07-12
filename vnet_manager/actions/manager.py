@@ -28,6 +28,8 @@ logger = getLogger(__name__)
 
 
 def action_manager(action, config, machines=None, sniffer=False, base_image=False):
+    # pylint: disable=too-many-branches
+    # TODO: Refactor if statements
     """
     Initiate an action
     :param str action: The action to preform

@@ -16,6 +16,7 @@ def check_for_root_user():
 
 
 def request_confirmation(message=None, prompt="Continue? (yes/no) ", func=sys.exit, args=None, kwargs=None):
+    # pylint: disable=comparison-with-callable
     """
     Prompt user for confirmation before continuing program execution.
 
@@ -49,9 +50,9 @@ def request_confirmation(message=None, prompt="Continue? (yes/no) ", func=sys.ex
     while True:
         if response in ("y", "yes"):
             return
-        elif response in ("n", "no"):
+        if response in ("n", "no"):
             func(*args, **kwargs)
             return
-        elif response is not None:
+        if response is not None:
             print("Please answer yes or no.")
         response = input(prompt).lower()

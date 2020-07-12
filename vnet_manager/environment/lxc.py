@@ -78,12 +78,12 @@ def configure_lxc_base_machine(config):
     # Check for DNS
     logger.debug("Checking for DNS connectivity")
     dns = False
-    for i in range(0, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
+    for _ in range(0, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
         if execute_and_log("host -t A google.com")[0] == 0:
             dns = True
             break
-        else:
-            sleep(2)
+        # No DNS connectivity (yet), try again
+        sleep(2)
     if not dns:
         raise RuntimeError("Base machine started without working DNS, unable to continue")
 

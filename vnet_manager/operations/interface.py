@@ -95,7 +95,7 @@ def check_if_interface_exists(ifname):
     :return: bool: True if the interface exists, False otherwise
     """
     iface = IPRoute().link_lookup(ifname=ifname)
-    return True if iface else False
+    return bool(iface)
 
 
 def create_vnet_interface(ifname):
