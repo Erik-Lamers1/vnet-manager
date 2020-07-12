@@ -3,3 +3,4 @@
 # These requirements are only needed when running the tests (Pytest atm)
 pytest==5.4.2
 pylint==2.5.2
+black==19.10b0
