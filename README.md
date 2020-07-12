@@ -1,4 +1,5 @@
 # VNet-manager
+[![Build Status](https://travis-ci.org/Erik-Lamers1/vnet-manager.svg?branch=master)](https://travis-ci.org/Erik-Lamers1/vnet-manager)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -48,3 +49,19 @@ VNET_SNIFFER_PCAP_DIR    - Sets the directory where the sniffer PCAP files will 
 VNET_LXC_BASE_IMAGE      - Sets the alias for the LXC base image, only set when using a custom base image
 VNET_FORCE               - Internal env var, used with --yes. Do not set manually
 ```
+
+## Development
+Opening pull requests for new features and bug fixes is highly appreciated!  
+Before you do make sure you setup your development environment.
+```bash
+apt-get install tox virtualenvwrapper
+# Depending on your console setup, you might have to logout and in again to make sure virtualenvwrapper is loaded
+# cd to your development directory
+cd ~/vnet-manager
+mkvirtualenv -p /usr/bin/python3.6 -a $(pwd) vnet-manager
+pip install -U pip
+pip install -r requirements/development.txt
+pre-commit install
+```
+### Running the tests
+Simply run `tox` in the vnet-manager directory.
