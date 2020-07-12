@@ -54,7 +54,7 @@ VNET_FORCE               - Internal env var, used with --yes. Do not set manuall
 Opening pull requests for new features and bug fixes is highly appreciated!  
 Before you do make sure you setup your development environment.
 ```bash
-apt-get install tox virtualenvwrapper
+apt-get install tox virtualenvwrapper libapt-pkg-dev intltool
 # Depending on your console setup, you might have to logout and in again to make sure virtualenvwrapper is loaded
 # cd to your development directory
 cd ~/vnet-manager
