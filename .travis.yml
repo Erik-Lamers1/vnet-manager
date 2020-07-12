@@ -1,5 +1,7 @@
-sudo: false
 language: python
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install python3-apt
 python:
     - "3.6"
     - "3.8"
