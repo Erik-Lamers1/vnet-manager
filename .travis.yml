@@ -1,11 +1,12 @@
 language: python
-virtualenv:
-    system_site_packages: true
 before_install:
   - sudo apt-get update
   - sudo apt-get -y install python3-apt
 python:
     - "3.6"
     - "3.8"
-install: pip install tox-travis
-script: tox
+virtualenv:
+    system_site_packages: true
+install: pip install -r requirements/test.txt
+before_script: "black --check --diff --line-length 140 --target-version py36 vnet_manager"
+script: "pytest; pylint vnet_manager"
