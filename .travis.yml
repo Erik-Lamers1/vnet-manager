@@ -2,11 +2,11 @@ language: python
 before_install:
   - sudo apt-get update
   - sudo apt-get -y install python3-apt
+  # Stupid dirty hack to get the apt module to work on other python versions, because Debian can't do proper Python packaging
+  - sudo cp /usr/lib/python3/dist-packages/apt_pkg.cpython-35m-x86_64-linux-gnu.so /usr/lib/python3/dist-packages/apt_pkg.so
 python:
     - "3.6"
     - "3.8"
-virtualenv:
-    system_site_packages: true
 install: pip install -r requirements/test.txt
 before_script: "black --check --diff --line-length 140 --target-version py36 vnet_manager"
 script: "pytest; pylint vnet_manager"
