@@ -1,12 +1,11 @@
 language: python
 before_install:
+  # Hack: Debian doesn't have proper Python packaging for their apt module. So, we install it via apt-get and copy it into the venv.
   - sudo apt-get update
-  - sudo apt-get -y install python3-apt intltool libapt-pkg-dev
-  - pip install -U pip setuptools
-  - pip install -U wheel
-  # Install some reqs first, needed for the compile
-  - pip install "Sphinx==3.1.2"
-  - pip install git+https://salsa.debian.org/python-team/modules/python-distutils-extra.git@c8cf85a9c86f7f62c47b38b1141e2269b96829a6
+  - sudo apt-get -y install python3-apt
+  - export PYTHON_VERSION=$(python --version 2>&1 | awk '{print$2}')
+  - sudo cp /usr/lib/python3/dist-packages/apt_pkg.cpython-35m-x86_64-linux-gnu.so /home/travis/virtualenv/python${PYTHON_VERSION}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/apt_pkg.so
+  - sudo cp -r /usr/lib/python3/dist-packages/apt/ /home/travis/virtualenv/python${PYTHON_VERSION}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/
 python:
     - "3.6"
     - "3.8"

@@ -4,11 +4,3 @@
 pytest==5.4.2
 pylint==2.5.2
 black==19.10b0
-
-# The Debian people don't make proper Python packaging for their apt module, so we install it by hand for the test env.
-# In production this can be done by installing the python3-apt package
-Sphinx==3.1.2
-# v2.45
-git+https://salsa.debian.org/python-team/modules/python-distutils-extra.git@c8cf85a9c86f7f62c47b38b1141e2269b96829a6
-# v1.6.5ubuntu0.2 (works on Xenial)
--e git+https://salsa.debian.org/apt-team/python-apt.git@cceda9f40a2cf59b498d344ef2c0f84a79dfd6e5#egg=python-apt
