@@ -213,3 +213,30 @@ class TestValidateConfigValidateBaseImageParameters(VNetTestCase):
         self.logger.error.assert_called_once_with(
             "Provider lxc protocol for base image config is not a string{}".format(self.validator.default_message)
         )
+
+
+class TestValidateConfigValidateSwitchConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+
+    def test_validate_switch_config_runs_ok_with_good_config(self):
+        self.validator.validate_switch_config()
+        self.assertTrue(self.validator.config_validation_successful)
+        self.assertGreater(self.validator.validators_ran, 0)
+
+    def test_validate_switch_config_fails_when_switch_config_not_present(self):
+        del self.validator.config["switches"]
+        self.validator.validate_switch_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with("Config item 'switches' missing{}".format(self.validator.default_message))
+
+    def test_validate_switch_config_fails_when_switch_config_not_a_int(self):
+        self.validator.config["switches"] = "os3"
+        self.validator.validate_switch_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Config item 'switches: {}' does not seem to be an integer{}".format(
+                self.validator.config["switches"], self.validator.default_message
+            )
+        )
