@@ -336,3 +336,29 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.validate_machine_config()
         calls = [call(machine) for machine in self.validator.config["machines"].keys()]
         self.validate_interfaces.assert_has_calls(calls)
+
+
+class TestValidateConfigValidateMachineFilesParameters(VNetTestCase):
+    def setUp(self) -> None:
+        # Use VALIDATED_CONFIG so we have the config_dir
+        self.validator = ValidateConfig(deepcopy(settings.VALIDATED_CONFIG))
+        self.is_dir = self.set_up_patch("vnet_manager.config.validate.isdir")
+        self.is_dir.return_value = False
+        self.is_file = self.set_up_patch("vnet_manager.config.validate.isfile")
+        self.is_file.return_value = False
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+
+    def test_validate_machine_file_parameters_fails_when_no_file_or_dir_found(self):
+        self.validator.validate_machine_files_parameters("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.assertTrue(self.logger.error.called)
+
+    def test_validate_machine_file_parameters_is_ok_when_is_dir_is_true(self):
+        self.is_dir.return_value = True
+        self.validator.validate_machine_files_parameters("router100")
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_file_parameters_is_ok_when_is_file_is_true(self):
+        self.is_file.return_value = True
+        self.validator.validate_machine_files_parameters("router100")
+        self.assertTrue(self.validator.config_validation_successful)
