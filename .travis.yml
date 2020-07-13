@@ -11,5 +11,7 @@ python:
     - "3.6"
     - "3.8"
 install: pip install -r requirements/test.txt
+env:
+  - SETTINGS_MODULE=vnet_manager.settings.test
 before_script: "black --check --diff --line-length 140 --target-version py36 vnet_manager"
 script: "pytest && pylint vnet_manager"
