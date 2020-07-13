@@ -35,6 +35,14 @@ CONFIG = {
             "files": {"router102": "/etc/frr/"},
         },
     },
+    "veths": {
+        "vnet-veth3": {"bridge": "vnet-br2", "stp": True},
+        "vnet-veth2": {"peer": "vnet-veth3", "bridge": "vnet-br0"},
+        "vnet-veth1": {"bridge": "vnet-br1", "stp": True},
+        "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": True},
+        "vnet-veth5": {"bridge": "vnet-br2"},
+        "vnet-veth4": {"peer": "vnet-veth5", "bridge": "vnet-br1"},
+    },
 }
 
 VALIDATED_CONFIG = {
@@ -67,6 +75,14 @@ VALIDATED_CONFIG = {
             "interfaces": {"eth23": {"ipv4": "10.0.0.2/8", "ipv6": "fd00:23::2/64", "mac": "00:00:00:00:03:23", "bridge": 1}},
             "files": {"/root/vnet-manager/config/ripng/router102": "/etc/frr/"},
         },
+    },
+    "veths": {
+        "vnet-veth3": {"bridge": "vnet-br2", "stp": True},
+        "vnet-veth2": {"peer": "vnet-veth3", "bridge": "vnet-br0"},
+        "vnet-veth1": {"bridge": "vnet-br1", "stp": True},
+        "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": True},
+        "vnet-veth5": {"bridge": "vnet-br2"},
+        "vnet-veth4": {"peer": "vnet-veth5", "bridge": "vnet-br1"},
     },
     "config_dir": "/root/vnet-manager/config/ripng",
 }

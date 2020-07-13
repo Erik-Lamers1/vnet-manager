@@ -271,8 +271,9 @@ class ValidateConfig:
             logger.warning("Tried to validate veth config, but no veth config present, skipping...")
             return
         if not isinstance(self.config["veths"], dict):
-            logger.error("Config item: 'veth' does not seem to be a dict {}".format(self.default_message))
+            logger.error("Config item: 'veths' does not seem to be a dict {}".format(self.default_message))
             self._all_ok = False
+            return
         for name, values in self.config["veths"].items():
             if not isinstance(name, str):
                 logger.error("veth interface name: {} does not seem to be a string{}".format(name, self.default_message))
@@ -284,7 +285,7 @@ class ValidateConfig:
                 if "bridge" not in values:
                     logger.error("veth interface {} is missing the bridge parameter{}".format(name, self.default_message))
                     self._all_ok = False
-                if not isinstance(values["bridge"], str):
+                elif not isinstance(values["bridge"], str):
                     logger.error("veth interface {} bridge parameter does not seem to be a str{}".format(name, self.default_message))
                     self._all_ok = False
                 if "peer" not in values:
