@@ -362,3 +362,66 @@ class TestValidateConfigValidateMachineFilesParameters(VNetTestCase):
         self.is_file.return_value = True
         self.validator.validate_machine_files_parameters("router100")
         self.assertTrue(self.validator.config_validation_successful)
+
+
+class TestValidateConfigValidateInterfaceConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+
+    def test_validate_interface_config_runs_ok_with_good_config(self):
+        self.validator.validate_interface_config("router100")
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_interface_config_fails_when_ipv4_not_present(self):
+        del self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["ipv4"]
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "ipv4 not found for interface eth12 on machine router100{}".format(self.validator.default_message)
+        )
+
+    def test_validate_interface_config_fails_when_ipv4_not_valid(self):
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["ipv4"] = "255.255.256.257"
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
+
+    def test_validate_interface_config_does_not_fail_when_ipv6_not_present(self):
+        del self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["ipv6"]
+        self.validator.validate_interface_config("router100")
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_interface_config_fails_when_ipv6_not_valid(self):
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["ipv6"] = "2001:h80:1:2d96::f1a5/64"
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
+
+    def test_validate_interface_config_fails_when_bridge_not_present(self):
+        del self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["bridge"]
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "bridge keyword missing on interface eth12 for machine router100{}".format(self.validator.default_message)
+        )
+
+    def test_validate_interface_config_fails_when_bridge_not_a_int(self):
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["bridge"] = "42"
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Invalid bridge number detected for interface eth12 on machine router100. "
+            "The bridge keyword should correspond to the interface number of the vnet bridge to connect to "
+            "(starting at iface number 0)"
+        )
+
+    def test_validate_interface_config_fails_when_bridge_number_higher_then_the_amount_of_switches(self):
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["bridge"] = 3
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Invalid bridge number detected for interface eth12 on machine router100. "
+            "The bridge keyword should correspond to the interface number of the vnet bridge to connect to "
+            "(starting at iface number 0)"
+        )
