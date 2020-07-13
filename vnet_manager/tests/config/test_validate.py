@@ -154,3 +154,62 @@ class TestValidateConfigValidateProviderConfig(VNetTestCase):
     def test_validate_provider_config_calls_base_image_validator_with_name_of_provider(self):
         self.validator.validate_provider_config()
         self.base_image_validator.assert_called_once_with("lxc")
+
+
+class TestValidateConfigValidateBaseImageParameters(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+
+    def test_validate_base_image_config_runs_ok_on_good_config(self):
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertTrue(self.validator.config_validation_successful)
+        self.assertEqual(self.validator.validators_ran, 0)
+
+    def test_validate_base_image_config_fails_when_os_not_present(self):
+        del self.validator.config["providers"]["lxc"]["base_image"]["os"]
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Provider lxc is missing OS in the base image config{}".format(self.validator.default_message)
+        )
+
+    def test_validate_base_image_config_fails_when_os_is_not_a_string(self):
+        self.validator.config["providers"]["lxc"]["base_image"]["os"] = 42
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Provider lxc OS for base image config is not a string{}".format(self.validator.default_message)
+        )
+
+    def test_validate_base_image_config_fails_when_server_not_present(self):
+        del self.validator.config["providers"]["lxc"]["base_image"]["server"]
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Provider lxc is missing server in the base image config{}".format(self.validator.default_message)
+        )
+
+    def test_validate_base_image_config_fails_when_server_is_not_a_string(self):
+        self.validator.config["providers"]["lxc"]["base_image"]["server"] = 42
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Provider lxc server for base image config is not a string{}".format(self.validator.default_message)
+        )
+
+    def test_validate_base_image_config_fails_when_protocol_not_present(self):
+        del self.validator.config["providers"]["lxc"]["base_image"]["protocol"]
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Provider lxc is missing protocol in the base image config{}".format(self.validator.default_message)
+        )
+
+    def test_validate_base_image_config_fails_when_protocol_is_not_a_string(self):
+        self.validator.config["providers"]["lxc"]["base_image"]["protocol"] = 42
+        self.validator.validate_base_image_parameters("lxc")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Provider lxc protocol for base image config is not a string{}".format(self.validator.default_message)
+        )

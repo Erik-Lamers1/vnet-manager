@@ -110,22 +110,22 @@ class ValidateConfig:
         """
         base_image_config = self.config["providers"][provider]["base_image"]
         if "os" not in base_image_config:
-            logger.error("Provider {} is missing OS in the base image config".format(provider))
+            logger.error("Provider {} is missing OS in the base image config{}".format(provider, self.default_message))
             self._all_ok = False
         elif not isinstance(base_image_config["os"], str):
-            logger.error("Provider {} OS for base image config is not a string".format(provider))
+            logger.error("Provider {} OS for base image config is not a string{}".format(provider, self.default_message))
             self._all_ok = False
         if "server" not in base_image_config:
-            logger.error("Provider {} is missing server in the base image config".format(provider))
+            logger.error("Provider {} is missing server in the base image config{}".format(provider, self.default_message))
             self._all_ok = False
         elif not isinstance(base_image_config["server"], str):
-            logger.error("Provider {} server for base image config is not a string".format(provider))
+            logger.error("Provider {} server for base image config is not a string{}".format(provider, self.default_message))
             self._all_ok = False
         if "protocol" not in base_image_config:
-            logger.error("Provider {} is missing protocol in the base image config".format(provider))
+            logger.error("Provider {} is missing protocol in the base image config{}".format(provider, self.default_message))
             self._all_ok = False
         elif not isinstance(base_image_config["protocol"], str):
-            logger.error("Provider {} protocol for base image config is not a string".format(provider))
+            logger.error("Provider {} protocol for base image config is not a string{}".format(provider, self.default_message))
             self._all_ok = False
 
     def validate_switch_config(self):
