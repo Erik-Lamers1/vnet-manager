@@ -1,10 +1,11 @@
+dist: bionic
 language: python
 before_install:
   # Hack: Debian doesn't have proper Python packaging for their apt module. So, we install it via apt-get and copy it into the venv.
   - sudo apt-get update
   - sudo apt-get -y install python3-apt
   - export PYTHON_VERSION=$(python --version 2>&1 | awk '{print$2}')
-  - sudo cp /usr/lib/python3/dist-packages/apt_pkg.cpython-35m-x86_64-linux-gnu.so /home/travis/virtualenv/python${PYTHON_VERSION}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/apt_pkg.so
+  - sudo cp /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /home/travis/virtualenv/python${PYTHON_VERSION}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/apt_pkg.so
   - sudo cp -r /usr/lib/python3/dist-packages/apt/ /home/travis/virtualenv/python${PYTHON_VERSION}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/
 python:
     - "3.6"
