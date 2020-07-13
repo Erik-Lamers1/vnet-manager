@@ -59,16 +59,15 @@ def wait_for_lxc_machine_status(container, status):
     :raise TimeoutError if wait time expires
     """
     logger.debug("Waiting for LXC container {} to get a {} status".format(container.name, status))
-    for _ in range(1, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
+    for i in range(1, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
         # Actually ask for the container.state().status, because container.status is a static value
         if container.state().status.lower() == status.lower():
             logger.debug("Container successfully converged to {} status".format(status))
             return
         # Container not in desired state yet, wait and try again
-        logger.info(
-            "Container {} not yet in {} status, waiting for {} seconds".format(container.name, status, settings.LXC_STATUS_WAIT_SLEEP)
-        )
-        sleep(settings.LXC_STATUS_WAIT_SLEEP)
+        sleep_time = i * (settings.LXC_STATUS_WAIT_SLEEP * settings.LXC_STATUS_BACKOFF_MULTIPLIER)
+        logger.info("Container {} not yet in {} status, waiting for {} seconds".format(container.name, status, sleep_time))
+        sleep(sleep_time)
     raise TimeoutError("Wait time for container {} to converge to {} status expired, giving up".format(container.name, status))
 
 
