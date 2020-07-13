@@ -35,7 +35,6 @@ CONFIG = {
             "files": {"router102": "/etc/frr/"},
         },
     },
-    "config_dir": "/root/vnet-manager/config/ripng",
 }
 
 VALIDATED_CONFIG = {
