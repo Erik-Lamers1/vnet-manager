@@ -99,7 +99,7 @@ class ValidateConfig:
                     logger.error("'base_image' for provider {} is not a dict{}".format(name, self.default_message))
                     self._all_ok = False
                 # Validate the base image
-                if self._all_ok:
+                else:
                     self.validate_base_image_parameters(name)
 
     def validate_base_image_parameters(self, provider):

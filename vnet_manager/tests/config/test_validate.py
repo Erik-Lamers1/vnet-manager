@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from copy import deepcopy
 
 from vnet_manager.tests import VNetTestCase
@@ -240,3 +240,99 @@ class TestValidateConfigValidateSwitchConfig(VNetTestCase):
                 self.validator.config["switches"], self.validator.default_message
             )
         )
+
+
+class TestValidateConfigValidateMachineConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+        self.validate_files = Mock()
+        self.validate_interfaces = Mock()
+        self.validator.validate_interface_config = self.validate_interfaces
+        self.validator.validate_machine_files_parameters = self.validate_files
+
+    def test_validate_machine_config_runs_ok_with_good_config(self):
+        self.validator.validate_machine_config()
+        self.assertTrue(self.validator.config_validation_successful)
+        self.assertGreater(self.validator.validators_ran, 0)
+
+    def test_validate_machine_config_fails_when_machine_config_not_present(self):
+        del self.validator.config["machines"]
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with("Config item 'machines' missing{}".format(self.validator.default_message))
+
+    def test_validate_machine_config_fails_when_machine_config_not_a_dict(self):
+        self.validator.config["machines"] = 42
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Machines config is not a dict, this means the user config is incorrect{}".format(self.validator.default_message)
+        )
+
+    def test_validate_machine_config_fails_when_machine_type_not_present(self):
+        del self.validator.config["machines"]["router100"]["type"]
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with("Type not found for machine router100{}".format(self.validator.default_message))
+
+    def test_validate_machine_config_fails_when_machine_type_not_in_supported_machine_types(self):
+        self.validator.config["machines"]["router100"]["type"] = "banana"
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Type banana for machine router100 unsupported. I only support the following types: {}{}".format(
+                settings.SUPPORTED_MACHINE_TYPES, self.validator.default_message
+            )
+        )
+
+    def test_validate_machine_config_fails_when_machine_files_not_a_dict(self):
+        self.validator.config["machines"]["router100"]["files"] = "banana"
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Files directive for machine router100 is not a dict{}".format(self.validator.default_message)
+        )
+
+    def test_validate_machine_config_succeeds_when_machine_files_not_present(self):
+        del self.validator.config["machines"]["router100"]["files"]
+        del self.validator.config["machines"]["router101"]["files"]
+        del self.validator.config["machines"]["router102"]["files"]
+        self.validator.validate_machine_config()
+        self.assertTrue(self.validator.config_validation_successful)
+        self.assertFalse(self.validate_files.called)
+
+    def test_validate_machine_config_calls_validate_files(self):
+        self.validator.validate_machine_config()
+        calls = [call(machine) for machine in self.validator.config["machines"].keys()]
+        self.validate_files.assert_has_calls(calls)
+
+    def test_validate_machine_config_fails_if_interfaces_not_in_machine_config(self):
+        del self.validator.config["machines"]["router100"]["interfaces"]
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Machine router100 does not appear to have any interfaces{}".format(self.validator.default_message)
+        )
+
+    def test_validate_machine_config_fails_if_interfaces_is_not_a_dict(self):
+        self.validator.config["machines"]["router100"]["interfaces"] = 42
+        self.validator.config["machines"]["router101"]["interfaces"] = 42
+        self.validator.config["machines"]["router102"]["interfaces"] = 42
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        calls = [
+            call(
+                "The interfaces for machine {} are not given as a dict, this usually means a typo in the config{}".format(
+                    machine, self.validator.default_message
+                )
+            )
+            for machine in self.validator.config["machines"].keys()
+        ]
+        self.logger.error.assert_has_calls(calls)
+        self.assertFalse(self.validate_interfaces.called)
+
+    def test_validate_machine_config_calls_validate_interface_config(self):
+        self.validator.validate_machine_config()
+        calls = [call(machine) for machine in self.validator.config["machines"].keys()]
+        self.validate_interfaces.assert_has_calls(calls)
