@@ -59,7 +59,7 @@ class ValidateConfig:
         self.validate_provider_config()
         self.validate_switch_config()
         self.validate_machine_config()
-        if "veth" in self.config:
+        if "veths" in self.config:
             self.validate_veth_config()
 
     def validate_provider_config(self):
@@ -96,10 +96,11 @@ class ValidateConfig:
                     logger.error("No base_image found for provider {}{}".format(name, self.default_message))
                     self._all_ok = False
                 elif not isinstance(values["base_image"], dict):
-                    logger.error("base_image for provider {} is not a string{}".format(name, self.default_message))
+                    logger.error("'base_image' for provider {} is not a dict{}".format(name, self.default_message))
                     self._all_ok = False
                 # Validate the base image
-                self.validate_base_image_parameters(name)
+                if self._all_ok:
+                    self.validate_base_image_parameters(name)
 
     def validate_base_image_parameters(self, provider):
         """
