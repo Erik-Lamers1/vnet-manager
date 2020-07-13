@@ -65,10 +65,8 @@ def wait_for_lxc_machine_status(container, status):
             logger.debug("Container successfully converged to {} status".format(status))
             return
         # Container not in desired state yet, wait and try again
-        sleep_time = i * (settings.LXC_STATUS_WAIT_SLEEP * settings.LCX_STATUS_BACKOFF_MULTIPLIER)
-        logger.info(
-            "Container {} not yet in {} status, waiting for {} seconds".format(container.name, status, sleep_time)
-        )
+        sleep_time = i * (settings.LXC_STATUS_WAIT_SLEEP * settings.LXC_STATUS_BACKOFF_MULTIPLIER)
+        logger.info("Container {} not yet in {} status, waiting for {} seconds".format(container.name, status, sleep_time))
         sleep(sleep_time)
     raise TimeoutError("Wait time for container {} to converge to {} status expired, giving up".format(container.name, status))
 
