@@ -3,8 +3,8 @@ from logging import getLogger
 from time import sleep
 
 from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_image_from_container
-from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_vnet_lxc_profile
-from vnet_manager.operations.storage import check_if_lxc_storage_pool_exists, create_lxc_storage_pool
+from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_vnet_lxc_profile, delete_vnet_lxc_profile
+from vnet_manager.operations.storage import check_if_lxc_storage_pool_exists, create_lxc_storage_pool, delete_lxc_storage_pool
 from vnet_manager.operations.machine import create_lxc_base_image_container, change_lxc_machine_status, destroy_lxc_machine
 from vnet_manager.environment.host import check_for_supported_os, check_for_installed_packages
 from vnet_manager.providers.lxc import get_lxd_client
@@ -58,6 +58,16 @@ def ensure_vnet_lxc_environment(config):
         destroy_lxc_machine(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=False)
     else:
         logger.debug("Base image {} found".format(settings.LXC_BASE_IMAGE_ALIAS))
+
+
+def cleanup_vnet_lxc_environment():
+    """
+    Cleans up specific VNet LXC configuration
+    No environments should be active when calling this function
+    """
+    logger.info("Cleaning up VNet LXC configuration")
+    delete_vnet_lxc_profile(settings.LXC_VNET_PROFILE)
+    delete_lxc_storage_pool(settings.LXC_STORAGE_POOL_NAME)
 
 
 def configure_lxc_base_machine(config):

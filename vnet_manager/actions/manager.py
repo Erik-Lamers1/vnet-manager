@@ -6,7 +6,7 @@ from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import ValidateConfig
 from vnet_manager.utils.version import show_version
 from vnet_manager.utils.user import request_confirmation
-from vnet_manager.environment.lxc import ensure_vnet_lxc_environment
+from vnet_manager.environment.lxc import ensure_vnet_lxc_environment, cleanup_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
 from vnet_manager.operations.files import put_files_on_machine, generate_vnet_hosts_file, place_vnet_hosts_file_on_machines
 from vnet_manager.operations.machine import (
@@ -102,6 +102,8 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
                 )
             else:
                 delete_vnet_interfaces(config)
+    if action == "clean":
+        cleanup_vnet_lxc_environment()
 
     # Finally return all OK
     return EX_OK

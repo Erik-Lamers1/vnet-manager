@@ -34,4 +34,26 @@ def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings
         client.storage_pools.create({"name": name, "driver": driver, "config": {"size": settings.LXC_STORAGE_POOL_SIZE}})
         logger.info("Storage pool {} with driver {} successfully created".format(name, driver))
     except LXDAPIException as e:
-        logger.error("Got API error while creating storage pool {}. Error: {}".format(name, e))
+        logger.critical("Got API error while creating storage pool {}. Error: {}".format(name, e))
+        raise RuntimeError("Received API error while creating storage pool {}".format(name))
+
+
+def delete_lxc_storage_pool(name):
+    """
+    Deletes a LXC storage pool
+    Pool must be empty before deletion
+    :param str name: The name of the pool to delete
+    """
+    # Check if the pool even exists
+    if not check_if_lxc_storage_pool_exists(name):
+        logger.warning("Tried to delete LXC storage pool {}, but it didn't exist, skipping...".format(name))
+        return
+
+    client = get_lxd_client()
+    # Try to delete it
+    try:
+        logger.info("Deleting LXC storage pool {}".format(name))
+        client.storage_pools.get(name).delete()
+    except LXDAPIException as e:
+        logger.critical("Got API error while deleting storage pool {}. Error: {}".format(name, e))
+        raise RuntimeError("Received API error while deleting storage pool {}".format(name))

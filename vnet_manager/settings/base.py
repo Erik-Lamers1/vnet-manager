@@ -37,7 +37,7 @@ LOGGING = {
 }
 
 # VNet Manager static settings / config
-VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "version"]
+VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "clean", "version"]
 CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(expanduser("~"), PYTHON_PACKAGE_NAME, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
 VNET_SNIFFER_PCAP_DIR = getenv("VNET_SNIFFER_PCAP_DIR", "/tmp")
