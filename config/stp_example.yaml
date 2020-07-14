@@ -6,7 +6,7 @@
 #                |                                       |
 #                |                                       |
 #                |                                       |
-#            vnet-veth3 --- vnet-br2--- vnet-veth5 ---- |
+#            vnet-veth3 ---- vnet-br2 --- vnet-veth5 --- |
 #                               |
 #                             host3
 
