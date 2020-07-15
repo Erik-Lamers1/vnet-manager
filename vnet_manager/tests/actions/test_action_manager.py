@@ -32,6 +32,7 @@ class TestActionManager(VNetTestCase):
         self.destroy_lxc_image = self.set_up_patch("vnet_manager.actions.manager.destroy_lxc_image")
         self.destroy_machines = self.set_up_patch("vnet_manager.actions.manager.destroy_machines")
         self.delete_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.delete_vnet_interfaces")
+        self.cleanup_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.cleanup_vnet_lxc_environment")
 
     def test_action_raises_not_implemented_error_if_unsupported_action(self):
         with self.assertRaises(NotImplementedError):
@@ -141,6 +142,10 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_destroy_machines_with_destroy_action(self):
         action_manager("destroy", "blaaap")
         self.destroy_machines.assert_called_once_with(self.validator.updated_config, machines=None)
+
+    def test_action_manager_calls_cleanup_vnet_lxc_environment_with_clean_action(self):
+        action_manager("clean", "banana")
+        self.cleanup_vnet_lxc_environment.assert_called_once_with()
 
     def test_action_manager_calls_destroy_machines_with_destroy_action_and_machines(self):
         action_manager("destroy", "blaaap", machines=["machine"])
