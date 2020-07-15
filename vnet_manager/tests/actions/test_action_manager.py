@@ -33,6 +33,7 @@ class TestActionManager(VNetTestCase):
         self.destroy_machines = self.set_up_patch("vnet_manager.actions.manager.destroy_machines")
         self.delete_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.delete_vnet_interfaces")
         self.cleanup_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.cleanup_vnet_lxc_environment")
+        self.display_help_for_action = self.set_up_patch("vnet_manager.actions.manager.display_help_for_action")
 
     def test_action_raises_not_implemented_error_if_unsupported_action(self):
         with self.assertRaises(NotImplementedError):
@@ -41,6 +42,11 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_show_version_with_version_action(self):
         ret = action_manager("version", "blaap")
         self.show_version.assert_called_once_with()
+        self.assertEqual(ret, EX_OK)
+
+    def test_action_manager_calls_display_help_for_action_when_action_has_been_called_with_help_as_second_parameter(self):
+        ret = action_manager("start", "help")
+        self.display_help_for_action.assert_called_once_with("start")
         self.assertEqual(ret, EX_OK)
 
     def test_action_manager_calls_get_config(self):
