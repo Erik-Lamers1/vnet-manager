@@ -5,7 +5,7 @@ logger = getLogger(__name__)
 
 try:
     from apt import Cache
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     logger.critical("Python apt module not installed, please 'apt-get install python3-apt' first")
     raise ModuleNotFoundError("Python apt module missing")
 
