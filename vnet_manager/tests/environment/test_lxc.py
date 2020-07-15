@@ -85,3 +85,16 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
             settings.LXC_BASE_IMAGE_MACHINE_NAME, alias=settings.LXC_BASE_IMAGE_ALIAS
         )
         self.destroy_lxc_machine.assert_called_once_with(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=False)
+
+
+class TestCleanupVNetLXCEnvironment(VNetTestCase):
+    def setUp(self) -> None:
+        self.confirm = self.set_up_patch("vnet_manager.environment.lxc.request_confirmation")
+        self.delete_vnet_lxc_profile = self.set_up_patch("vnet_manager.environment.lxc.delete_vnet_lxc_profile")
+        self.delete_lxc_storage_pool = self.set_up_patch("vnet_manager.environment.lxc.delete_lxc_storage_pool")
+
+    def test_cleanup_vnet_lxc_environment_calls_correct_functions(self):
+        cleanup_vnet_lxc_environment()
+        self.confirm.assert_called_once_with(message="Cleanup will delete the VNet LXC configurations, such as profile and storage pools")
+        self.delete_vnet_lxc_profile.assert_called_once_with(settings.LXC_VNET_PROFILE)
+        self.delete_lxc_storage_pool.assert_called_once_with(settings.LXC_STORAGE_POOL_NAME)
