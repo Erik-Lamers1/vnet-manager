@@ -9,6 +9,7 @@ from vnet_manager.operations.machine import create_lxc_base_image_container, cha
 from vnet_manager.environment.host import check_for_supported_os, check_for_installed_packages
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.conf import settings
+from vnet_manager.utils.user import request_confirmation
 
 logger = getLogger(__name__)
 
@@ -65,6 +66,7 @@ def cleanup_vnet_lxc_environment():
     Cleans up specific VNet LXC configuration
     No environments should be active when calling this function
     """
+    request_confirmation(message="Cleanup will delete the VNet LXC configurations, such as profile and storage pools")
     logger.info("Cleaning up VNet LXC configuration")
     delete_vnet_lxc_profile(settings.LXC_VNET_PROFILE)
     delete_lxc_storage_pool(settings.LXC_STORAGE_POOL_NAME)

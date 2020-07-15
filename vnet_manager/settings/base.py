@@ -38,6 +38,24 @@ LOGGING = {
 
 # VNet Manager static settings / config
 VALID_ACTIONS = ["list", "start", "stop", "create", "destroy", "clean", "version"]
+HELP_TEXT_ACTION_MAPPING = {
+    "list": """Lists the current status of the supplied config.
+    """,
+    "start": """Starts up a previously built config.
+This action will also bring up/start required VNet interfaces and enable sniffers if the --sniffer option is passed.
+    """,
+    "stop": """Stops a previously started config.
+This action will also bring down the corresponding VNet interfaces.
+    """,
+    "destroy": """Destroys a previously built config.
+This action will delete the corresponding machines and VNet interfaces.
+Use this action in combination with the --base-image parameter to delete the VNet base images.
+    """,
+    "clean": """Purge VNet specific provider configuration from the system.
+This action can only if all VNet config on the system are destroyed.
+Only use this action when you wish to reset or uninstall VNet manager.
+    """,
+}
 CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(expanduser("~"), PYTHON_PACKAGE_NAME, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
 VNET_SNIFFER_PCAP_DIR = getenv("VNET_SNIFFER_PCAP_DIR", "/tmp")

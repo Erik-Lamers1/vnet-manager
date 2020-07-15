@@ -9,6 +9,7 @@ from vnet_manager.utils.user import request_confirmation
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment, cleanup_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
 from vnet_manager.operations.files import put_files_on_machine, generate_vnet_hosts_file, place_vnet_hosts_file_on_machines
+from vnet_manager.actions.help import display_help_for_action
 from vnet_manager.operations.machine import (
     show_status,
     change_machine_status,
@@ -33,7 +34,7 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     """
     Initiate an action
     :param str action: The action to preform
-    :param str config: The path to the user config file
+    :param str config: The path to the user config file, or literal string 'help' for docs
     :param list machines: The specific container to execute actions on
     :param bool sniffer: Start a sniffer on the VNet interfaces on start
     :param bool base_image: Destroy the image image instead of the machines
@@ -42,13 +43,16 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     # Check for valid action
     if action not in settings.VALID_ACTIONS:
         raise NotImplementedError("{} is not a valid action".format(action))
-    logger.info("Initiating {} action".format(action))
 
     # These actions do not require the config
     if action == "version":
         show_version()
         return EX_OK
+    if config.lower() == "help":
+        display_help_for_action(action)
+        return EX_OK
 
+    logger.info("Initiating {} action".format(action))
     # For these actions we need the config
     config = get_config(config)
     # Validate the config

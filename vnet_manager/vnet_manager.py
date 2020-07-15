@@ -12,8 +12,12 @@ logger = getLogger(__name__)
 
 
 def parse_args(args=None):
-    parser = ArgumentParser(description="VNet-manager a virtual network manager - manages containers and VMs to create virtual networks")
-    parser.add_argument("action", choices=sorted(settings.VALID_ACTIONS), help="The action to preform on the virtual network")
+    parser = ArgumentParser(description="VNet-manager a virtual network manager - manages containers to create virtual networks")
+    parser.add_argument(
+        "action",
+        choices=sorted(settings.VALID_ACTIONS),
+        help="The action to preform on the virtual network, use '<action> help' for information about that action",
+    )
     parser.add_argument("config", help="The yaml config file to use")
 
     # Options
