@@ -73,7 +73,6 @@ VALIDATED_CONFIG = {
         "router102": {
             "type": "router",
             "interfaces": {"eth23": {"ipv4": "10.0.0.2/8", "ipv6": "fd00:23::2/64", "mac": "00:00:00:00:03:23", "bridge": 1}},
-            "files": {"/root/vnet-manager/config/ripng/router102": "/etc/frr/"},
         },
     },
     "veths": {
