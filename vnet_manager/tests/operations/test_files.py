@@ -1,9 +1,10 @@
 from copy import deepcopy
-from unittest.mock import call
+from unittest.mock import call, patch, mock_open
 from os.path import join
+from pylxd.exceptions import NotFound
 
 from vnet_manager.tests import VNetTestCase
-from vnet_manager.operations.files import put_files_on_machine, select_files_and_put_on_machine
+from vnet_manager.operations.files import put_files_on_machine, select_files_and_put_on_machine, place_file_on_lxc_machine
 from vnet_manager.conf import settings
 
 
@@ -72,3 +73,33 @@ class TestSelectFilesAndPutOnMachine(VNetTestCase):
         self.logger.error.assert_called_once_with(
             "Tried to select file {} for copying, but it is neither a file nor a directory".format(next(iter(self.files)))
         )
+
+
+class TestPlaceFileOnLXCContainer(VNetTestCase):
+    def setUp(self) -> None:
+        self.lxd_client = self.set_up_patch("vnet_manager.operations.files.get_lxd_client")
+        self.is_file = self.set_up_patch("vnet_manager.operations.files.isfile")
+        self.host_file_p = "/root/host"
+        self.guest_file_p = "/root/guest"
+
+    @patch("builtins.open", new_callable=mock_open, read_data="data")
+    def test_place_file_on_lxc_machine_calls_lxd_client(self, _):
+        place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
+        self.lxd_client.assert_called_once_with()
+
+    @patch("builtins.open", new_callable=mock_open, read_data="data")
+    def test_place_file_on_lxc_machine_calls_open(self, open_mock):
+        place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
+        open_mock.assert_called_once_with(self.host_file_p, "r")
+
+    @patch("builtins.open", new_callable=mock_open, read_data="data")
+    def test_place_file_on_lxc_machine_does_nothing_if_container_not_found(self, open_mock):
+        self.lxd_client.side_effect = NotFound(response=b"response")
+        place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
+        self.assertFalse(open_mock.called)
+
+    @patch("builtins.open", new_callable=mock_open, read_data="data")
+    def test_place_file_on_lxc_machine_does_nothing_if_file_is_not_a_file(self, open_mock):
+        self.is_file.return_value = False
+        place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
+        self.assertFalse(open_mock.called)
