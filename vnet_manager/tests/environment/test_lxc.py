@@ -1,5 +1,6 @@
 from copy import deepcopy
-from unittest.mock import call
+import shlex
+from unittest.mock import call, MagicMock
 
 from vnet_manager.tests import VNetTestCase
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment, cleanup_vnet_lxc_environment, configure_lxc_base_machine
@@ -98,3 +99,64 @@ class TestCleanupVNetLXCEnvironment(VNetTestCase):
         self.confirm.assert_called_once_with(message="Cleanup will delete the VNet LXC configurations, such as profile and storage pools")
         self.delete_vnet_lxc_profile.assert_called_once_with(settings.LXC_VNET_PROFILE)
         self.delete_lxc_storage_pool.assert_called_once_with(settings.LXC_STORAGE_POOL_NAME)
+
+
+class TestConfigureLXCBaseMachine(VNetTestCase):
+    def setUp(self) -> None:
+        self.get_lxd_client = self.set_up_patch("vnet_manager.environment.lxc.get_lxd_client")
+        self.client = MagicMock()
+        self.machine = MagicMock()
+        self.get_lxd_client.return_value = self.client
+        self.client.containers.get.return_value = self.machine
+        self.machine.execute.return_value = [0]
+        self.sleep = self.set_up_patch("vnet_manager.environment.lxc.sleep")
+        self.config = settings.CONFIG
+
+    def test_configure_lxc_base_machine_check_for_dns(self):
+        configure_lxc_base_machine(self.config)
+        self.machine.execute.assert_has_calls([call(shlex.split("host -t A google.com"))])
+
+    def test_configure_lxc_base_machine_does_not_continue_if_no_dns_connectivity(self):
+        self.machine.execute.return_value = [1]
+        with self.assertRaises(RuntimeError):
+            configure_lxc_base_machine(self.config)
+        self.assertTrue(self.sleep.called)
+
+    def test_configure_lxc_base_machine_calls_correct_configure_cmds(self):
+        calls = [
+            call(shlex.split("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'")),
+            call(
+                shlex.split(
+                    "bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} | "
+                    "tee -a /etc/apt/sources.list.d/frr.list'".format(settings.FRR_RELEASE)
+                )
+            ),
+            call(shlex.split("apt-get update")),
+            call(
+                shlex.split("apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'"),
+                environment={"DEBIAN_FRONTEND": "noninteractive"},
+            ),
+            call(
+                shlex.split(
+                    "apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
+                        " ".join(self.config["providers"]["lxc"]["guest_packages"])
+                    )
+                ),
+                environment={"DEBIAN_FRONTEND": "noninteractive"},
+            ),
+            call(shlex.split("systemctl disable radvd")),
+            call(shlex.split("bash -c 'echo network: {config: disabled} > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg'")),
+            call(shlex.split("bash -c 'export VTYSH_PAGER=more >> ~/.bashrc'")),
+            call(
+                shlex.split(
+                    'bash -c \'echo -e "#!/bin/bash\nchown -R frr:frr /etc/frr\nsystemctl restart frr" > /etc/rc.local; chmod +x '
+                    "/etc/rc.local' "
+                )
+            ),
+        ]
+        configure_lxc_base_machine(self.config)
+        self.machine.execute.assert_has_calls(calls)
+
+    def test_configure_lxc_base_machine_call_machine_stop_(self):
+        configure_lxc_base_machine(self.config)
+        self.machine.stop.assert_called_once_with(wait=True)

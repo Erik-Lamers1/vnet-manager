@@ -85,3 +85,6 @@ VALIDATED_CONFIG = {
     },
     "config_dir": "/root/vnet-manager/config/ripng",
 }
+
+# Speed up testing
+LXC_MAX_STATUS_WAIT_ATTEMPTS = 2
