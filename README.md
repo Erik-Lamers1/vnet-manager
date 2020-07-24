@@ -5,7 +5,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-VNet-manager a virtual network manager - manages containers and VMs to create virtual networks
+VNet-manager a virtual network manager - manages containers to create virtual networks
 
 ## What is it?
 VNet-manager allows you to create quick virtual network setups using LXC containers.
