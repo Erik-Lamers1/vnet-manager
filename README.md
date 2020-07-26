@@ -18,6 +18,7 @@ apt-get update
 apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
 # LXD defaults are fine
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n" | lxd init
+cd ~
 git clone https://github.com/Erik-Lamers1/vnet-manager.git
 cd vnet-manager
 python3 setup.py install
