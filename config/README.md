@@ -5,7 +5,7 @@ VNet-manager works with YAML configs in order to define virtual networks. There 
 
 ## User config
 The user config defines a virtual network. The hosts, routers and interfaces should be defined in this config.
-Below the currently possible user config options are explained.
+Below the currently possible user, config options are explained.
 switches: 3
 
 ```yaml
@@ -23,7 +23,7 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
         mac: mac_address  # This mac address will be assigned to the interface.
         bridge: int  # The bridge number that this interface will be connected to.
                      # Note that counting starts from 0.
-                     # So, if you want to connect to the first bridge this value should be set to 0.
+                     # So, if you want to connect to the first bridge, this value should be set to 0.
       ethN: ...
     files: dict  # This defines the files that will be copied to the machine (optional).
       host1: str  # Key should be set to the absolute or relative path as seen from the user config.
@@ -34,11 +34,11 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
 
 veths: dict  # Veths can be used to link two vnet bridges together (optional).
              # When two bridges are linked this will create a virtual link between the two bridges.
-             # So they can communicate between each other.
+             # So they can communicate with each other.
   vnet-veth0: dict  # This defines a vnet veth interface
     peer: str  # The name of the other vnet veth interface to peer/link with.
                # A peerage should only be defined once, this can be done on either vnet veth interface.
-               # Note, the peerage should be define the peered interface is defined.
+               # Note, the peerage should be defined before the peered interface is defined.
     bridge: str  # The full name of the vnet bridge to connect this veth interface to.
                  # Note, the vnet bridge prefix can be found in the settings (default: vnet-br).
     stp: bool  # Weather to enable STP on the corresponding bridge interface (optional).
@@ -46,14 +46,14 @@ veths: dict  # Veths can be used to link two vnet bridges together (optional).
 ```
 
 ## Defaults config
-The defaults config defines some parameters that are used by VNet-manager for configuration. Most notably the provider settings.
-Below the defaults config options are defined.
+The defaults config defines some parameters that are used by VNet-manager for configuration. Most notably, the provider settings.
+Below the defaults, config options are defined.
 
 ```yaml
-providers: dict  # Defines which providers are avaiable for this VNet-manager instance.
+providers: dict  # Defines which providers are available for this VNet-manager instance.
                  # Note, it is not possible (yet) to simply define a new provider here,
                  # whiteout witting procedural support for it first.
-  lxc: dict  # This defines a individual provider.
+  lxc: dict  # This defines an individual provider.
     supported_operating_systems: list  # Of host operating systems that this provider supports.
     dns-nameserver: str  # The name server that should be used for machines that use this provider (optional).
     required_host_packages: list  # The packages that should be installed on the host machine before this provider can be used.
