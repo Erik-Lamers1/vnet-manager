@@ -10,7 +10,8 @@ VNet-manager a virtual network manager - manages containers to create virtual ne
 ## What is it?
 VNet-manager allows you to create quick virtual network setups using LXC containers.
 VNet-manager will create and manage the containers you need to create a virtual network.
-This is done in combination with [FRRouting](https://frrouting.org/).
+This is done in combination with [FRRouting](https://frrouting.org/).  
+Because VNet-manager makes heavy use of LXC, the current supported operating systems are Ubuntu Bionic (18.04) and Focal Fossa (20.04).
 ## Setup
 ```bash
 apt-get update
