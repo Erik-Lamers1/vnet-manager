@@ -35,7 +35,7 @@ lxc exec host1 -- ping -c 2 router1
 ```
 ## How to use it
 First you need to create a config file for VNet-manager to work with.
-In your config file you define the topology of your network. See the [config](config) directory for examples.  
+In your config file you define the topology of your network. See the [config](config) directory for examples. See the [README](config/README.md) in the config directory for a detailed explanation.
 
 There are two important config files. First off the config file you use to create your topology (the user config file).
 The second config file is the defaults config, which stores generic information you might want to edit if you are an advanced user.
