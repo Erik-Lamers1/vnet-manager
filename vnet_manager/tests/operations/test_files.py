@@ -9,6 +9,7 @@ from vnet_manager.operations.files import (
     select_files_and_put_on_machine,
     place_file_on_lxc_machine,
     place_lxc_interface_configuration_on_container,
+    generate_vnet_hosts_file,
 )
 from vnet_manager.conf import settings
 
@@ -176,3 +177,24 @@ class TestPlaceLXCInterfaceConfigurationOnContainer(VNetTestCase):
         del self.config["machines"]["router101"]["interfaces"]["eth12"]["ipv6"]
         place_lxc_interface_configuration_on_container(self.config, "router101")
         self.safe_dump.assert_called_once_with(self.expected_config)
+
+
+class TestGenerateVNetHostsFile(VNetTestCase):
+    def setUp(self) -> None:
+        self.config = deepcopy(settings.CONFIG)
+        self.excepted_hosts_file = (
+            settings.VNET_STATIC_HOSTS_FILE_PART
+            + "192.168.0.2   router100\nfd00:12::2   router100\n192.168.0.1   router101\nfd00:12::1   router101\n10.0.0.1   "
+            "router101\nfd00:23::1   router101\n10.0.0.2   router102\nfd00:23::2   router102"
+        )
+
+    @patch("builtins.open", new_callable=mock_open)
+    def test_generate_vnet_hosts_file_calls_open(self, open_mock):
+        generate_vnet_hosts_file(self.config)
+        open_mock.assert_called_once_with(settings.VNET_ETC_HOSTS_FILE_PATH, "w")
+
+    @patch("builtins.open", new_callable=mock_open)
+    def test_generate_vnet_hosts_file_generates_correct_hosts_file(self, open_mock):
+        generate_vnet_hosts_file(self.config)
+        handle = open_mock()
+        handle.write.assert_called_once_with(self.excepted_hosts_file)
