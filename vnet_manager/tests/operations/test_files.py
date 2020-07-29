@@ -4,7 +4,12 @@ from os.path import join
 from pylxd.exceptions import NotFound
 
 from vnet_manager.tests import VNetTestCase
-from vnet_manager.operations.files import put_files_on_machine, select_files_and_put_on_machine, place_file_on_lxc_machine
+from vnet_manager.operations.files import (
+    put_files_on_machine,
+    select_files_and_put_on_machine,
+    place_file_on_lxc_machine,
+    place_lxc_interface_configuration_on_container,
+)
 from vnet_manager.conf import settings
 
 
@@ -78,7 +83,6 @@ class TestSelectFilesAndPutOnMachine(VNetTestCase):
 class TestPlaceFileOnLXCContainer(VNetTestCase):
     def setUp(self) -> None:
         self.get_lxd_client = self.set_up_patch("vnet_manager.operations.files.get_lxd_client")
-        self.client = MagicMock()
         self.machine = MagicMock()
         self.get_lxd_client.return_value.containers.get.return_value = self.machine
         self.is_file = self.set_up_patch("vnet_manager.operations.files.isfile")
@@ -117,3 +121,58 @@ class TestPlaceFileOnLXCContainer(VNetTestCase):
     def test_place_file_on_lxc_machine_calls_files_put_method_on_machine(self, _):
         place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
         self.machine.files.put.assert_called_once_with(self.guest_file_p, "data")
+
+
+class TestPlaceLXCInterfaceConfigurationOnContainer(VNetTestCase):
+    def setUp(self) -> None:
+        self.get_lxd_client = self.set_up_patch("vnet_manager.operations.files.get_lxd_client")
+        self.machine = MagicMock()
+        self.get_lxd_client.return_value.containers.get.return_value = self.machine
+        self.safe_dump = self.set_up_patch("vnet_manager.operations.files.safe_dump")
+        self.config = deepcopy(settings.CONFIG)
+        self.expected_config = {
+            "network": {
+                "version": 2,
+                "renderer": "networkd",
+                "ethernets": {
+                    "eth12": {
+                        "dhcp4": "no",
+                        "dhcp6": "no",
+                        "match": {"macaddress": "00:00:00:00:02:12"},
+                        "set-name": "eth12",
+                        "addresses": ["192.168.0.1/24", "fd00:12::1/64"],
+                    },
+                    "eth23": {
+                        "dhcp4": "no",
+                        "dhcp6": "no",
+                        "match": {"macaddress": "00:00:00:00:02:22"},
+                        "set-name": "eth23",
+                        "addresses": ["10.0.0.1/8", "fd00:23::1/64"],
+                    },
+                },
+            }
+        }
+
+    def test_place_lxc_configuration_on_container_calls_get_lxd_client(self):
+        place_lxc_interface_configuration_on_container(self.config, "router101")
+        self.get_lxd_client.assert_called_once_with()
+
+    def test_place_lxc_configuration_on_container_calls_machine_files_put_method(self):
+        place_lxc_interface_configuration_on_container(self.config, "router101")
+        self.machine.files.put.assert_called_once_with(settings.VNET_NETPLAN_CONFIG_FILE_PATH, self.safe_dump())
+
+    def test_place_lxc_configuration_on_container_calls_safe_dump_with_excepted_config(self):
+        place_lxc_interface_configuration_on_container(self.config, "router101")
+        self.safe_dump.assert_called_once_with(self.expected_config)
+
+    def test_place_lxc_configuration_on_container_does_not_make_ipv4_config_when_not_present(self):
+        del self.expected_config["network"]["ethernets"]["eth12"]["addresses"][0]
+        del self.config["machines"]["router101"]["interfaces"]["eth12"]["ipv4"]
+        place_lxc_interface_configuration_on_container(self.config, "router101")
+        self.safe_dump.assert_called_once_with(self.expected_config)
+
+    def test_place_lxc_configuration_on_container_does_not_make_ipv6_config_when_not_present(self):
+        del self.expected_config["network"]["ethernets"]["eth12"]["addresses"][1]
+        del self.config["machines"]["router101"]["interfaces"]["eth12"]["ipv6"]
+        place_lxc_interface_configuration_on_container(self.config, "router101")
+        self.safe_dump.assert_called_once_with(self.expected_config)

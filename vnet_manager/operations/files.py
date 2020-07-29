@@ -91,7 +91,7 @@ def place_lxc_interface_configuration_on_container(config, container):
         }
     logger.info("Placing network config on LXC container {}".format(container))
     machine = get_lxd_client().containers.get(container)
-    machine.files.put("/etc/netplan/10-vnet-config.yaml", safe_dump(network_conf))
+    machine.files.put(settings.VNET_NETPLAN_CONFIG_FILE_PATH, safe_dump(network_conf))
 
 
 def generate_vnet_hosts_file(config):

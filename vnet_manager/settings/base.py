@@ -86,6 +86,7 @@ ff02::3 ip6-allhosts
 # VNet hosts
 
 """
+VNET_NETPLAN_CONFIG_FILE_PATH = "/etc/netplan/10-vnet-config.yaml"
 
 # LXC specific settings
 LXC_MAX_STATUS_WAIT_ATTEMPTS = 15
