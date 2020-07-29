@@ -10,6 +10,7 @@ from vnet_manager.operations.files import (
     place_file_on_lxc_machine,
     place_lxc_interface_configuration_on_container,
     generate_vnet_hosts_file,
+    place_vnet_hosts_file_on_machines,
 )
 from vnet_manager.conf import settings
 
@@ -198,3 +199,14 @@ class TestGenerateVNetHostsFile(VNetTestCase):
         generate_vnet_hosts_file(self.config)
         handle = open_mock()
         handle.write.assert_called_once_with(self.excepted_hosts_file)
+
+
+class TestPlaceVNetHostsFileOnMachines(VNetTestCase):
+    def setUp(self) -> None:
+        self.select_and_put = self.set_up_patch("vnet_manager.operations.files.select_files_and_put_on_machine")
+        self.config = deepcopy(settings.CONFIG)
+
+    def test_place_vnet_hosts_file_on_machines_calls_select_and_put_for_each_machine(self):
+        calls = [call(name, {settings.VNET_ETC_HOSTS_FILE_PATH: "/etc/hosts"}, "lxc") for name in self.config["machines"]]
+        place_vnet_hosts_file_on_machines(self.config)
+        self.select_and_put.assert_has_calls(calls)
