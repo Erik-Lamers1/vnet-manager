@@ -1,5 +1,5 @@
 from copy import deepcopy
-from unittest.mock import call, patch, mock_open
+from unittest.mock import call, patch, mock_open, MagicMock
 from os.path import join
 from pylxd.exceptions import NotFound
 
@@ -77,7 +77,10 @@ class TestSelectFilesAndPutOnMachine(VNetTestCase):
 
 class TestPlaceFileOnLXCContainer(VNetTestCase):
     def setUp(self) -> None:
-        self.lxd_client = self.set_up_patch("vnet_manager.operations.files.get_lxd_client")
+        self.get_lxd_client = self.set_up_patch("vnet_manager.operations.files.get_lxd_client")
+        self.client = MagicMock()
+        self.machine = MagicMock()
+        self.get_lxd_client.return_value.containers.get.return_value = self.machine
         self.is_file = self.set_up_patch("vnet_manager.operations.files.isfile")
         self.host_file_p = "/root/host"
         self.guest_file_p = "/root/guest"
@@ -85,7 +88,7 @@ class TestPlaceFileOnLXCContainer(VNetTestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="data")
     def test_place_file_on_lxc_machine_calls_lxd_client(self, _):
         place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
-        self.lxd_client.assert_called_once_with()
+        self.get_lxd_client.assert_called_once_with()
 
     @patch("builtins.open", new_callable=mock_open, read_data="data")
     def test_place_file_on_lxc_machine_calls_open(self, open_mock):
@@ -93,8 +96,14 @@ class TestPlaceFileOnLXCContainer(VNetTestCase):
         open_mock.assert_called_once_with(self.host_file_p, "r")
 
     @patch("builtins.open", new_callable=mock_open, read_data="data")
+    def test_place_file_on_lxc_machine_calls_open_read_function(self, open_mock):
+        place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
+        handle = open_mock()
+        handle.read.assert_called_once_with()
+
+    @patch("builtins.open", new_callable=mock_open, read_data="data")
     def test_place_file_on_lxc_machine_does_nothing_if_container_not_found(self, open_mock):
-        self.lxd_client.side_effect = NotFound(response=b"response")
+        self.get_lxd_client.side_effect = NotFound(response=b"response")
         place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
         self.assertFalse(open_mock.called)
 
@@ -103,3 +112,8 @@ class TestPlaceFileOnLXCContainer(VNetTestCase):
         self.is_file.return_value = False
         place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
         self.assertFalse(open_mock.called)
+
+    @patch("builtins.open", new_callable=mock_open, read_data="data")
+    def test_place_file_on_lxc_machine_calls_files_put_method_on_machine(self, _):
+        place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
+        self.machine.files.put.assert_called_once_with(self.guest_file_p, "data")
