@@ -43,7 +43,7 @@ def create_lxc_image_from_container(container, alias=None, description=None):
     img = container.publish(wait=True)
     logger.info("Image {} created successfully".format(img.fingerprint))
 
-    # Create the alias if needed
+    # Create the alias if requested
     if alias:
         logger.info("Adding alias {} to newly created image".format(alias))
         img.add_alias(alias, description)
