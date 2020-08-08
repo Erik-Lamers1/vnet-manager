@@ -94,8 +94,7 @@ def check_if_interface_exists(ifname):
     :param str ifname: The interface name to check for
     :return: bool: True if the interface exists, False otherwise
     """
-    iface = IPRoute().link_lookup(ifname=ifname)
-    return bool(iface)
+    return bool(IPRoute().link_lookup(ifname=ifname))
 
 
 def create_vnet_interface(ifname):
@@ -104,8 +103,7 @@ def create_vnet_interface(ifname):
     :param str ifname: The name of the interface to create
     """
     logger.info("Creating VNet bridge interface {}".format(ifname))
-    ip = IPRoute()
-    ip.link("add", ifname=ifname, kind="bridge")
+    IPRoute().link("add", ifname=ifname, kind="bridge")
     # Bring up the interface
     configure_vnet_interface(ifname)
 
