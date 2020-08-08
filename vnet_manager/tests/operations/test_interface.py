@@ -1,3 +1,5 @@
+import shlex
+from subprocess import DEVNULL, CalledProcessError
 from unittest.mock import Mock, MagicMock, ANY, call
 
 from vnet_manager.tests import VNetTestCase
@@ -9,6 +11,7 @@ from vnet_manager.operations.interface import (
     check_if_interface_exists,
     create_vnet_interface,
     create_veth_interface,
+    create_vnet_interface_iptables_rules,
 )
 from vnet_manager.conf import settings
 
@@ -200,3 +203,30 @@ class TestCreateVethInterface(VNetTestCase):
     def test_create_veth_interface_does_nothing_when_called_with_interface_without_a_peer(self):
         create_veth_interface("vneth-veth0", settings.CONFIG["veths"]["vnet-veth1"])
         self.assertFalse(self.iproute.return_value.link.called)
+
+
+class TestCreateVNetInterfaceIPtablesDropRules(VNetTestCase):
+    def setUp(self) -> None:
+        self.check_call = self.set_up_patch("vnet_manager.operations.interface.check_call")
+        self.check_call.side_effect = [CalledProcessError(1, "test"), 0]
+        self.logger = self.set_up_patch("vnet_manager.operations.interface.logger")
+
+    def test_create_vnet_interface_iptables_drop_rules_makes_correct_check_call_calls(self):
+        calls = [
+            call(shlex.split("iptables -C OUTPUT -o dev1 -j DROP"), stderr=DEVNULL),
+            call(shlex.split("iptables -A OUTPUT -o dev1 -j DROP")),
+        ]
+        create_vnet_interface_iptables_rules("dev1")
+        self.check_call.assert_has_calls(calls)
+        self.logger.info.assert_called_once_with("Creating IPtables DROP rule to the outside world for VNet interface dev1")
+
+    def test_create_vnet_interface_iptables_drop_rules_does_not_add_rules_if_they_already_exist(self):
+        self.check_call.side_effect = [0, 0]
+        create_vnet_interface_iptables_rules("dev1")
+        self.check_call.assert_called_once_with(shlex.split("iptables -C OUTPUT -o dev1 -j DROP"), stderr=DEVNULL)
+        self.logger.debug.assert_called_once_with("IPtables DROP rule for VNet interface dev1 already exists, skipping creation")
+
+    def test_create_vnet_interface_iptables_drop_rules_logs_error_if_both_commands_fail(self):
+        self.check_call.side_effect = [CalledProcessError(1, "test"), CalledProcessError(1, "test")]
+        create_vnet_interface_iptables_rules("dev1")
+        self.logger.error.assert_called_once_with("Unable to create IPtables rule, got output: None")
