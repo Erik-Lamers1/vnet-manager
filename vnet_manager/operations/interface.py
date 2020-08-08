@@ -51,7 +51,7 @@ def show_vnet_interface_status(config):
         dev = ip.link_lookup(ifname=ifname)
         if not dev:
             # Link does not exist
-            statuses.append([ifname, "NA", "NA", "NA", ", ".join(used_by)])
+            statuses.append([ifname, "NA", "NA", "NA", "NA", ", ".join(used_by)])
         else:
             # Get the link info
             sniffer = check_if_sniffer_exists(ifname)
