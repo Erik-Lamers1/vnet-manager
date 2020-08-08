@@ -447,7 +447,7 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         )
 
     def test_validate_veth_config_fails_when_veth_config_name_if_not_a_string(self):
-        self.validator.config["veths"][42] = self.validator.config["veths"].pop("vnet-veth3")
+        self.validator.config["veths"][42] = self.validator.config["veths"].pop("vnet-veth1")
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
@@ -455,41 +455,41 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         )
 
     def test_validate_veth_config_fails_when_veth_config_values_if_not_a_dict(self):
-        self.validator.config["veths"]["vnet-veth3"] = "blaap"
+        self.validator.config["veths"]["vnet-veth1"] = "blaap"
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth3 data does not seem to be a dict{}".format(self.validator.default_message)
+            "veth interface vnet-veth1 data does not seem to be a dict{}".format(self.validator.default_message)
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_bridge_missing(self):
-        del self.validator.config["veths"]["vnet-veth3"]["bridge"]
+        del self.validator.config["veths"]["vnet-veth1"]["bridge"]
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth3 is missing the bridge parameter{}".format(self.validator.default_message)
+            "veth interface vnet-veth1 is missing the bridge parameter{}".format(self.validator.default_message)
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_bridge_is_not_a_string(self):
-        self.validator.config["veths"]["vnet-veth3"]["bridge"] = 42
+        self.validator.config["veths"]["vnet-veth1"]["bridge"] = 42
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth3 bridge parameter does not seem to be a str{}".format(self.validator.default_message)
+            "veth interface vnet-veth1 bridge parameter does not seem to be a str{}".format(self.validator.default_message)
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_peer_is_not_a_string(self):
-        self.validator.config["veths"]["vnet-veth3"]["peer"] = 42
+        self.validator.config["veths"]["vnet-veth1"]["peer"] = 42
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth3 peer parameter does not seem to be a string{}".format(self.validator.default_message)
+            "veth interface vnet-veth1 peer parameter does not seem to be a string{}".format(self.validator.default_message)
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_stp_is_not_a_bool(self):
-        self.validator.config["veths"]["vnet-veth3"]["stp"] = "42"
+        self.validator.config["veths"]["vnet-veth1"]["stp"] = "42"
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth3 stp parameter does not seem to be a boolean{}".format(self.validator.default_message)
+            "veth interface vnet-veth1 stp parameter does not seem to be a boolean{}".format(self.validator.default_message)
         )

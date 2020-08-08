@@ -1,10 +1,11 @@
-from unittest.mock import Mock, MagicMock, ANY
+from unittest.mock import Mock, MagicMock, ANY, call
 
 from vnet_manager.tests import VNetTestCase
 from vnet_manager.operations.interface import (
     get_vnet_interface_names_from_config,
     get_machines_by_vnet_interface_name,
     show_vnet_interface_status,
+    show_vnet_veth_interface_status,
 )
 from vnet_manager.conf import settings
 
@@ -98,5 +99,57 @@ class TestShowVNetInterfaceStatus(VNetTestCase):
         self.tabulate.assert_called_once_with(
             [["vnet-br0", ANY, ANY, self.check_if_sniffer_exists.return_value, True, "router100, router101"]],
             headers=["Name", "Status", "L2_addr", "Sniffer", "STP", "Used by"],
+            tablefmt="pretty",
+        )
+
+
+class TestShowVNetVethInterfaceStatus(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute_obj = Mock()
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute.return_value = self.iproute_obj
+        self.iproute_obj.link.return_value = [
+            {
+                "state": "up",
+                "attrs": [
+                    ("IFLA_ADDRESS", "mac"),
+                    ("IFLA_LINK", "dev2"),
+                    ("IFLA_IFNAME", "peer"),
+                    ("IFLA_MASTER", "eth0"),
+                    ("IFLA_IFNAME", "master"),
+                ],
+            }
+        ]
+        self.iproute_obj.link_lookup.return_value = ["dev1"]
+        self.tabulate = self.set_up_patch("vnet_manager.operations.interface.tabulate")
+
+    def test_show_vnet_veth_interface_status_calls_iproute(self):
+        show_vnet_veth_interface_status(settings.CONFIG)
+        self.iproute.assert_called_once_with()
+
+    def test_show_vnet_veth_interface_status_calls_ip_lookup(self):
+        calls = [call(ifname=i) for i in settings.CONFIG["veths"]]
+        show_vnet_veth_interface_status(settings.CONFIG)
+        self.iproute_obj.link_lookup.assert_has_calls(calls)
+
+    def test_show_vnet_veth_interface_status_calls_ip_link(self):
+        show_vnet_veth_interface_status(settings.CONFIG)
+        calls = [call("get", index="dev1"), call("get", index="dev2"), call("get", index="eth0")]
+        self.iproute_obj.link.assert_has_calls(calls)
+
+    def test_show_vnet_veth_interface_status_calls_tabulate(self):
+        show_vnet_veth_interface_status(settings.CONFIG)
+        self.tabulate.assert_called_once_with(
+            [["vnet-veth1", "up", "mac", "peer", "peer"], ["vnet-veth0", "up", "mac", "peer", "peer"]],
+            headers=["Name", "Status", "L2_addr", "Peer", "Master"],
+            tablefmt="pretty",
+        )
+
+    def test_show_vnet_veth_interface_status_calls_tabulate_when_dev_does_not_exist(self):
+        self.iproute_obj.link_lookup.return_value = []
+        show_vnet_veth_interface_status(settings.CONFIG)
+        self.tabulate.assert_called_once_with(
+            [["vnet-veth1", "NA", "NA", "NA", "vnet-br1"], ["vnet-veth0", "NA", "NA", "NA", "vnet-br0"]],
+            headers=["Name", "Status", "L2_addr", "Peer", "Master"],
             tablefmt="pretty",
         )
