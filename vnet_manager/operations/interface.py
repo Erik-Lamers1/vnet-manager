@@ -114,10 +114,9 @@ def create_veth_interface(name, data):
     :param str name: The name of the veth interface to create
     :param dict data: The bridge and peer data
     """
-    ip = IPRoute()
     # We only create the interface if it has a peer
     if "peer" in data:
-        ip.link("add", ifname=name, kind="veth", peer=data["peer"])
+        IPRoute().link("add", ifname=name, kind="veth", peer=data["peer"])
 
 
 def create_vnet_interface_iptables_rules(ifname):

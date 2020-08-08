@@ -8,6 +8,7 @@ from vnet_manager.operations.interface import (
     show_vnet_veth_interface_status,
     check_if_interface_exists,
     create_vnet_interface,
+    create_veth_interface,
 )
 from vnet_manager.conf import settings
 
@@ -186,3 +187,16 @@ class TestCreateVNetInterface(VNetTestCase):
     def test_create_vnet_interface_calls_configure_vnet_interface(self):
         create_vnet_interface("dev1")
         self.configure_int.assert_called_once_with("dev1")
+
+
+class TestCreateVethInterface(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+
+    def test_create_veth_interface_calls_iproute_link_add(self):
+        create_veth_interface("vnet-veth0", settings.CONFIG["veths"]["vnet-veth0"])
+        self.iproute.return_value.link.assert_called_once_with("add", ifname="vnet-veth0", kind="veth", peer="vnet-veth1")
+
+    def test_create_veth_interface_does_nothing_when_called_with_interface_without_a_peer(self):
+        create_veth_interface("vneth-veth0", settings.CONFIG["veths"]["vnet-veth1"])
+        self.assertFalse(self.iproute.return_value.link.called)
