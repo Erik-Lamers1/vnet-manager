@@ -6,6 +6,7 @@ from vnet_manager.operations.interface import (
     get_machines_by_vnet_interface_name,
     show_vnet_interface_status,
     show_vnet_veth_interface_status,
+    check_if_interface_exists,
 )
 from vnet_manager.conf import settings
 
@@ -153,3 +154,20 @@ class TestShowVNetVethInterfaceStatus(VNetTestCase):
             headers=["Name", "Status", "L2_addr", "Peer", "Master"],
             tablefmt="pretty",
         )
+
+
+class TestCheckIfInterfaceExists(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute.return_value.link_lookup.return_value = [1]
+
+    def test_check_if_interface_exists_calls_iproute_lookup(self):
+        check_if_interface_exists("dev1")
+        self.iproute.return_value.link_lookup.assert_called_once_with(ifname="dev1")
+
+    def test_check_if_interface_exists_returns_true_if_it_exists(self):
+        self.assertTrue(check_if_interface_exists("dev1"))
+
+    def test_check_if_interface_exists_returns_false_if_it_does_not_exist(self):
+        self.iproute.return_value.link_lookup.return_value = []
+        self.assertFalse(check_if_interface_exists("dev1"))
