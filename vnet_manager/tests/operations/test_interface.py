@@ -13,6 +13,7 @@ from vnet_manager.operations.interface import (
     create_veth_interface,
     create_vnet_interface_iptables_rules,
     configure_vnet_interface,
+    configure_veth_interface,
 )
 from vnet_manager.conf import settings
 
@@ -261,3 +262,25 @@ class TestConfigureVNetInterface(VNetTestCase):
         ]
         configure_vnet_interface("test")
         self.iproute_obj.link.assert_has_calls(calls)
+
+
+class TestConfigureVethInterface(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute_obj = Mock()
+        self.iproute.return_value = self.iproute_obj
+        self.iproute_obj.link_lookup.side_effect = [[1], [2]]
+        self.data = settings.CONFIG["veths"]["vnet-veth1"]
+
+    def test_configure_veth_interface_calls_ip_route(self):
+        configure_veth_interface("test", self.data)
+        self.iproute.assert_called_once_with()
+
+    def test_configure_veth_interface_makes_correct_ip_lookup_calls(self):
+        calls = [call(ifname="test"), call(ifname=settings.CONFIG["veths"]["vnet-veth1"]["bridge"])]
+        configure_veth_interface("test", self.data)
+        self.iproute_obj.link_lookup.assert_has_calls(calls)
+
+    def test_configure_veth_interface_calls_ip_link(self):
+        configure_veth_interface("test", self.data)
+        self.iproute_obj.link.assert_called_once_with("set", index=1, master=2)
