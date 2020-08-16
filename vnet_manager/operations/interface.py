@@ -149,7 +149,7 @@ def configure_vnet_interface(ifname):
     ip.link("set", index=dev, state="down")
     # Set the mac
     ip.link("set", index=dev, address=random_mac_generator())
-    # Bring up the interface
+    # Finally, bring up the interface
     ip.link("set", index=dev, state="up")
 
 

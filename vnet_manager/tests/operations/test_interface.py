@@ -12,6 +12,7 @@ from vnet_manager.operations.interface import (
     create_vnet_interface,
     create_veth_interface,
     create_vnet_interface_iptables_rules,
+    configure_vnet_interface,
 )
 from vnet_manager.conf import settings
 
@@ -230,3 +231,33 @@ class TestCreateVNetInterfaceIPtablesDropRules(VNetTestCase):
         self.check_call.side_effect = [CalledProcessError(1, "test"), CalledProcessError(1, "test")]
         create_vnet_interface_iptables_rules("dev1")
         self.logger.error.assert_called_once_with("Unable to create IPtables rule, got output: None")
+
+
+class TestConfigureVNetInterface(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute_obj = Mock()
+        self.iproute.return_value = self.iproute_obj
+        self.iproute_obj.link_lookup.return_value = [1]
+        self.rand_mac = self.set_up_patch("vnet_manager.operations.interface.random_mac_generator")
+
+    def test_configure_vnet_interfaces_calls_ip_route(self):
+        configure_vnet_interface("test")
+        self.iproute.assert_called_once_with()
+
+    def test_configure_vnet_interface_looks_up_passed_interface(self):
+        configure_vnet_interface("test")
+        self.iproute_obj.link_lookup.assert_called_once_with(ifname="test")
+
+    def test_configure_vnet_interface_calls_random_mac_generator(self):
+        configure_vnet_interface("test")
+        self.rand_mac.assert_called_once_with()
+
+    def test_configure_vnet_interface_makes_correct_ip_set_calls(self):
+        calls = [
+            call("set", index=1, state="down"),
+            call("set", index=1, address=self.rand_mac.return_value),
+            call("set", index=1, state="up"),
+        ]
+        configure_vnet_interface("test")
+        self.iproute_obj.link.assert_has_calls(calls)
