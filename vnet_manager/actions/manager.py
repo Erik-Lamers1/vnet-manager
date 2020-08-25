@@ -71,17 +71,17 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
         show_vnet_interface_status(config)
         if "veths" in config:
             show_vnet_veth_interface_status(config)
-    if action == "start":
+    elif action == "start":
         bring_up_vnet_interfaces(config, sniffer=sniffer)
         change_machine_status(config, machines=machines, status="start")
-    if action == "stop":
+    elif action == "stop":
         change_machine_status(config, machines=machines, status="stop")
         # If specific machines are specified, we don't want to mess with the interfaces
         if machines:
             logger.warning("Not bringing down VNet interfaces as we are only stopping specific machines, this may leave lingering sniffers")
         else:
             bring_down_vnet_interfaces(config)
-    if action == "create":
+    elif action == "create":
         # Make sure the provider environments are correct
         ensure_vnet_lxc_environment(config)
         # Make the machines
@@ -93,7 +93,7 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
         place_vnet_hosts_file_on_machines(config)
         # Configure type specific stuff
         enable_type_specific_machine_configuration(config)
-    if action == "destroy":
+    elif action == "destroy":
         if base_image:
             request_confirmation(prompt="Are you sure you want to delete the VNet base images (y/n)? ")
             destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
@@ -106,7 +106,7 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
                 )
             else:
                 delete_vnet_interfaces(config)
-    if action == "clean":
+    elif action == "clean":
         cleanup_vnet_lxc_environment()
 
     # Finally return all OK
