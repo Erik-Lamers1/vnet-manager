@@ -1,0 +1,5 @@
+vnet-manager (20200825.125517) bionic; urgency=medium
+
+  * Initial release.
+
+ -- Erik Lamers <mail@eriklamers.nl>  Tue, 25 Aug 2020 13:09:37 +0200
