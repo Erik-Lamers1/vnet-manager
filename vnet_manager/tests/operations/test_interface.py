@@ -1,6 +1,7 @@
 import shlex
 from subprocess import DEVNULL, CalledProcessError
 from unittest.mock import Mock, MagicMock, ANY, call
+from copy import deepcopy
 
 from vnet_manager.tests import VNetTestCase
 from vnet_manager.operations.interface import (
@@ -14,6 +15,7 @@ from vnet_manager.operations.interface import (
     create_vnet_interface_iptables_rules,
     configure_vnet_interface,
     configure_veth_interface,
+    bring_up_vnet_interfaces,
 )
 from vnet_manager.conf import settings
 
@@ -284,3 +286,74 @@ class TestConfigureVethInterface(VNetTestCase):
     def test_configure_veth_interface_calls_ip_link(self):
         configure_veth_interface("test", self.data)
         self.iproute_obj.link.assert_called_once_with("set", index=1, master=2)
+
+
+class TestBringUpVNetInterfaces(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute_obj = Mock()
+        self.iproute.return_value = self.iproute_obj
+        self.get_vnet_interface_names = self.set_up_patch("vnet_manager.operations.interface.get_vnet_interface_names_from_config")
+        self.get_vnet_interface_names.return_value = ["int1", "int2"]
+        self.check_if_interface_exists = self.set_up_patch("vnet_manager.operations.interface.check_if_interface_exists")
+        self.check_if_interface_exists.return_value = False
+        self.create_vnet_interface = self.set_up_patch("vnet_manager.operations.interface.create_vnet_interface")
+        self.creare_vnet_interface_block_rules = self.set_up_patch("vnet_manager.operations.interface.create_vnet_interface_iptables_rules")
+        self.check_if_sniffer_exists = self.set_up_patch("vnet_manager.operations.interface.check_if_sniffer_exists")
+        self.check_if_sniffer_exists.return_value = False
+        self.start_tcpdump_on_interface = self.set_up_patch("vnet_manager.operations.interface.start_tcpdump_on_vnet_interface")
+        self.ensure_vnet_veth_interfaces = self.set_up_patch("vnet_manager.operations.interface.ensure_vnet_veth_interfaces")
+        self.config = deepcopy(settings.CONFIG)
+        self.expected_vnet_interface_calls = [call(i) for i in self.get_vnet_interface_names.return_value]
+
+    def test_bring_up_vnet_interfaces_calls_ip_route(self):
+        bring_up_vnet_interfaces(self.config)
+        self.iproute.assert_called_once_with()
+
+    def test_bring_up_vnet_interfaces_calls_get_vnet_interface_names_from_config(self):
+        bring_up_vnet_interfaces(self.config)
+        self.get_vnet_interface_names.assert_called_once_with(self.config)
+
+    def test_bring_up_vnet_interfaces_calls_check_if_interface_exists_with_interface_names(self):
+        bring_up_vnet_interfaces(self.config)
+        self.check_if_interface_exists.assert_has_calls(self.expected_vnet_interface_calls)
+
+    def test_bring_up_vnet_interfaces_calls_create_vnet_interface_with_interface_names(self):
+        bring_up_vnet_interfaces(self.config)
+        self.create_vnet_interface.assert_has_calls(self.expected_vnet_interface_calls)
+
+    def test_bring_up_vnet_interfaces_does_not_call_create_interface_if_the_interface_already_exists(self):
+        self.check_if_interface_exists.return_value = True
+        bring_up_vnet_interfaces(self.config)
+        self.assertFalse(self.create_vnet_interface.called)
+
+    def test_bring_up_vnet_interfaces_calls_create_vnet_interface_iptables_rules(self):
+        bring_up_vnet_interfaces(self.config)
+        self.creare_vnet_interface_block_rules.assert_has_calls(self.expected_vnet_interface_calls)
+
+    def test_bring_up_vnet_interfaces_calls_ip_link_to_bring_up_interfaces(self):
+        calls = [call("set", ifname=i, state="up") for i in self.get_vnet_interface_names.return_value]
+        bring_up_vnet_interfaces(self.config)
+        self.iproute_obj.link.assert_has_calls(calls)
+
+    def test_bring_up_vnet_interfaces_does_not_create_sniffer_by_default(self):
+        bring_up_vnet_interfaces(self.config)
+        self.assertFalse(self.start_tcpdump_on_interface.called)
+
+    def test_bring_up_vnet_interfaces_calls_sniffer_when_sniffer_argument_passed(self):
+        bring_up_vnet_interfaces(self.config, sniffer=True)
+        self.start_tcpdump_on_interface.assert_has_calls(self.expected_vnet_interface_calls)
+
+    def test_bring_up_vnet_interfaces_does_not_call_start_sniffer_when_the_sniffer_already_exists(self):
+        self.check_if_sniffer_exists.return_value = True
+        bring_up_vnet_interfaces(self.config, sniffer=True)
+        self.assertFalse(self.start_tcpdump_on_interface.called)
+
+    def test_bring_up_vnet_interfaces_calls_ensure_vnet_veth_interfaces(self):
+        bring_up_vnet_interfaces(self.config)
+        self.ensure_vnet_veth_interfaces.assert_called_once_with(self.config)
+
+    def test_bring_up_vnet_interfaces_does_not_calls_ensure_vnet_veth_interface_if_no_veth_interfaces_present_in_config(self):
+        del self.config["veths"]
+        bring_up_vnet_interfaces(self.config)
+        self.assertFalse(self.ensure_vnet_veth_interfaces.called)
