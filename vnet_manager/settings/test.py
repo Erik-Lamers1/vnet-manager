@@ -35,7 +35,7 @@ CONFIG = {
             "files": {"router102": "/etc/frr/"},
         },
     },
-    "veths": {"vnet-veth1": {"bridge": "vnet-br1", "stp": True}, "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": True},},
+    "veths": {"vnet-veth1": {"bridge": "vnet-br1", "stp": True}, "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": False},},
 }
 
 VALIDATED_CONFIG = {
