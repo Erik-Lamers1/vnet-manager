@@ -65,7 +65,7 @@ class TestShowVNetInterfaceStatus(VNetTestCase):
 
     def test_show_vnet_interface_status_calls_ndb(self):
         show_vnet_interface_status(settings.CONFIG)
-        self.ndb.assert_called_once_with(log="off")
+        self.ndb.assert_called_once_with(log=False)
 
     def test_show_vnet_interfaces_status_calls_get_vnet_interface_names_from_config(self):
         show_vnet_interface_status(settings.CONFIG)

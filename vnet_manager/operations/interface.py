@@ -45,7 +45,7 @@ def show_vnet_interface_status(config):
     header = ["Name", "Status", "L2_addr", "Sniffer", "STP", "Used by"]
     statuses = []
     ip = IPRoute()
-    ndb = NDB(log="off")
+    ndb = NDB(log=False)
     for ifname in get_vnet_interface_names_from_config(config):
         used_by = get_machines_by_vnet_interface_name(config, ifname)
         dev = ip.link_lookup(ifname=ifname)
@@ -200,7 +200,7 @@ def ensure_vnet_veth_interfaces(config):
         if "stp" in data:
             logger.info("{} STP on VNet interface {}".format("Enabling" if data["stp"] else "Disabling", data["bridge"]))
             state = 1 if data["stp"] else 0
-            nbd = NDB(log="off")
+            nbd = NDB(log=False)
             with nbd.interfaces[data["bridge"]] as bridge:
                 bridge.set("br_stp_state", state)
         if not check_if_interface_exists(name):
