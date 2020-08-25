@@ -55,6 +55,9 @@ Use this action in combination with the --base-image parameter to delete the VNe
 This action can only if all VNet config on the system are destroyed.
 Only use this action when you wish to reset or uninstall VNet manager.
     """,
+    "create": """Builds a VNet configuration so it can be started using the 'start' action.
+This action will create a base image for all providers present in the configuration if they do not exist yet.
+    """,
 }
 CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(expanduser("~"), PYTHON_PACKAGE_NAME, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
