@@ -1,0 +1,15 @@
+Source: vnet-manager
+Maintainer: Erik Lamers
+Homepage: https://github.com/Erik-Lamers1/vnet-manager
+Section: misc
+Priority: optional
+Standards-Version: 4.0.0
+Build-Depends: debhelper (>= 10), python3, python3-setuptools, python3-dev
+X-Python3-Version: >= 3.6
+
+Package: hypernode-kamikaze3
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3-apt
+Description: Virtual network manager
+ VNet-manager allows for easy virtualization of network setups,
+ using containers on the host.
