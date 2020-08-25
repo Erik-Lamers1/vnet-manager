@@ -1,5 +1,5 @@
 import sys
-from unipath import Path
+from pathlib import Path
 from os.path import join, expanduser
 from os import getenv
 
