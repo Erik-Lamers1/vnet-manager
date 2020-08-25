@@ -15,7 +15,7 @@ setup(
     author="Erik Lamers",
     license="MIT",
     # PyLXD 2.2.11 is currently broken: https://github.com/lxc/pylxd/issues/404
-    install_requires=["colorama", "unipath", "PyYAML", "tabulate", "pylxd==2.2.10", "pyroute2", "psutil", "distro"],
+    install_requires=["colorama", "PyYAML", "tabulate", "pylxd==2.2.10", "pyroute2", "psutil", "distro"],
     entry_points={"console_scripts": ["vnet-manager = vnet_manager.vnet_manager:main",],},
     classifiers=["Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent",],
     python_requires=">=3.6",
