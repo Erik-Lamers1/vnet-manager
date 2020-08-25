@@ -4,7 +4,7 @@ from os.path import join, expanduser
 from os import getenv
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
-PROJECT_DIR = Path(__file__).absolute().ancestor(3)
+PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Log settings
 LOGGING = {
