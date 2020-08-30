@@ -30,8 +30,9 @@ logger = getLogger(__name__)
 
 
 def action_manager(action, config, machines=None, sniffer=False, base_image=False):
-    # pylint: disable=too-many-branches
-    # TODO: Refactor if statements
+    # pylint: disable=too-many-branches, too-many-statements
+    # TODO: Refactor, if-statements, branches
+    # Maybe make this into a class?
     """
     Initiate an action
     :param str action: The action to preform
@@ -49,10 +50,10 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     if action == "version":
         show_version()
         return EX_OK
-    elif config.lower() == "help":
+    if config.lower() == "help":
         display_help_for_action(action)
         return EX_OK
-    elif action == "bash-completion":
+    if action == "bash-completion":
         bash_script_content = generate_bash_completion_script()
         write_file_to_disk(settings.VNET_BASH_COMPLETION_PATH, bash_script_content)
         logger.info("Bash completion generated and placed. Use ' . /etc/bash_completion' to load in this terminal")
