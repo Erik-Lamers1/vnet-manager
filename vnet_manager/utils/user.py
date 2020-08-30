@@ -56,3 +56,13 @@ def request_confirmation(message=None, prompt="Continue? (yes/no) ", func=sys.ex
         if response is not None:
             print("Please answer yes or no.")
         response = input(prompt).lower()
+
+
+def generate_bash_completion_script():
+    """
+    Generates the contents of the bash completion script that can be used with VNet-manager
+    :returns: str: The bash completion script that can be written to disk
+    """
+    logger.info("Generating bash completion script")
+    template = settings.VNET_BASH_COMPLETION_TEMPLATE
+    return template.format(options=" ".join(settings.get("VALID_ACTIONS", "")), name=settings.get("PYTHON_PACKAGE_NAME", "vnet-manager"))

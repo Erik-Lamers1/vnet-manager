@@ -58,7 +58,7 @@ Only use this action when you wish to reset or uninstall VNet manager.
     "create": """Builds a VNet configuration so it can be started using the 'start' action.
 This action will create a base image for all providers present in the configuration if they do not exist yet.
     """,
-    "bash-completion": """Places the VNet-manager bash_completion script""",
+    "bash-completion": """Places the VNet-manager bash completion script""",
 }
 CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(expanduser("~"), PYTHON_PACKAGE_NAME, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
@@ -91,9 +91,22 @@ ff02::3 ip6-allhosts
 
 """
 VNET_NETPLAN_CONFIG_FILE_PATH = "/etc/netplan/10-vnet-config.yaml"
-VNET_BASH_COMPLETION_TEMPLATE = """
-#!/usr/bin/env bash
-complete -W "{}" {}
+VNET_BASH_COMPLETION_TEMPLATE = """#!/usr/bin/env bash
+
+_{name}_completions() {{
+    local opts
+    opts="{options}"
+    case $COMP_CWORD in
+        1)
+            COMPREPLY=( $(compgen -W "${{opts}}" -- "${{COMP_WORDS[COMP_CWORD]}}") )
+            ;;
+        2)
+            COMPREPLY=( $(compgen -o default -- "${{COMP_WORDS[COMP_CWORD]}}") )
+            ;;
+    esac
+    return 0
+}}
+complete -F _{name}_completions {name}
 """
 VNET_BASH_COMPLETION_PATH = "/etc/bash_completion.d/{}.bash".format(PYTHON_PACKAGE_NAME)
 

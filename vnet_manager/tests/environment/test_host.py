@@ -22,6 +22,7 @@ class TestCheckForSupportedOS(VNetTestCase):
 class TestCheckForInstalledPackages(VNetTestCase):
     def setUp(self) -> None:
         self.cache = self.set_up_patch("vnet_manager.environment.host.Cache", themock=MagicMock())
+        self.logger = self.set_up_patch("vnet_manager.environment.host.logger")
         self.config = settings.CONFIG
 
     def test_check_for_installed_packages_calls_apt_cache(self):

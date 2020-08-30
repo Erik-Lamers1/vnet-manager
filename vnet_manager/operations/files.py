@@ -7,6 +7,7 @@ from sys import modules
 
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.conf import settings
+from vnet_manager.utils.files import write_file_to_disk
 
 logger = getLogger(__name__)
 
@@ -109,8 +110,7 @@ def generate_vnet_hosts_file(config):
             if "ipv6" in int_data:
                 vnet_hosts.append("{}   {}".format(int_data["ipv6"].split("/")[0], machine_name))
     vnet_etc_hosts_data = settings.VNET_STATIC_HOSTS_FILE_PART + "\n".join(vnet_hosts)
-    with open(settings.VNET_ETC_HOSTS_FILE_PATH, "w") as fh:
-        fh.write(vnet_etc_hosts_data)
+    write_file_to_disk(settings.VNET_ETC_HOSTS_FILE_PATH, vnet_etc_hosts_data)
 
 
 def place_vnet_hosts_file_on_machines(config):

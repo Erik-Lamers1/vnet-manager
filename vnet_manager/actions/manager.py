@@ -5,7 +5,8 @@ from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import ValidateConfig
 from vnet_manager.utils.version import show_version
-from vnet_manager.utils.user import request_confirmation
+from vnet_manager.utils.user import request_confirmation, generate_bash_completion_script
+from vnet_manager.utils.files import write_file_to_disk
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment, cleanup_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
 from vnet_manager.operations.files import put_files_on_machine, generate_vnet_hosts_file, place_vnet_hosts_file_on_machines
@@ -48,8 +49,13 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
     if action == "version":
         show_version()
         return EX_OK
-    if config.lower() == "help":
+    elif config.lower() == "help":
         display_help_for_action(action)
+        return EX_OK
+    elif action == "bash-completion":
+        bash_script_content = generate_bash_completion_script()
+        write_file_to_disk(settings.VNET_BASH_COMPLETION_PATH, bash_script_content)
+        logger.info("Bash completion generated and placed. Use ' . /etc/bash_completion' to load in this terminal")
         return EX_OK
 
     logger.info("Initiating {} action".format(action))

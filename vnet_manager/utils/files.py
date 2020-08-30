@@ -19,3 +19,15 @@ def get_yaml_content(path):
     with open(path, "r") as fh:
         content = safe_load(fh)
     return content
+
+
+def write_file_to_disk(path, content):
+    """
+    Write a file to disk
+    Overwrites if file already exists
+    :param: str: path: The filepath to write the file to
+    :param: content: The content to write to the file
+    """
+    logger.debug("Writing content to {}".format(path))
+    with open(path, "w") as fh:
+        fh.write(content)
