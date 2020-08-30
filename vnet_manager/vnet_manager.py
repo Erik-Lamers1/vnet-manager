@@ -18,7 +18,7 @@ def parse_args(args=None):
         choices=sorted(settings.VALID_ACTIONS),
         help="The action to preform on the virtual network, use '<action> help' for information about that action",
     )
-    parser.add_argument("config", help="The yaml config file to use")
+    parser.add_argument("config", help="The yaml config file to use", nargs="?", default="default")
 
     # Options
     parser.add_argument(
@@ -37,6 +37,8 @@ def parse_args(args=None):
     args = parser.parse_args(args=args)
 
     # User input sanity checks
+    if args.config == "default" and args.action in settings.CONFIG_REQUIRED_ACTIONS:
+        parser.error("This action requires a config file to be passed")
     if args.sniffer and not args.action == "start":
         parser.error("The sniffer option only makes sense with the 'start' action")
     if args.base_image and not args.action == "destroy":

@@ -58,6 +58,9 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
         write_file_to_disk(settings.VNET_BASH_COMPLETION_PATH, bash_script_content)
         logger.info("Bash completion generated and placed. Use ' . /etc/bash_completion' to load in this terminal")
         return EX_OK
+    if action == "clean":
+        cleanup_vnet_lxc_environment()
+        return EX_OK
 
     logger.info("Initiating {} action".format(action))
     # For these actions we need the config
@@ -113,8 +116,6 @@ def action_manager(action, config, machines=None, sniffer=False, base_image=Fals
                 )
             else:
                 delete_vnet_interfaces(config)
-    elif action == "clean":
-        cleanup_vnet_lxc_environment()
 
     # Finally return all OK
     return EX_OK
