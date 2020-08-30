@@ -3,3 +3,6 @@ venv
 .coverage
 coverage.xml
 __pycache__
+build/
+dist/
+vnet_manager.egg-info/

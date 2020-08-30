@@ -1,13 +1,14 @@
 from distro import codename
 from logging import getLogger
+from sys import modules
 
 logger = getLogger(__name__)
 
 try:
     from apt import Cache
 except (ImportError, ModuleNotFoundError):
-    logger.critical("Python apt module not installed, please 'apt-get install python3-apt' first")
-    raise ModuleNotFoundError("Python apt module missing")
+    logger.error("Python apt module not installed, please 'apt-get install python3-apt' first")
+    logger.warning("Will not preform host checks without apt module")
 
 
 def check_for_supported_os(config, provider):
@@ -29,10 +30,13 @@ def check_for_installed_packages(config, provider):
     :return bool: True if all required packages have been installed, False otherwise
     """
     logger.debug("Checking if all required host packages have been install for provider {}".format(provider))
-    cache = Cache()
     all_installed = True
-    for package in config["providers"][provider]["required_host_packages"]:
-        if not cache[package].is_installed:
-            logger.error("Required host package {} for provider {} is not installed".format(package, provider))
-            all_installed = False
+    cache = Cache()
+    if "apt" not in modules:
+        logger.warning("Skipping host package rquirements check, apt module missing")
+    else:
+        for package in config["providers"][provider]["required_host_packages"]:
+            if not cache[package].is_installed:
+                logger.error("Required host package {} for provider {} is not installed".format(package, provider))
+                all_installed = False
     return all_installed
