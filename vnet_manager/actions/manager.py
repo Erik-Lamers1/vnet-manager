@@ -29,93 +29,139 @@ from vnet_manager.operations.interface import (
 logger = getLogger(__name__)
 
 
-def action_manager(action, config, machines=None, sniffer=False, base_image=False):
-    # pylint: disable=too-many-branches, too-many-statements
-    # TODO: Refactor, if-statements, branches
-    # Maybe make this into a class?
+class ActionManager:
     """
-    Initiate an action
-    :param str action: The action to preform
-    :param str config: The path to the user config file, or literal string 'help' for docs
-    :param list machines: The specific container to execute actions on
-    :param bool sniffer: Start a sniffer on the VNet interfaces on start
-    :param bool base_image: Destroy the image image instead of the machines
-    :return int: exit_code
+    The VNet Action Manager class
+    Use this class to initiate specific VNet action in a controlled manner
     """
-    # Check for valid action
-    if action not in settings.VALID_ACTIONS:
-        raise NotImplementedError("{} is not a valid action".format(action))
 
-    # These actions do not require the config
-    if action == "version":
-        show_version()
-        return EX_OK
-    if config.lower() == "help":
-        display_help_for_action(action)
-        return EX_OK
-    if action == "bash-completion":
-        bash_script_content = generate_bash_completion_script()
-        write_file_to_disk(settings.VNET_BASH_COMPLETION_PATH, bash_script_content)
-        logger.info("Bash completion generated and placed. Use ' . /etc/bash_completion' to load in this terminal")
-        return EX_OK
-    if action == "clean":
-        cleanup_vnet_lxc_environment()
+    def __init__(self, config_path=None, sniffer=False, base_image=False):
+        """
+        :param str config_path: The path to the config
+        :param bool sniffer: Whether to enable sniffers on 'start'
+        :param bool base_image: Whether to delete the base image on 'destroy'
+        """
+        self.config_path = config_path
+        self.config = None
+        self.sniffer = (sniffer,)
+        self.base_image = base_image
+        self._machines = None
+        self._config_validated = False
+
+    @property
+    def machines(self):
+        return self._machines
+
+    @machines.setter
+    def machines(self, machines):
+        """
+        Only preform actions on a certain amount of machines.
+        Note that this only applies to the machine actions, all general actions will ignore this value.
+        :param tpl/list: machines: The machine names to preform actions on, defaults to all
+        """
+        self._machines = machines
+
+    def execute(self, action):
+        """
+        Execute an action
+        :param str action: The name of the action to execute
+        :raises NotImplementedError: If the action is unknown
+        :raises RuntimeError
+        :return: int: returncode of the action
+        """
+        # First do a sanity check on the action
+        if action not in settings.VALID_ACTIONS:
+            raise NotImplementedError("{} is not a valid action".format(action))
+        # Check if the operator only wants to see the help text
+        if self.config_path.lower() == "help":
+            display_help_for_action(action)
+            return EX_OK
+        # Check if a config is required
+        if action in settings.CONFIG_REQUIRED_ACTIONS:
+            if not self.config_path:
+                raise RuntimeError("The {} action requires a config to be passed, but it wasn't".format(action))
+            else:
+                self.config = get_config(self.config_path)
+                # Config passed and required, validate it
+                check_result, self.config = self.check_and_update_config()
+                if not check_result:
+                    # Config NOT OK, quit execution and return usage code
+                    return EX_USAGE
+        # Preform the action
+        logger.info("Initiating {} action".format(action))
+        getattr(self, "preform_{}_action".format(action.replace("-", "_")))()
         return EX_OK
 
-    logger.info("Initiating {} action".format(action))
-    # For these actions we need the config
-    config = get_config(config)
-    # Validate the config
-    validator = ValidateConfig(config)
-    validator.validate()
-    if validator.config_validation_successful:
-        logger.debug("Config successfully validated")
-    else:
-        logger.critical("The config seems to have unrecoverable issues, please fix them before proceeding")
-        return EX_USAGE
-    # Use the updated values from the config validator
-    config = validator.updated_config
+    def check_and_update_config(self):
+        """
+        Validates the config passed to this instance.
+        The validator can also fix some minor config issues, these are returned.
+        :return: bool: True if config successfully validated, False otherwise / dict: The updated config
+        """
+        validator = ValidateConfig(self.config)
+        validator.validate()
+        if validator.config_validation_successful:
+            logger.debug("Config validation successful")
+            return True, validator.updated_config
+        else:
+            logger.critical("The config seems to have unrecoverable issues, please fix them before proceeding")
+            return False, dict()
 
-    if action == "list":
-        show_status(config)
-        show_vnet_interface_status(config)
-        if "veths" in config:
-            show_vnet_veth_interface_status(config)
-    elif action == "start":
-        bring_up_vnet_interfaces(config, sniffer=sniffer)
-        change_machine_status(config, machines=machines, status="start")
-    elif action == "stop":
-        change_machine_status(config, machines=machines, status="stop")
+    def preform_list_action(self):
+        show_status(self.config)
+        show_vnet_interface_status(self.config)
+        if "veths" in self.config:
+            show_vnet_veth_interface_status(self.config)
+
+    def preform_start_action(self):
+        bring_up_vnet_interfaces(self.config, sniffer=self.sniffer)
+        change_machine_status(self.config, machines=self._machines, status="start")
+
+    def preform_stop_action(self):
+        change_machine_status(self.config, machines=self._machines, status="stop")
         # If specific machines are specified, we don't want to mess with the interfaces
-        if machines:
+        if self._machines:
             logger.warning("Not bringing down VNet interfaces as we are only stopping specific machines, this may leave lingering sniffers")
         else:
-            bring_down_vnet_interfaces(config)
-    elif action == "create":
+            bring_down_vnet_interfaces(self.config)
+
+    def preform_create_action(self):
         # Make sure the provider environments are correct
-        ensure_vnet_lxc_environment(config)
+        ensure_vnet_lxc_environment(self.config)
         # Make the machines
-        create_machines(config, machines=machines)
+        create_machines(self.config, machines=self._machines)
         # Put user requested file on the machines
-        put_files_on_machine(config)
+        put_files_on_machine(self.config)
         # Put /etc/hosts on the machines
-        generate_vnet_hosts_file(config)
-        place_vnet_hosts_file_on_machines(config)
+        generate_vnet_hosts_file(self.config)
+        place_vnet_hosts_file_on_machines(self.config)
         # Configure type specific stuff
-        enable_type_specific_machine_configuration(config)
-    elif action == "destroy":
-        if base_image:
+        enable_type_specific_machine_configuration(self.config)
+
+    def preform_destroy_action(self):
+        if self.base_image:
             request_confirmation(prompt="Are you sure you want to delete the VNet base images (y/n)? ")
             destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
         else:
-            destroy_machines(config, machines=machines)
+            destroy_machines(self.config, machines=self._machines)
             # If specific machines are specified, we don't want to mess with the interfaces
-            if machines:
+            if self._machines:
                 logger.warning(
                     "Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers"
                 )
             else:
-                delete_vnet_interfaces(config)
+                delete_vnet_interfaces(self.config)
 
-    # Finally return all OK
-    return EX_OK
+    @staticmethod
+    def preform_version_action():
+        show_version()
+
+    @staticmethod
+    def preform_bash_completion_action():
+        bash_script_content = generate_bash_completion_script()
+        write_file_to_disk(settings.VNET_BASH_COMPLETION_PATH, bash_script_content)
+        logger.info("Bash completion generated and placed. Use ' . /etc/bash_completion' to load in this terminal")
+
+    @staticmethod
+    def preform_clean_action():
+        cleanup_vnet_lxc_environment()

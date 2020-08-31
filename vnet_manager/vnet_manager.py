@@ -5,7 +5,7 @@ from os import EX_NOPERM, environ
 
 from vnet_manager.conf import settings
 from vnet_manager.log import setup_console_logging
-from vnet_manager.actions.manager import action_manager
+from vnet_manager.actions.manager import ActionManager
 from vnet_manager.utils.user import check_for_root_user
 
 logger = getLogger(__name__)
@@ -62,7 +62,10 @@ def main(args=None):
         logger.critical("This program should only be run as root")
         return EX_NOPERM
     # Let the action manager handle the rest
-    return action_manager(args.action, args.config, machines=args.machines, sniffer=args.sniffer, base_image=args.base_image)
+    manager = ActionManager(config_path=args.config, sniffer=args.sniffer, base_image=args.base_image)
+    if args.machines:
+        manager.machines = args.machines
+    return manager.execute(args.action)
 
 
 if __name__ == "__main__":
