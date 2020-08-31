@@ -43,7 +43,7 @@ class ActionManager:
         """
         self.config_path = config_path
         self.config = None
-        self.sniffer = (sniffer,)
+        self.sniffer = sniffer
         self.base_image = base_image
         self._machines = None
         self._config_validated = False
@@ -73,20 +73,19 @@ class ActionManager:
         if action not in settings.VALID_ACTIONS:
             raise NotImplementedError("{} is not a valid action".format(action))
         # Check if the operator only wants to see the help text
-        if self.config_path.lower() == "help":
+        if self.config_path and self.config_path.lower() == "help":
             display_help_for_action(action)
             return EX_OK
         # Check if a config is required
         if action in settings.CONFIG_REQUIRED_ACTIONS:
             if not self.config_path:
                 raise RuntimeError("The {} action requires a config to be passed, but it wasn't".format(action))
-            else:
-                self.config = get_config(self.config_path)
-                # Config passed and required, validate it
-                check_result, self.config = self.check_and_update_config()
-                if not check_result:
-                    # Config NOT OK, quit execution and return usage code
-                    return EX_USAGE
+            self.config = get_config(self.config_path)
+            # Config passed and required, validate it
+            check_result, self.config = self.check_and_update_config()
+            if not check_result:
+                # Config NOT OK, quit execution and return usage code
+                return EX_USAGE
         # Preform the action
         logger.info("Initiating {} action".format(action))
         getattr(self, "preform_{}_action".format(action.replace("-", "_")))()
@@ -100,12 +99,12 @@ class ActionManager:
         """
         validator = ValidateConfig(self.config)
         validator.validate()
-        if validator.config_validation_successful:
-            logger.debug("Config validation successful")
-            return True, validator.updated_config
-        else:
+        if not validator.config_validation_successful:
             logger.critical("The config seems to have unrecoverable issues, please fix them before proceeding")
             return False, dict()
+        # Everything okay
+        logger.debug("Config validation successful")
+        return True, validator.updated_config
 
     def preform_list_action(self):
         show_status(self.config)
