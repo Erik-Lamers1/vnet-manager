@@ -1,4 +1,5 @@
 import shlex
+from os.path import join
 from subprocess import DEVNULL, CalledProcessError
 from unittest.mock import Mock, MagicMock, ANY, call
 from copy import deepcopy
@@ -20,6 +21,7 @@ from vnet_manager.operations.interface import (
     check_if_sniffer_exists,
     bring_down_vnet_interfaces,
     delete_vnet_interfaces,
+    start_tcpdump_on_vnet_interface,
 )
 from vnet_manager.conf import settings
 
@@ -522,3 +524,14 @@ class TestDeleteVNetInterfaces(VNetTestCase):
         delete_vnet_interfaces(self.config)
         self.iproute_obj.link.assert_has_calls(calls)
         self.assertEqual(self.iproute_obj.link.call_count, 2)
+
+
+class TestStartTcpdumpOnVNetInterface(VNetTestCase):
+    def setUp(self) -> None:
+        self.popen = self.set_up_patch("vnet_manager.operations.interface.Popen")
+
+    def test_start_tcpdump_on_vnet_interface_makes_correct_popen_call(self):
+        start_tcpdump_on_vnet_interface("dev1")
+        self.popen.assert_called_once_with(
+            shlex.split("tcpdump -i dev1 -U -w {}".format(join(settings.VNET_SNIFFER_PCAP_DIR, "dev1.pcap")))
+        )
