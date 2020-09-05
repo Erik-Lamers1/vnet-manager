@@ -452,3 +452,23 @@ class TestBringDownVNetInterfaces(VNetTestCase):
         bring_down_vnet_interfaces(self.config)
         self.check_if_interface_exists.assert_has_calls(calls)
         self.assertEqual(self.check_if_interface_exists.call_count, 4)
+
+    def test_bring_down_vnet_interfaces_does_not_check_veth_interfaces_if_not_in_config(self):
+        calls = [call("vnet-br0"), call("vnet-br1")]
+        del self.config["veths"]
+        bring_down_vnet_interfaces(self.config)
+        self.check_if_interface_exists.assert_has_calls(calls)
+        self.assertEqual(self.check_if_interface_exists.call_count, 2)
+
+    def test_bring_down_vnet_interfaces_calls_ip_link_to_bring_down_interfaces(self):
+        calls = [call("set", ifname=i, state="down") for i in ["vnet-veth1", "vnet-veth0", "vnet-br0", "vnet-br1"]]
+        bring_down_vnet_interfaces(self.config)
+        self.iproute_obj.link.assert_has_calls(calls)
+        self.assertEqual(self.iproute_obj.link.call_count, 4)
+
+    def test_bring_down_vnet_interfaces_down_not_bring_down_veth_interfaces_if_not_in_config(self):
+        calls = [call("set", ifname=i, state="down") for i in ["vnet-br0", "vnet-br1"]]
+        del self.config["veths"]
+        bring_down_vnet_interfaces(self.config)
+        self.iproute_obj.link.assert_has_calls(calls)
+        self.assertEqual(self.iproute_obj.link.call_count, 2)
