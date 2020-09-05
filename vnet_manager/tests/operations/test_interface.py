@@ -17,6 +17,8 @@ from vnet_manager.operations.interface import (
     configure_veth_interface,
     bring_up_vnet_interfaces,
     ensure_vnet_veth_interfaces,
+    check_if_sniffer_exists,
+    bring_down_vnet_interfaces,
 )
 from vnet_manager.conf import settings
 
@@ -416,3 +418,37 @@ class TestEnsureVNetVethInterfaces(VNetTestCase):
         ensure_vnet_veth_interfaces(self.config)
         calls = [call(i) for i in self.config["veths"]]
         self.configure_vnet_interface.assert_has_calls(calls)
+
+
+class TestCheckIfSnifferExists(VNetTestCase):
+    def setUp(self) -> None:
+        self.process = Mock()
+        self.process_iter = self.set_up_patch("vnet_manager.operations.interface.process_iter")
+        self.process_iter.return_value = [self.process]
+        self.process.cmdline.return_value = "testprocess testargs"
+
+    def test_check_if_sniffer_exists_returns_false_if_sniffer_does_not_exist(self):
+        self.assertFalse(check_if_sniffer_exists("dev0"))
+
+    def test_check_if_sniffer_exists_returns_true_if_sniffer_exists(self):
+        self.process.cmdline.return_value = "/usr/sbin/tcpdump -i dev1 -n"
+        self.assertTrue(check_if_sniffer_exists("dev1"))
+
+
+class TestBringDownVNetInterfaces(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute_obj = Mock()
+        self.iproute.return_value = self.iproute_obj
+        self.check_if_interface_exists = self.set_up_patch("vnet_manager.operations.interface.check_if_interface_exists")
+        self.config = deepcopy(settings.CONFIG)
+
+    def test_bring_down_vnet_interfaces_calls_iproute(self):
+        bring_down_vnet_interfaces(self.config)
+        self.iproute.assert_called_once_with()
+
+    def test_bring_down_vnet_interfaces_check_if_interface_exists_for_each_interface_in_config(self):
+        calls = [call("vnet-veth1"), call("vnet-veth0"), call("vnet-br0"), call("vnet-br1")]
+        bring_down_vnet_interfaces(self.config)
+        self.check_if_interface_exists.assert_has_calls(calls)
+        self.assertEqual(self.check_if_interface_exists.call_count, 4)

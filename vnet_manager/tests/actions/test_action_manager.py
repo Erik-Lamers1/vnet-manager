@@ -213,3 +213,9 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap", base_image=True)
         manager.execute("destroy")
         self.request_confirmation.assert_called_once_with(prompt="Are you sure you want to delete the VNet base images (y/n)? ")
+
+    def test_action_manager_has_machine_property(self):
+        manager = ActionManager()
+        manager.machines = ["1", "2", "3"]
+        self.assertEqual(manager.machines, ["1", "2", "3"])
+        self.assertIsInstance(ActionManager.machines, property)
