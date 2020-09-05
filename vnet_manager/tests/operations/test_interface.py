@@ -19,6 +19,7 @@ from vnet_manager.operations.interface import (
     ensure_vnet_veth_interfaces,
     check_if_sniffer_exists,
     bring_down_vnet_interfaces,
+    delete_vnet_interfaces,
 )
 from vnet_manager.conf import settings
 
@@ -470,5 +471,54 @@ class TestBringDownVNetInterfaces(VNetTestCase):
         calls = [call("set", ifname=i, state="down") for i in ["vnet-br0", "vnet-br1"]]
         del self.config["veths"]
         bring_down_vnet_interfaces(self.config)
+        self.iproute_obj.link.assert_has_calls(calls)
+        self.assertEqual(self.iproute_obj.link.call_count, 2)
+
+    def test_bring_down_vnet_interfaces_does_nothing_if_interfaces_do_not_exist(self):
+        self.check_if_interface_exists.return_value = False
+        bring_down_vnet_interfaces(self.config)
+        self.assertFalse(self.iproute_obj.link.called)
+
+
+class TestDeleteVNetInterfaces(VNetTestCase):
+    def setUp(self) -> None:
+        self.iproute = self.set_up_patch("vnet_manager.operations.interface.IPRoute")
+        self.iproute_obj = Mock()
+        self.iproute.return_value = self.iproute_obj
+        self.check_if_interface_exists = self.set_up_patch("vnet_manager.operations.interface.check_if_interface_exists")
+        self.config = deepcopy(settings.CONFIG)
+
+    def test_delete_vnet_interfaces_calls_iproute(self):
+        delete_vnet_interfaces(self.config)
+        self.iproute.assert_called_once_with()
+
+    def test_delete_vnet_interfaces_does_nothing_if_interfaces_do_not_exist(self):
+        self.check_if_interface_exists.return_value = False
+        delete_vnet_interfaces(self.config)
+        self.assertFalse(self.iproute_obj.link.called)
+
+    def test_delete_vnet_interfaces_check_if_interface_exists_for_each_interface_in_config(self):
+        calls = [call("vnet-veth0"), call("vnet-br0"), call("vnet-br1")]
+        delete_vnet_interfaces(self.config)
+        self.check_if_interface_exists.assert_has_calls(calls)
+        self.assertEqual(self.check_if_interface_exists.call_count, 3)
+
+    def test_delete_vnet_interfaces_does_not_check_veth_interfaces_if_not_in_config(self):
+        calls = [call("vnet-br0"), call("vnet-br1")]
+        del self.config["veths"]
+        delete_vnet_interfaces(self.config)
+        self.check_if_interface_exists.assert_has_calls(calls)
+        self.assertEqual(self.check_if_interface_exists.call_count, 2)
+
+    def test_delete_vnet_interfaces_calls_ip_link_to_delete_interfaces(self):
+        calls = [call("del", ifname=i) for i in ["vnet-veth0", "vnet-br0", "vnet-br1"]]
+        delete_vnet_interfaces(self.config)
+        self.iproute_obj.link.assert_has_calls(calls)
+        self.assertEqual(self.iproute_obj.link.call_count, 3)
+
+    def test_delete_vnet_interfaces_down_not_delete_veth_interfaces_if_not_in_config(self):
+        calls = [call("del", ifname=i) for i in ["vnet-br0", "vnet-br1"]]
+        del self.config["veths"]
+        delete_vnet_interfaces(self.config)
         self.iproute_obj.link.assert_has_calls(calls)
         self.assertEqual(self.iproute_obj.link.call_count, 2)
