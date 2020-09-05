@@ -14,6 +14,7 @@ This is done in combination with [FRRouting](https://frrouting.org/).
 Because VNet-manager makes heavy use of LXC, the current supported operating systems are Ubuntu Bionic (18.04) and Focal Fossa (20.04).
 ## Setup
 ```bash
+# These commands must be run as the root user
 apt-get update
 apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
 # LXD defaults are fine
