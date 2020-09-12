@@ -1,9 +1,9 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock, PropertyMock
 from pylxd.exceptions import NotFound
 
 from vnet_manager.tests import VNetTestCase
 from vnet_manager.conf import settings
-from vnet_manager.operations.machine import show_status, check_if_lxc_machine_exists, get_lxc_machine_status
+from vnet_manager.operations.machine import show_status, check_if_lxc_machine_exists, get_lxc_machine_status, wait_for_lxc_machine_status
 
 
 class TestShowStatus(VNetTestCase):
@@ -63,3 +63,28 @@ class TestGetLXCMachineStatus(VNetTestCase):
     def test_get_lxc_machine_status_returns_na_on_not_found_exception(self):
         self.machine.containers.get.side_effect = NotFound(response="blaap")
         self.assertEqual(get_lxc_machine_status("test"), ["test", "NA", "LXC"])
+
+
+class TestWaitForLXCMachineStatus(VNetTestCase):
+    def setUp(self) -> None:
+        self.machine = MagicMock()
+        self.machine.state.return_value.status = "123"
+        self.sleep = self.set_up_patch("vnet_manager.operations.machine.sleep")
+
+    def test_wait_for_lxc_machine_status_calls_state(self):
+        wait_for_lxc_machine_status(self.machine, "123")
+        self.machine.state.assert_called_once_with()
+
+    def test_wait_for_lxc_machine_status_does_not_call_sleep_if_state_correct(self):
+        wait_for_lxc_machine_status(self.machine, "123")
+        self.assertFalse(self.sleep.called)
+
+    def test_wait_for_lxc_machine_status_raises_timeout_error_if_right_status_was_not_returned(self):
+        self.machine.state.return_value.status = "456"
+        with self.assertRaises(TimeoutError):
+            wait_for_lxc_machine_status(self.machine, "123")
+        self.assertTrue(self.sleep.called)
+
+    def test_wait_for_lxc_machine_status_deals_with_weird_capitals(self):
+        self.machine.state.return_value.status = "RuNNING"
+        wait_for_lxc_machine_status(self.machine, "rUNNing")
