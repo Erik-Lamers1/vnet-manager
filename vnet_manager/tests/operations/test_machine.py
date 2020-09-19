@@ -1,9 +1,15 @@
-from unittest.mock import Mock, MagicMock, PropertyMock
+from unittest.mock import Mock, MagicMock, call
 from pylxd.exceptions import NotFound
 
 from vnet_manager.tests import VNetTestCase
 from vnet_manager.conf import settings
-from vnet_manager.operations.machine import show_status, check_if_lxc_machine_exists, get_lxc_machine_status, wait_for_lxc_machine_status
+from vnet_manager.operations.machine import (
+    show_status,
+    check_if_lxc_machine_exists,
+    get_lxc_machine_status,
+    wait_for_lxc_machine_status,
+    change_machine_status,
+)
 
 
 class TestShowStatus(VNetTestCase):
@@ -88,3 +94,32 @@ class TestWaitForLXCMachineStatus(VNetTestCase):
     def test_wait_for_lxc_machine_status_deals_with_weird_capitals(self):
         self.machine.state.return_value.status = "RuNNING"
         wait_for_lxc_machine_status(self.machine, "rUNNing")
+
+
+class TestChangeMachineStatus(VNetTestCase):
+    def setUp(self) -> None:
+        self.change_lxc_machine_status = self.set_up_patch("vnet_manager.operations.machine.change_lxc_machine_status")
+
+    def test_change_machine_status_raises_not_implemented_error_when_invalid_status(self):
+        with self.assertRaises(NotImplementedError):
+            change_machine_status(settings.CONFIG, status="blaap")
+
+    def test_change_machine_status_calls_change_lxc_machine_status_with_machines_from_config(self):
+        change_machine_status(settings.CONFIG)
+        calls = [call(m, status="stop") for m in settings.CONFIG["machines"].keys()]
+        self.change_lxc_machine_status.assert_has_calls(calls)
+
+    def test_change_machine_status_calls_change_lxc_machine_status_only_with_given_machine_list(self):
+        machines = ["router100"]
+        change_machine_status(settings.CONFIG, machines=machines)
+        self.change_lxc_machine_status.assert_called_once_with(machines[0], status="stop")
+
+    def test_change_machine_status_calls_change_lxc_machine_status_with_different_status(self):
+        change_machine_status(settings.CONFIG, status="start")
+        calls = [call(m, status="start") for m in settings.CONFIG["machines"].keys()]
+        self.change_lxc_machine_status.assert_has_calls(calls)
+
+    def test_change_machine_status_skips_non_existent_machines(self):
+        machines = ["banaan1"]
+        change_machine_status(settings.CONFIG, machines=machines)
+        self.assertFalse(self.change_lxc_machine_status.called)
