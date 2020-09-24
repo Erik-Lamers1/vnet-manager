@@ -9,6 +9,7 @@ from vnet_manager.operations.machine import (
     get_lxc_machine_status,
     wait_for_lxc_machine_status,
     change_machine_status,
+    change_lxc_machine_status,
 )
 
 
@@ -123,3 +124,61 @@ class TestChangeMachineStatus(VNetTestCase):
         machines = ["banaan1"]
         change_machine_status(settings.CONFIG, machines=machines)
         self.assertFalse(self.change_lxc_machine_status.called)
+
+
+class TestChangeLXCMachineStatus(VNetTestCase):
+    def setUp(self) -> None:
+        self.lxd_client = self.set_up_patch("vnet_manager.operations.machine.get_lxd_client")
+        self.client = Mock()
+        self.machine = Mock()
+        self.lxd_client.return_value = self.client
+        self.client.containers.get.return_value = self.machine
+        self.sleep = self.set_up_patch("vnet_manager.operations.machine.sleep")
+        self.wait_for_lxc_machine_status = self.set_up_patch("vnet_manager.operations.machine.wait_for_lxc_machine_status")
+
+    def test_change_lxc_machine_status_calls_lxd_client(self):
+        change_lxc_machine_status("banaan")
+        self.lxd_client.assert_called_once_with()
+
+    def test_change_lxc_machine_status_calls_sleep(self):
+        change_lxc_machine_status("banaan")
+        self.sleep.assert_called_once_with(1)
+
+    def test_change_lxc_machine_status_calls_containers_get(self):
+        change_lxc_machine_status("banaan")
+        self.client.containers.get.assert_called_once_with("banaan")
+
+    def test_change_lxc_machine_status_calls_machine_stop_by_default(self):
+        change_lxc_machine_status("banaan")
+        self.machine.stop.assert_called_once_with()
+
+    def test_change_lxc_machine_status_does_not_call_start_by_default(self):
+        change_lxc_machine_status("banaan")
+        self.assertFalse(self.machine.start.called)
+
+    def test_change_lxc_machine_status_deals_with_not_found_error(self):
+        self.client.containers.get.side_effect = NotFound(response="blaap")
+        change_lxc_machine_status("banaan")
+        self.assertFalse(self.machine.stop.called)
+        self.assertFalse(self.machine.start.called)
+        self.assertFalse(self.wait_for_lxc_machine_status.called)
+
+    def test_change_lxc_machine_status_call_start_when_passed(self):
+        change_lxc_machine_status("banaan", status="start")
+        self.machine.start.assert_called_once_with(wait=True)
+
+    def test_change_lxc_machine_status_does_not_call_stop_when_start_passed(self):
+        change_lxc_machine_status("banaan", status="start")
+        self.assertFalse(self.machine.stop.called)
+
+    def test_change_lxc_machine_status_calls_wait_for_lxc_machine_status_with_stopped(self):
+        change_lxc_machine_status("banaan", status="stop")
+        self.wait_for_lxc_machine_status.assert_called_once_with(self.machine, "Stopped")
+
+    def test_change_lxc_machine_status_calls_wait_for_lxc_machine_status_with_running(self):
+        change_lxc_machine_status("banaan", status="start")
+        self.wait_for_lxc_machine_status.assert_called_once_with(self.machine, "Running")
+
+    def test_change_lxc_machine_status_catches_timeout_error(self):
+        self.wait_for_lxc_machine_status.side_effect = TimeoutError()
+        change_lxc_machine_status("banaan")
