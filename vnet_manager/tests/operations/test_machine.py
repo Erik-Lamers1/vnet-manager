@@ -10,6 +10,7 @@ from vnet_manager.operations.machine import (
     wait_for_lxc_machine_status,
     change_machine_status,
     change_lxc_machine_status,
+    create_machines,
 )
 
 
@@ -182,3 +183,16 @@ class TestChangeLXCMachineStatus(VNetTestCase):
     def test_change_lxc_machine_status_catches_timeout_error(self):
         self.wait_for_lxc_machine_status.side_effect = TimeoutError()
         change_lxc_machine_status("banaan")
+
+
+class TestCreateMachines(VNetTestCase):
+    def setUp(self) -> None:
+        self.create_lxc_machines_from_base_image = self.set_up_patch("vnet_manager.operations.machine.create_lxc_machines_from_base_image")
+
+    def test_create_machines_calls_create_lxc_machines_with_config_machines(self):
+        create_machines(settings.CONFIG)
+        self.create_lxc_machines_from_base_image.assert_called_once_with(settings.CONFIG, settings.CONFIG["machines"].keys())
+
+    def test_create_machines_calls_create_lxc_machine_with_custom_machine_list(self):
+        create_machines(settings.CONFIG, machines=["test1", "test2"])
+        self.create_lxc_machines_from_base_image.assert_called_once_with(settings.CONFIG, ["test1", "test2"])
