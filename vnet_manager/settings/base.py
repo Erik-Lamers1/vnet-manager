@@ -37,8 +37,8 @@ LOGGING = {
 }
 
 # VNet Manager static settings / config
-CONFIG_REQUIRED_ACTIONS = ["list", "show", "start", "stop", "create", "destroy"]
-VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["clean", "version", "bash-completion"]
+CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "create", "destroy"]
+VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["list", "clean", "version", "bash-completion"]
 HELP_TEXT_ACTION_MAPPING = {
     "list": """Lists the status of the config files in a particular directory.
 Usage: vnet-manager list <dir>.
