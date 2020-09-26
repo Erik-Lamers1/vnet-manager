@@ -1,4 +1,5 @@
-from os.path import isfile
+from os.path import isfile, join
+from os import walk
 from yaml import safe_load
 from logging import getLogger
 
@@ -31,3 +32,18 @@ def write_file_to_disk(path, content):
     logger.debug("Writing content to {}".format(path))
     with open(path, "w") as fh:
         fh.write(content)
+
+
+def get_yaml_file_from_disk_path(path):
+    """
+    Returns a list of yaml files from a path (recursive search)
+    :param path: str: The path to search in
+    :return: list of paths: the found yaml files
+    """
+    yaml_files = []
+    logger.debug("Retrieving yaml files from path: {}".format(path))
+    for root, _, files in walk(path):
+        for f in files:
+            if f.endswith("yaml") or f.endswith("yml"):
+                yaml_files.append(join(root, f))
+    return yaml_files

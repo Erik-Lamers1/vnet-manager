@@ -37,10 +37,16 @@ LOGGING = {
 }
 
 # VNet Manager static settings / config
-CONFIG_REQUIRED_ACTIONS = ["list", "start", "stop", "create", "destroy"]
+CONFIG_REQUIRED_ACTIONS = ["list", "show", "start", "stop", "create", "destroy"]
 VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["clean", "version", "bash-completion"]
 HELP_TEXT_ACTION_MAPPING = {
-    "list": """Lists the current status of the supplied config.
+    "list": """Lists the status of the config files in a particular directory.
+Usage: vnet-manager list <dir>.
+In which the <dir> contains vnet-manager user config yaml files.
+This command does a recursive search for all vnet-manager config in the supplied directory (so it also lists subdirectories).
+No interface status will be shown, as these might overlap for some configs.
+    """,
+    "show": """Show the current status of the supplied config file
     """,
     "start": """Starts up a previously built config.
 This action will also bring up/start required VNet interfaces and enable sniffers if the --sniffer option is passed.
