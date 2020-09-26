@@ -1,6 +1,6 @@
 # Based on https://sunnynetwork.wordpress.com/2017/02/06/lab-37-linux-bridge-with-linux-containers-lxc/
 #
-#  host1 --- vnet-br0 - vnet-veth0 --- vnet-veth1 - vnet-br1 --- host2
+#  host11 --- vnet-br0 - vnet-veth0 --- vnet-veth1 - vnet-br1 --- host22
 #                |                                       |
 #           vnet-veth2                              vnet-veth4
 #                |                                       |
@@ -8,7 +8,7 @@
 #                |                                       |
 #            vnet-veth3 ---- vnet-br2 --- vnet-veth5 --- |
 #                               |
-#                             host3
+#                             host33
 
 switches: 3
 
@@ -35,7 +35,7 @@ veths:
     bridge: vnet-br2
 
 machines:
-  host1:
+  host11:
     type: host
     interfaces:
       eth1:
@@ -43,7 +43,7 @@ machines:
         ipv6: fd00:12::1/64
         mac: 00:00:00:00:00:11
         bridge: 0
-  host2:
+  host22:
     type: host
     interfaces:
       eth2:
@@ -51,7 +51,7 @@ machines:
         ipv6: fd00:12::2/64
         mac: 00:00:00:00:00:22
         bridge: 1
-  host3:
+  host33:
     type: host
     interfaces:
       eth3:
