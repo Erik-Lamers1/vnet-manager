@@ -289,12 +289,12 @@ class ValidateConfig:
                     logger.error("veth interface {} bridge parameter does not seem to be a str{}".format(name, self.default_message))
                     self._all_ok = False
                 if "peer" not in values:
-                    logger.debug("veth interface {} does not have a peer, that's ok, assuming it's peer is defined elsewhere")
+                    logger.debug("veth interface {} does not have a peer, that's ok, assuming it's peer is defined elsewhere".format(name))
                 elif not isinstance(values["peer"], str):
                     logger.error("veth interface {} peer parameter does not seem to be a string{}".format(name, self.default_message))
                     self._all_ok = False
                 if "stp" not in values:
-                    logger.debug("veth interface {} as no STP parameter, that's okay")
+                    logger.debug("veth interface {} as no STP parameter, that's okay".format(name))
                 elif not isinstance(values["stp"], bool):
                     logger.error("veth interface {} stp parameter does not seem to be a boolean{}".format(name, self.default_message))
                     self._all_ok = False

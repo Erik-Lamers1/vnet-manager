@@ -167,7 +167,9 @@ class ActionManager:
     def preform_list_action(self):
         # First check if we have been passed a file or directory
         if isfile(self.config_path):
-            warn("List action with a regular config file is deprecated, use the 'show' action instead.")
+            dep_msg = "List action with a regular config file is deprecated, use the 'show' action instead"
+            logger.warning(dep_msg)
+            warn(dep_msg)
             # Execute the show action instead
             self.execute("show")
         elif isdir(self.config_path):
