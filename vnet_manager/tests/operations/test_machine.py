@@ -14,6 +14,7 @@ from vnet_manager.operations.machine import (
     create_machines,
     create_lxc_machines_from_base_image,
     destroy_machines,
+    destroy_lxc_machine,
 )
 
 
@@ -284,3 +285,35 @@ class TestDestroyMachines(VNetTestCase):
     def test_destroy_machines_calls_destroy_lxc_machine_with_specific_machine(self):
         destroy_machines(settings.CONFIG, machines=["router100"])
         self.destroy_lxc_machine.assert_called_once_with("router100")
+
+
+class TestDestroyLXCMachine(VNetTestCase):
+    def setUp(self) -> None:
+        self.lxd_client = self.set_up_patch("vnet_manager.operations.machine.get_lxd_client")
+        self.client = Mock()
+        self.machine = Mock()
+        self.lxd_client.return_value = self.client
+        self.client.containers.get.return_value = self.machine
+
+    def test_destroy_lxc_machine_calls_lxd_client(self):
+        destroy_lxc_machine("banaan")
+        self.lxd_client.assert_called_once_with()
+
+    def test_destroy_lxc_machine_calls_container_delete_method(self):
+        destroy_lxc_machine("banaan")
+        self.machine.delete.assert_called_once_with(wait=False)
+
+    def test_destroy_lxc_machine_does_not_call_stop_by_default(self):
+        destroy_lxc_machine("banaan")
+        self.assertFalse(self.machine.stop.called)
+
+    def test_destroy_lxc_machine_calls_machine_stop_when_status_is_running(self):
+        self.machine.status = "Running"
+        destroy_lxc_machine("banaan")
+        self.machine.stop.assert_called_once_with(wait=True)
+
+    def test_destroy_lxc_machine_does_nothing_if_machine_does_not_exist(self):
+        self.client.containers.get.side_effect = NotFound(response="blaap")
+        destroy_lxc_machine("banaan")
+        self.assertFalse(self.machine.delete.called)
+        self.assertFalse(self.machine.stop.called)
