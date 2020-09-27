@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import Mock, MagicMock, call
 from pylxd.exceptions import NotFound
 
@@ -11,6 +12,7 @@ from vnet_manager.operations.machine import (
     change_machine_status,
     change_lxc_machine_status,
     create_machines,
+    create_lxc_machines_from_base_image,
 )
 
 
@@ -19,7 +21,7 @@ class TestShowStatus(VNetTestCase):
         self.tabulate = self.set_up_patch("vnet_manager.operations.machine.tabulate")
         self.get_lxc_machine_status = self.set_up_patch("vnet_manager.operations.machine.get_lxc_machine_status")
         self.get_lxc_machine_status.return_value = ["router", "up", "LXC"]
-        self.config = settings.CONFIG
+        self.config = deepcopy(settings.CONFIG)
         # Only 1 machine for less output
         self.config["machines"].pop("router101", None)
         self.config["machines"].pop("router102", None)
@@ -196,3 +198,66 @@ class TestCreateMachines(VNetTestCase):
     def test_create_machines_calls_create_lxc_machine_with_custom_machine_list(self):
         create_machines(settings.CONFIG, machines=["test1", "test2"])
         self.create_lxc_machines_from_base_image.assert_called_once_with(settings.CONFIG, ["test1", "test2"])
+
+
+class TestCreateLXCMachinesFromBaseImage(VNetTestCase):
+    def setUp(self) -> None:
+        self.check_if_lxc_machine_exists = self.set_up_patch("vnet_manager.operations.machine.check_if_lxc_machine_exists")
+        self.check_if_lxc_machine_exists.return_value = False
+        self.lxd_client = self.set_up_patch("vnet_manager.operations.machine.get_lxd_client")
+        self.client = Mock()
+        self.lxd_client.return_value = self.client
+        self.place_lxc_interface_configuration_on_container = self.set_up_patch(
+            "vnet_manager.operations.machine.place_lxc_interface_configuration_on_container"
+        )
+        self.reqeust_confirm = self.set_up_patch("vnet_manager.operations.machine.request_confirmation")
+        self.config = deepcopy(settings.CONFIG)
+        self.excepted_config = {
+            "name": "router100",
+            "source": {"alias": settings.LXC_BASE_IMAGE_ALIAS, "type": "image"},
+            "ephemeral": False,
+            "config": {"user.network-config": "disabled"},
+            "devices": {
+                "eth0": {"type": "none"},
+                "eth12": {
+                    "name": "eth12",
+                    "host_name": "router100-eth12",
+                    "parent": "vnet-br0",
+                    "type": "nic",
+                    "nictype": "bridged",
+                    "hwaddr": "00:00:00:00:01:11",
+                },
+            },
+            "profiles": [settings.LXC_VNET_PROFILE],
+        }
+
+    def test_create_lxc_machines_from_base_image_calls_lxc_client(self):
+        create_lxc_machines_from_base_image(settings.CONFIG, ["router100", "router101"])
+        self.lxd_client.assert_called_once_with()
+
+    def test_create_lxc_machines_from_base_image_does_nothing_if_machines_already_exist(self):
+        self.check_if_lxc_machine_exists.return_value = True
+        create_lxc_machines_from_base_image(self.config, ["router100", "router101"])
+        self.assertFalse(self.place_lxc_interface_configuration_on_container.called)
+        self.assertFalse(self.client.containers.create.called)
+
+    def test_create_lxc_machines_from_base_image_calls_containers_create_method(self):
+        create_lxc_machines_from_base_image(self.config, ["router100"])
+        self.client.containers.create.assert_called_once_with(self.excepted_config, wait=True)
+
+    def test_create_lxc_machines_from_base_image_calls_place_lxc_interface_configuration_on_container(self):
+        create_lxc_machines_from_base_image(self.config, ["router100"])
+        self.place_lxc_interface_configuration_on_container.assert_called_once_with(self.config, "router100")
+
+    def test_create_lxc_machine_from_base_image_calls_create_functions_on_the_basis_of_the_number_of_containers(self):
+        create_lxc_machines_from_base_image(self.config, ["router100", "router101", "router102"])
+        self.assertEqual(self.client.containers.create.call_count, 3)
+        self.assertEqual(self.place_lxc_interface_configuration_on_container.call_count, 3)
+
+    def test_create_lxc_machines_from_base_image_calls_request_confirmation_if_containers_already_created(self):
+        self.check_if_lxc_machine_exists.return_value = True
+        create_lxc_machines_from_base_image(self.config, ["router100", "router102"])
+        self.reqeust_confirm.assert_called_once_with(
+            message="Some containers already existed, the next operation will overwrite network, "
+            "host and user config files on those containers"
+        )
