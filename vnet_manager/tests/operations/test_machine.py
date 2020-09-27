@@ -13,6 +13,7 @@ from vnet_manager.operations.machine import (
     change_lxc_machine_status,
     create_machines,
     create_lxc_machines_from_base_image,
+    destroy_machines,
 )
 
 
@@ -210,7 +211,7 @@ class TestCreateLXCMachinesFromBaseImage(VNetTestCase):
         self.place_lxc_interface_configuration_on_container = self.set_up_patch(
             "vnet_manager.operations.machine.place_lxc_interface_configuration_on_container"
         )
-        self.reqeust_confirm = self.set_up_patch("vnet_manager.operations.machine.request_confirmation")
+        self.request_confirm = self.set_up_patch("vnet_manager.operations.machine.request_confirmation")
         self.config = deepcopy(settings.CONFIG)
         self.excepted_config = {
             "name": "router100",
@@ -257,7 +258,29 @@ class TestCreateLXCMachinesFromBaseImage(VNetTestCase):
     def test_create_lxc_machines_from_base_image_calls_request_confirmation_if_containers_already_created(self):
         self.check_if_lxc_machine_exists.return_value = True
         create_lxc_machines_from_base_image(self.config, ["router100", "router102"])
-        self.reqeust_confirm.assert_called_once_with(
+        self.request_confirm.assert_called_once_with(
             message="Some containers already existed, the next operation will overwrite network, "
             "host and user config files on those containers"
         )
+
+
+class TestDestroyMachines(VNetTestCase):
+    def setUp(self) -> None:
+        self.request_confirm = self.set_up_patch("vnet_manager.operations.machine.request_confirmation")
+        self.destroy_lxc_machine = self.set_up_patch("vnet_manager.operations.machine.destroy_lxc_machine")
+
+    def test_destroy_machines_calls_request_confirmation(self):
+        destroy_machines(settings.CONFIG)
+        self.request_confirm.assert_called_once_with(
+            message="Requesting confirmation of deletion for the following machines: router100, router101, router102",
+            prompt="This operation cannot be undone. Are you sure?! ",
+        )
+
+    def test_destroy_machines_calls_destroy_lxc_machine_per_lxc_machine(self):
+        calls = [call(m) for m in settings.CONFIG["machines"].keys()]
+        destroy_machines(settings.CONFIG)
+        self.destroy_lxc_machine.assert_has_calls(calls)
+
+    def test_destroy_machines_calls_destroy_lxc_machine_with_specific_machine(self):
+        destroy_machines(settings.CONFIG, machines=["router100"])
+        self.destroy_lxc_machine.assert_called_once_with("router100")
