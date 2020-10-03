@@ -242,7 +242,7 @@ class ValidateConfig:
                     logger.error("Unable to parse IPv6 address {} for machine {}. Parse error: {}".format(int_vals["ipv6"], machine, e))
                     self._all_ok = False
             if "mac" not in int_vals:
-                logger.info("MAC not found for interface {} on machine {}, generating a random one".format(int_name, machine))
+                logger.debug("MAC not found for interface {} on machine {}, generating a random one".format(int_name, machine))
                 self._new_config["machines"][machine]["interfaces"][int_name]["mac"] = random_mac_generator()
             # From: https://stackoverflow.com/a/7629690/8632038
             elif not fullmatch(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", int_vals["mac"]):
