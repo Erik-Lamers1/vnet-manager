@@ -231,7 +231,7 @@ class ValidateConfig:
                     logger.error("Unable to parse IPv4 address {} for machine {}. Parse error: {}".format(int_vals["ipv4"], machine, e))
                     self._all_ok = False
             if "ipv6" not in int_vals:
-                logger.info(
+                logger.debug(
                     "No IPv6 found for interface {} on machine {}, that's okay no IPv6 address will be configured".format(int_name, machine)
                 )
             else:
