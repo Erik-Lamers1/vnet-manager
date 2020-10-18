@@ -6,7 +6,6 @@ VNet-manager works with YAML configs in order to define virtual networks. There 
 ## User config
 The user config defines a virtual network. The hosts, routers and interfaces should be defined in this config.
 Below the currently possible user, config options are explained.
-switches: 3
 
 ```yaml
 switches: int  # Switches defines the number of vnet-bridges that should be created.
@@ -26,7 +25,7 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
                      # So, if you want to connect to the first bridge, this value should be set to 0.
       ethN: ...
     vlans: dict  # This defines the vlan interfaces that will be created on the machine (optional).
-      vlan.100:  # This defines a vlan interface
+      vlan.100: dict  # This defines a vlan interface
         id: int  # The vlan id of this interface.
         link: str  # The parent interface, this must correspond to a interface configured above.
         addresses: list  # The IP addresses to assign to this vlan interface (optional).
