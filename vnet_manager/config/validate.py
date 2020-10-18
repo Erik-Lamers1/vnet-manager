@@ -1,4 +1,4 @@
-from ipaddress import IPv4Interface, IPv6Interface
+from ipaddress import IPv4Interface, IPv6Interface, ip_interface
 from re import fullmatch
 from logging import getLogger
 from os.path import isdir, isfile, join
@@ -188,6 +188,71 @@ class ValidateConfig:
                     self._all_ok = False
                 else:
                     self.validate_interface_config(name)
+
+                # VLANs?
+                if "vlans" not in values:
+                    logger.debug("Machine {} does not appear to have any VLAN interfaces, that's okay")
+                elif not isinstance(values["vlans"], dict):
+                    logger.error(
+                        "Machine {} has a VLAN config but it does not appear to be a dict, this usually means a typo in the config{}".format(
+                            name, self.default_message
+                        )
+                    )
+                    self._all_ok = False
+                else:
+                    self.validate_vlan_config(name)
+
+    def validate_vlan_config(self, machine):
+        """
+        Validates the VLAN config of a particular machine
+        :param machine: str: the machine to validate the VLAN config for
+        """
+        vlans = self.config["machines"][machine]["vlans"]
+        for name, values in vlans.items():
+            if "id" not in values:
+                logger.error("VLAN {} on machine {} is missing it's vlan id{}".format(name, machine, self.default_message))
+                self._all_ok = False
+            else:
+                try:
+                    self._new_config["machines"][machine]["vlans"][name]["id"] = int(values["id"])
+                except ValueError:
+                    logger.error("Unable to cast VLAN {} with ID {} from machine {} to a integer".format(name, values["id"], machine))
+                    self._all_ok = False
+            if "link" not in values:
+                logger.error("VLAN {} on machine {} is missing it's link attribute{}".format(name, machine, self.default_message))
+                self._all_ok = False
+            elif not isinstance(values["link"], str):
+                logger.error(
+                    "Link {} for VLAN {} on machine {}, does not seem to be a string{}".format(
+                        values["link"], name, machine, self.default_message
+                    )
+                )
+                self._all_ok = False
+            elif values["link"] not in self.config["machines"][machine]["interfaces"]:
+                logger.error(
+                    "Link {} for VLAN {} on machine {} does not correspond to any interfaces on the same machine{}".format(
+                        values["link"], name, machine, self.default_message
+                    )
+                )
+                self._all_ok = False
+            if "addresses" not in values:
+                logger.debug("VLAN {} on machine {} does not have any addresses, that's okay".format(name, machine))
+            elif not isinstance(values["addresses"], list):
+                logger.error(
+                    "Addresses on VLAN {} for machine {}, does not seem to be a list{}".format(name, machine, self.default_message)
+                )
+                self._all_ok = False
+            else:
+                for address in values["addresses"]:
+                    try:
+                        ip_interface(address)
+                    except ValueError as e:
+                        logger.error(
+                            "Address {} for VLAN {} on machine {} does not seem to be a valid address, got parse error {}".format(
+                                address, name, machine, e
+                            )
+                        )
+                        self._all_ok = False
 
     def validate_machine_files_parameters(self, machine):
         """
