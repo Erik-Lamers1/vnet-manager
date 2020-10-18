@@ -25,6 +25,12 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
                      # Note that counting starts from 0.
                      # So, if you want to connect to the first bridge, this value should be set to 0.
       ethN: ...
+    vlans: dict  # This defines the vlan interfaces that will be created on the machine (optional).
+      vlan.100:  # This defines a vlan interface
+        id: int  # The vlan id of this interface.
+        link: str  # The parent interface, this must correspond to a interface configured above.
+        addresses: list  # The IP addresses to assign to this vlan interface (optional).
+      vlan.N: ...
     files: dict  # This defines the files that will be copied to the machine (optional).
       host1: str  # Key should be set to the absolute or relative path as seen from the user config.
                       # This can be a directory or a single file.
