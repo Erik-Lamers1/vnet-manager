@@ -143,6 +143,8 @@ class ValidateConfig:
             self._all_ok = False
 
     def validate_machine_config(self):
+        # TODO: Refactor
+        # pylint: disable=too-many-branches
         """
         Validates the machines part of the config
         """
@@ -194,9 +196,8 @@ class ValidateConfig:
                     logger.debug("Machine {} does not appear to have any VLAN interfaces, that's okay")
                 elif not isinstance(values["vlans"], dict):
                     logger.error(
-                        "Machine {} has a VLAN config but it does not appear to be a dict, this usually means a typo in the config{}".format(
-                            name, self.default_message
-                        )
+                        "Machine {} has a VLAN config but it does not "
+                        "appear to be a dict, this usually means a typo in the config{}".format(name, self.default_message)
                     )
                     self._all_ok = False
                 else:
@@ -216,7 +217,11 @@ class ValidateConfig:
                 try:
                     self._new_config["machines"][machine]["vlans"][name]["id"] = int(values["id"])
                 except ValueError:
-                    logger.error("Unable to cast VLAN {} with ID {} from machine {} to a integer".format(name, values["id"], machine))
+                    logger.error(
+                        "Unable to cast VLAN {} with ID {} from machine {} to a integer{}".format(
+                            name, values["id"], machine, self.default_message
+                        )
+                    )
                     self._all_ok = False
             if "link" not in values:
                 logger.error("VLAN {} on machine {} is missing it's link attribute{}".format(name, machine, self.default_message))
@@ -228,7 +233,8 @@ class ValidateConfig:
                     )
                 )
                 self._all_ok = False
-            elif values["link"] not in self.config["machines"][machine]["interfaces"]:
+            # This check requires a valid interface config, so we only do it if the previous checks have been successful
+            elif self._all_ok and values["link"] not in self.config["machines"][machine]["interfaces"]:
                 logger.error(
                     "Link {} for VLAN {} on machine {} does not correspond to any interfaces on the same machine{}".format(
                         values["link"], name, machine, self.default_message

@@ -1,6 +1,7 @@
 from copy import deepcopy
 from unittest.mock import Mock, MagicMock, call
 from pylxd.exceptions import NotFound
+from yaml import safe_dump
 
 from vnet_manager.tests import VNetTestCase
 from vnet_manager.conf import settings
@@ -15,6 +16,8 @@ from vnet_manager.operations.machine import (
     create_lxc_machines_from_base_image,
     destroy_machines,
     destroy_lxc_machine,
+    place_lxc_interface_configuration_on_container,
+    generate_machine_netplan_config,
 )
 
 
@@ -317,3 +320,54 @@ class TestDestroyLXCMachine(VNetTestCase):
         destroy_lxc_machine("banaan")
         self.assertFalse(self.machine.delete.called)
         self.assertFalse(self.machine.stop.called)
+
+
+class TestPlaceLXCInterfaceConfigurationOnContainer(VNetTestCase):
+    def setUp(self) -> None:
+        self.network_conf = self.set_up_patch("vnet_manager.operations.machine.generate_machine_netplan_config")
+        self.network_conf.return_value = {"int": "456"}
+        self.write_files_to_lxc_container = self.set_up_patch("vnet_manager.operations.machine.write_file_to_lxc_container")
+        self.config = {"int": "123"}
+
+    def test_place_lxc_interface_configuration_on_container_calls_generate_machine_netplan_config(self):
+        place_lxc_interface_configuration_on_container(self.config, "router100")
+        self.network_conf.assert_called_once_with(self.config, "router100")
+
+    def test_place_lxc_interface_configuration_on_container_calls_write_file_to_lxc_container(self):
+        place_lxc_interface_configuration_on_container(self.config, "router100")
+        self.write_files_to_lxc_container.assert_called_once_with(
+            "router100", settings.VNET_NETPLAN_CONFIG_FILE_PATH, safe_dump(self.network_conf.return_value)
+        )
+
+
+class TestGenerateMachineNetplanConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.maxDiff = None
+        self.config = deepcopy(settings.CONFIG)
+        self.expected_config = {
+            "network": {
+                "version": 2,
+                "renderer": "networkd",
+                "ethernets": {
+                    "eth12": {
+                        "dhcp4": "no",
+                        "dhcp6": "no",
+                        "match": {"macaddress": "00:00:00:00:01:11"},
+                        "set-name": "eth12",
+                        "addresses": ["192.168.0.2/24", "fd00:12::2/64"],
+                    },
+                },
+                "vlans": {"vlan.100": {"id": 100, "link": "eth12", "addresses": ["10.0.100.1/24"], "dhcp4": "no", "dhcp6": "no",}},
+            }
+        }
+
+    def test_generate_machine_netplan_config_returns_a_dict(self):
+        self.assertIsInstance(generate_machine_netplan_config(self.config, "router100"), dict)
+
+    def test_generate_machine_netplan_config_returns_expected_config_without_vlans(self):
+        del self.config["machines"]["router100"]["vlans"]
+        del self.expected_config["network"]["vlans"]
+        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, "router100"))
+
+    def test_generate_machine_netplan_config_returns_expected_config_with_vlans(self):
+        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, "router100"))

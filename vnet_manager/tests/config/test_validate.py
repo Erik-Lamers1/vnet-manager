@@ -250,6 +250,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validate_interfaces = Mock()
         self.validator.validate_interface_config = self.validate_interfaces
         self.validator.validate_machine_files_parameters = self.validate_files
+        self.validate_vlan_config = self.set_up_patch("vnet_manager.config.validate.ValidateConfig.validate_vlan_config")
 
     def test_validate_machine_config_runs_ok_with_good_config(self):
         self.validator.validate_machine_config()
@@ -336,6 +337,25 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.validate_machine_config()
         calls = [call(machine) for machine in self.validator.config["machines"].keys()]
         self.validate_interfaces.assert_has_calls(calls)
+
+    def test_validate_machine_config_calls_validate_vlan_config_for_each_vlan_interface(self):
+        # We have only one VLAN interface defined in the settings
+        self.validator.validate_machine_config()
+        self.validate_vlan_config.assert_called_once_with("router100")
+
+    def test_validate_machine_config_does_not_call_validate_vlan_config_if_not_vlans_present(self):
+        del self.validator.config["machines"]["router100"]["vlans"]
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validate_vlan_config.called)
+
+    def test_validate_machine_config_fails_if_vlans_is_not_a_dict(self):
+        self.validator.config["machines"]["router100"]["vlans"] = 1337
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Machine router100 has a VLAN config but it does not appear to be a dict, "
+            "this usually means a typo in the config{}".format(self.validator.default_message)
+        )
 
 
 class TestValidateConfigValidateMachineFilesParameters(VNetTestCase):
@@ -492,4 +512,77 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
             "veth interface vnet-veth1 stp parameter does not seem to be a boolean{}".format(self.validator.default_message)
+        )
+
+
+class TestValidateConfigValidateVLANConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+        self.machine = "router100"
+
+    def test_validate_vlan_config_is_successful_is_everything_okay(self):
+        self.validator.validate_vlan_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_vlan_config_fails_is_id_is_not_present(self):
+        del self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["id"]
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "VLAN vlan.100 on machine {} is missing it's vlan id{}".format(self.machine, self.validator.default_message)
+        )
+
+    def test_validate_vlan_config_fails_if_id_is_not_castable_to_int(self):
+        self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["id"] = "banaan"
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Unable to cast VLAN vlan.100 with ID banaan from machine {} to a integer{}".format(
+                self.machine, self.validator.default_message
+            )
+        )
+
+    def test_validate_vlan_config_fails_if_link_is_not_present(self):
+        del self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["link"]
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "VLAN vlan.100 on machine {} is missing it's link attribute{}".format(self.machine, self.validator.default_message)
+        )
+
+    def test_validate_vlan_config_fails_if_link_is_not_a_string(self):
+        self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["link"] = 42
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Link 42 for VLAN vlan.100 on machine {}, does not seem to be a string{}".format(self.machine, self.validator.default_message)
+        )
+
+    def test_validate_vlan_config_fails_if_link_is_not_found_in_machine_interfaces(self):
+        self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["link"] = "eth1337"
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Link eth1337 for VLAN vlan.100 on machine {} does not correspond to any interfaces on "
+            "the same machine{}".format(self.machine, self.validator.default_message)
+        )
+
+    def test_validate_vlan_config_does_not_check_link_in_interfaces_if_config_validation_already_failed(self):
+        self.validator._all_ok = False
+        self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["link"] = "eth1337"
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.logger.error.called)
+
+    def test_validate_vlan_config_does_not_fail_if_addresses_not_in_values(self):
+        del self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["addresses"]
+        self.validator.validate_vlan_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_vlan_config_fails_if_invalid_address_in_addresses(self):
+        self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["addresses"].append("banaan")
+        self.validator.validate_vlan_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.assertTrue(
+            self.logger.error.call_args_list[0].startswith("Address banaan for VLAN vlan.100 on machine {}".format(self.machine))
         )

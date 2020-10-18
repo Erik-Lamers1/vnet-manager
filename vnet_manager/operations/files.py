@@ -1,5 +1,4 @@
 from logging import getLogger
-from yaml import safe_dump
 from pylxd.exceptions import NotFound
 from os.path import isfile, isdir, join, basename
 from os import listdir
@@ -43,9 +42,7 @@ def select_files_and_put_on_machine(machine, files, provider):
             logger.error("Tried to select file {} for copying, but it is neither a file nor a directory".format(host_path))
 
 
-def write_file_to_lxc_container(
-    container, file_path, data,
-):
+def write_file_to_lxc_container(container, file_path, data):
     """
     Writes file data to a path on the LXC container
     :param container: str: The name of the container
