@@ -47,6 +47,7 @@ class ActionManager:
         self.config = None
         self.sniffer = sniffer
         self.base_image = base_image
+        self.no_hosts = no_hosts
         self._machines = None
         self._config_validated = False
 
