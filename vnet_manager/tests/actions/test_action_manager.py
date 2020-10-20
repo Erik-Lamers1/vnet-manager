@@ -221,6 +221,37 @@ class TestActionManager(VNetTestCase):
         manager.execute("create")
         self.enable_type_specific_machine_configuration.assert_called_once_with(self.validator.updated_config)
 
+    def test_action_manager_calls_ensure_vnet_lxc_environment_with_create_action_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.execute("create")
+        self.ensure_vnet_lxc_environment.assert_called_once_with(self.validator.updated_config)
+
+    def test_action_manager_calls_create_machines_with_create_action_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.execute("create")
+        self.create_machines.assert_called_once_with(self.validator.updated_config, machines=None)
+
+    def test_action_manager_calls_create_machines_with_create_action_and_machines_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.machines = ["machine"]
+        manager.execute("create")
+        self.create_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
+
+    def test_action_manager_calls_put_files_on_machine_with_create_action_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.execute("create")
+        self.put_files_on_machine.assert_called_once_with(self.validator.updated_config)
+
+    def test_action_manager_calls_generate_vnet_hosts_file_with_create_action_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.execute("create")
+        self.generate_vnet_hosts_file.assert_called_once_with(self.validator.updated_config)
+
+    def test_action_manager_calls_enable_type_specific_machine_configuration_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.execute("create")
+        self.enable_type_specific_machine_configuration.assert_called_once_with(self.validator.updated_config)
+
     def test_action_manager_calls_destroy_machines_with_destroy_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("destroy")
