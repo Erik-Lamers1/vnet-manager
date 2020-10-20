@@ -24,7 +24,7 @@ class TestActionManager(VNetTestCase):
         self.create_machines = self.set_up_patch("vnet_manager.actions.manager.create_machines")
         self.put_files_on_machine = self.set_up_patch("vnet_manager.actions.manager.put_files_on_machine")
         self.generate_vnet_hosts_file = self.set_up_patch("vnet_manager.actions.manager.generate_vnet_hosts_file")
-        self.place_vnet_hosts_file_on_machines = self.set_up_patch("vnet_manager.actions.manager.gent_hosts_file_on_machines")
+        self.place_vnet_hosts_file_on_machines = self.set_up_patch("vnet_manager.actions.manager.gen_hosts_file_on_machines")
         self.enable_type_specific_machine_configuration = self.set_up_patch(
             "vnet_manager.actions.manager.enable_type_specific_machine_configuration"
         )
