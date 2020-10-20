@@ -24,7 +24,7 @@ class TestActionManager(VNetTestCase):
         self.create_machines = self.set_up_patch("vnet_manager.actions.manager.create_machines")
         self.put_files_on_machine = self.set_up_patch("vnet_manager.actions.manager.put_files_on_machine")
         self.generate_vnet_hosts_file = self.set_up_patch("vnet_manager.actions.manager.generate_vnet_hosts_file")
-        self.place_vnet_hosts_file_on_machines = self.set_up_patch("vnet_manager.actions.manager.place_vnet_hosts_file_on_machines")
+        self.place_vnet_hosts_file_on_machines = self.set_up_patch("vnet_manager.actions.manager.gent_hosts_file_on_machines")
         self.enable_type_specific_machine_configuration = self.set_up_patch(
             "vnet_manager.actions.manager.enable_type_specific_machine_configuration"
         )
@@ -245,7 +245,7 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_generate_vnet_hosts_file_with_create_action_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
         manager.execute("create")
-        self.generate_vnet_hosts_file.assert_called_once_with(self.validator.updated_config)
+        self.generate_vnet_hosts_file.assert_not_called(self.validator.updated_config)
 
     def test_action_manager_calls_enable_type_specific_machine_configuration_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
