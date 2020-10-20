@@ -29,6 +29,7 @@ def parse_args(args=None):
     )
     parser.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print debug messages")
+    parser.add_argument("-nh", "--no-hosts", action="store_true", help="Disable creation of /etc/hosts")
 
     start_group = parser.add_argument_group("Start options", "These options can be specified for the start action")
     start_group.add_argument("-s", "--sniffer", action="store_true", help="Start a TCPdump sniffer on the VNet interfaces")
@@ -62,7 +63,7 @@ def main(args=None):
         logger.critical("This program should only be run as root")
         return EX_NOPERM
     # Let the action manager handle the rest
-    manager = ActionManager(config_path=args.config, sniffer=args.sniffer, base_image=args.base_image)
+    manager = ActionManager(config_path=args.config, sniffer=args.sniffer, base_image=args.base_image, no_hosts=args.no_hosts)
     if args.machines:
         manager.machines = args.machines
     return manager.execute(args.action)
