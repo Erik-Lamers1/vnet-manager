@@ -211,6 +211,11 @@ class TestActionManager(VNetTestCase):
         manager.execute("create")
         self.put_files_on_machine.assert_called_once_with(self.validator.updated_config)
 
+    def test_action_manager_calls_place_vnet_hosts_file_on_machines_with_create_action(self):
+        manager = ActionManager(config_path="blaap")
+        manager.execute("create")
+        self.place_vnet_hosts_file_on_machines.assert_called_once_with(self.validator.updated_config)
+
     def test_action_manager_calls_generate_vnet_hosts_file_with_create_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("create")
@@ -241,6 +246,11 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap", no_hosts=True)
         manager.execute("create")
         self.put_files_on_machine.assert_called_once_with(self.validator.updated_config)
+
+    def test_action_manager_calls_place_vnet_hosts_file_on_machines_with_create_action_and_nohosts(self):
+        manager = ActionManager(config_path="blaap", no_hosts=True)
+        manager.execute("create")
+        self.assertFalse(self.place_vnet_hosts_file_on_machines.called)
 
     def test_action_manager_calls_generate_vnet_hosts_file_with_create_action_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
