@@ -37,7 +37,7 @@ class ActionManager:
     Use this class to initiate specific VNet action in a controlled manner
     """
 
-    def __init__(self, config_path=None, sniffer=False, base_image=False):
+    def __init__(self, config_path=None, sniffer=False, base_image=False, no_hosts=False):
         """
         :param str config_path: The path to the config
         :param bool sniffer: Whether to enable sniffers on 'start'
@@ -47,6 +47,7 @@ class ActionManager:
         self.config = None
         self.sniffer = sniffer
         self.base_image = base_image
+        self.no_hosts = no_hosts
         self._machines = None
         self._config_validated = False
 
@@ -144,9 +145,10 @@ class ActionManager:
         create_machines(self.config, machines=self._machines)
         # Put user requested file on the machines
         put_files_on_machine(self.config)
-        # Put /etc/hosts on the machines
-        generate_vnet_hosts_file(self.config)
-        place_vnet_hosts_file_on_machines(self.config)
+        if not self.no_hosts:
+            # Put /etc/hosts on the machines
+            generate_vnet_hosts_file(self.config)
+            place_vnet_hosts_file_on_machines(self.config)
         # Configure type specific stuff
         enable_type_specific_machine_configuration(self.config)
 
