@@ -12,7 +12,7 @@ default_args = ["list", "config"]
 
 class TestParseArgs(VNetTestCase):
     def test_parse_args_produces_known_args(self):
-        known_args = ("action", "config", "machines", "yes", "verbose", "sniffer", "base_image")
+        known_args = ("action", "config", "machines", "yes", "verbose", "sniffer", "base_image", "no_hosts")
         args = parse_args(default_args)
         for arg in known_args:
             self.assertTrue(hasattr(args, arg), msg="Argument {} not found in parse_args return value".format(arg))
@@ -34,6 +34,12 @@ class TestParseArgs(VNetTestCase):
         with self.assertRaises(SystemExit):
             parse_args(["list", "config", "--base-image"])
         self.assertTrue(stderr.getvalue().strip().endswith("The base_image option only makes sense with the 'destroy' action"))
+
+    @patch("sys.stderr", new_callable=StringIO)
+    def test_parse_args_exists_when_no_hosts_passed_without_create_action(self, stderr):
+        with self.assertRaises(SystemExit):
+            parse_args(["list", "config", "--no-hosts"])
+        self.assertTrue(stderr.getvalue().strip().endswith("The no_hosts option only makes sense with the 'create' action"))
 
 
 class TestVNetManagerMain(VNetTestCase):

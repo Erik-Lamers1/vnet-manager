@@ -44,6 +44,8 @@ def parse_args(args=None):
         parser.error("The sniffer option only makes sense with the 'start' action")
     if args.base_image and not args.action == "destroy":
         parser.error("The base_image option only makes sense with the 'destroy' action")
+    if args.no_hosts and not args.action == "create":
+        parser.error("The no_hosts option only makes sense with the 'create' action")
     return args
 
 
