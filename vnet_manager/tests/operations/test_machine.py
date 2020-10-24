@@ -20,6 +20,7 @@ from vnet_manager.operations.machine import (
     generate_machine_netplan_config,
     create_lxc_base_image_container,
     enable_type_specific_machine_configuration,
+    configure_lxc_ip_forwarding,
 )
 
 
@@ -412,6 +413,21 @@ class TestEnableTypeSpecificMachineConfiguration(VNetTestCase):
         enable_type_specific_machine_configuration(settings.CONFIG)
         self.configure_lxc_ip_forwarding.assert_has_calls([call("router100"), call("router101"), call("router102")])
         self.assertEqual(self.configure_lxc_ip_forwarding.call_count, 3)
+
+
+class TestConfigureLXCIPForwarding(VNetTestCase):
+    def setUp(self) -> None:
+        self.write_file_to_lxc_container = self.set_up_patch("vnet_manager.operations.machine.write_file_to_lxc_container")
+
+    def test_configure_lxc_ip_forwarding_calls_write_file_to_lxc_container(self):
+        configure_lxc_ip_forwarding("router100")
+        self.write_file_to_lxc_container.assert_has_calls(
+            [
+                call("router100", "/etc/sysctl.d/20-net.ipv4.ip_forward.conf", "net.ipv4.ip_forward=1\n"),
+                call("router100", "/etc/sysctl.d/20-net.ipv6.conf.all.forwarding.conf", "net.ipv6.conf.all.forwarding=1\n"),
+            ]
+        )
+        self.assertEqual(self.write_file_to_lxc_container.call_count, 2)
 
 
 class TestGenerateMachineNetplanConfig(VNetTestCase):
