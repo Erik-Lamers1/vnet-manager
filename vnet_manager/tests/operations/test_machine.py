@@ -18,6 +18,7 @@ from vnet_manager.operations.machine import (
     destroy_lxc_machine,
     place_lxc_interface_configuration_on_container,
     generate_machine_netplan_config,
+    create_lxc_base_image_container,
 )
 
 
@@ -320,6 +321,68 @@ class TestDestroyLXCMachine(VNetTestCase):
         destroy_lxc_machine("banaan")
         self.assertFalse(self.machine.delete.called)
         self.assertFalse(self.machine.stop.called)
+
+
+class TestCreateLXCBaseImageContainer(VNetTestCase):
+    def setUp(self) -> None:
+        self.check_if_machine_exists = self.set_up_patch("vnet_manager.operations.machine.check_if_lxc_machine_exists")
+        self.check_if_machine_exists.return_value = False
+        self.request_confirm = self.set_up_patch("vnet_manager.operations.machine.request_confirmation")
+        self.destroy_lxc_machine = self.set_up_patch("vnet_manager.operations.machine.destroy_lxc_machine")
+        self.lxd_client = self.set_up_patch("vnet_manager.operations.machine.get_lxd_client")
+        self.client = Mock()
+        self.lxd_client.return_value = self.client
+
+    def test_create_lxc_base_image_container_calls_check_if_machine_exists(self):
+        create_lxc_base_image_container(settings.CONFIG)
+        self.check_if_machine_exists.assert_called_once_with(settings.LXC_BASE_IMAGE_MACHINE_NAME)
+
+    def test_create_lxc_base_image_container_does_not_call_destroy_lxc_machine_when_machine_does_not_exist(self):
+        create_lxc_base_image_container(settings.CONFIG)
+        self.assertFalse(self.request_confirm.called)
+        self.assertFalse(self.destroy_lxc_machine.called)
+
+    def test_create_lxc_base_image_container_calls_confirm_when_machine_already_exists(self):
+        self.check_if_machine_exists.return_value = True
+        create_lxc_base_image_container(settings.CONFIG)
+        self.request_confirm.assert_called_once_with(
+            message="Recreating it will destroy any local changes", prompt="Recreate the LXC base image machine? "
+        )
+
+    def test_create_lxc_base_image_container_calls_destroy_lxc_machine_when_machine_already_exists(self):
+        self.check_if_machine_exists.return_value = True
+        create_lxc_base_image_container(settings.CONFIG)
+        self.destroy_lxc_machine.assert_called_once_with(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=True)
+
+    def test_create_lxc_base_image_calls_get_lxd_client(self):
+        create_lxc_base_image_container(settings.CONFIG)
+        self.lxd_client.assert_called_once_with()
+
+    def test_create_lxc_base_image_calls_client_create_function(self):
+        excepted_config = {
+            "name": settings.LXC_BASE_IMAGE_MACHINE_NAME,
+            "architecture": "x86_64",
+            "profiles": [settings.LXC_VNET_PROFILE],
+            "ephemeral": False,
+            "config": {},
+            "devices": {
+                "eth0": {
+                    "name": "eth0",
+                    "parent": "lxdbr0",
+                    "type": "nic",
+                    "nictype": "bridged",
+                    "host_name": "{}-eth0".format(settings.LXC_BASE_IMAGE_MACHINE_NAME),
+                }
+            },
+            "source": {
+                "type": "image",
+                "protocol": str(settings.CONFIG["providers"]["lxc"]["base_image"]["protocol"]),
+                "server": settings.CONFIG["providers"]["lxc"]["base_image"]["server"],
+                "alias": str(settings.CONFIG["providers"]["lxc"]["base_image"]["os"]),
+            },
+        }
+        create_lxc_base_image_container(settings.CONFIG)
+        self.client.containers.create.assert_called_once_with(excepted_config, wait=True)
 
 
 class TestPlaceLXCInterfaceConfigurationOnContainer(VNetTestCase):
