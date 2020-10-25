@@ -193,7 +193,7 @@ class ValidateConfig:
 
                 # VLANs?
                 if "vlans" not in values:
-                    logger.debug("Machine {} does not appear to have any VLAN interfaces, that's okay")
+                    logger.debug("Machine {} does not appear to have any VLAN interfaces, that's okay".format(name))
                 elif not isinstance(values["vlans"], dict):
                     logger.error(
                         "Machine {} has a VLAN config but it does not "

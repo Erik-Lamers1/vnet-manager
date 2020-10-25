@@ -184,7 +184,9 @@ class ActionManager:
                 logger.info("Showing machine status for {}".format(path))
                 show_status(self.config)
         else:
-            logger.error("Path {} does not seem to be a file or a directory".format(self.config_path))
+            logger.error(
+                "Path {} does not seem to be a file or a directory, did you forget to pass a config directory?".format(self.config_path)
+            )
 
     @staticmethod
     def preform_version_action():

@@ -220,7 +220,7 @@ def destroy_machines(config, machines=None):
     # Ask the user if he is sure
     request_confirmation(
         message="Requesting confirmation of deletion for the following machines: {}".format(", ".join(machines)),
-        prompt="This operation cannot be undone. Are you sure?! ",
+        prompt="This operation cannot be undone. Are you sure?! (yes/no) ",
     )
 
     for machine in machines:

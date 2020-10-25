@@ -280,7 +280,7 @@ class TestDestroyMachines(VNetTestCase):
         destroy_machines(settings.CONFIG)
         self.request_confirm.assert_called_once_with(
             message="Requesting confirmation of deletion for the following machines: router100, router101, router102",
-            prompt="This operation cannot be undone. Are you sure?! ",
+            prompt="This operation cannot be undone. Are you sure?! (yes/no) ",
         )
 
     def test_destroy_machines_calls_destroy_lxc_machine_per_lxc_machine(self):

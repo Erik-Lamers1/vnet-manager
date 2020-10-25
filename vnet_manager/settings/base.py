@@ -37,6 +37,7 @@ LOGGING = {
 }
 
 # VNet Manager static settings / config
+# The 'list' action also requires a config, but because it is handled differently we don't add it to CONFIG_REQUIRED_ACTIONS
 CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "create", "destroy"]
 VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["list", "clean", "version", "bash-completion"]
 HELP_TEXT_ACTION_MAPPING = {
@@ -82,7 +83,7 @@ MACHINE_TYPE_CONFIG_FUNCTION_MAPPING = {
 }
 VALID_STATUSES = ["start", "stop"]
 VNET_FORCE_ENV_VAR = "VNET_FORCE"
-VNET_ETC_HOSTS_FILE_PATH = "/tmp/vnet_etc_hosts"
+VNET_ETC_HOSTS_FILE_PATH = "/tmp/.vnet_etc_hosts"
 VNET_STATIC_HOSTS_FILE_PART = """
 127.0.0.1 localhost
 
