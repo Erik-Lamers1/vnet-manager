@@ -393,13 +393,10 @@ class TestValidateConfigValidateInterfaceConfig(VNetTestCase):
         self.validator.validate_interface_config("router100")
         self.assertTrue(self.validator.config_validation_successful)
 
-    def test_validate_interface_config_fails_when_ipv4_not_present(self):
+    def test_validate_interface_config_runs_ok_if_ipv4_not_present(self):
         del self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["ipv4"]
         self.validator.validate_interface_config("router100")
-        self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with(
-            "ipv4 not found for interface eth12 on machine router100{}".format(self.validator.default_message)
-        )
+        self.assertTrue(self.validator.config_validation_successful)
 
     def test_validate_interface_config_fails_when_ipv4_not_valid(self):
         self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["ipv4"] = "255.255.256.257"
