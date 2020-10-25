@@ -1,0 +1,9 @@
+---
+
+extends: default
+
+rules:
+  line-length:
+    max: 140
+  # Indentation check if flaky and sometimes demands to much whitespace, let's not use it
+  indentation: disable
