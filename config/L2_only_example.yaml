@@ -1,3 +1,5 @@
+---
+
 # Basically a copy from exmaple.yaml, but without any IP addressing
 #
 # host1 --- router1 -- host3
