@@ -292,8 +292,9 @@ class ValidateConfig:
         interfaces = self.config["machines"][machine]["interfaces"]
         for int_name, int_vals in interfaces.items():
             if "ipv4" not in int_vals:
-                logger.error("ipv4 not found for interface {} on machine {}{}".format(int_name, machine, self.default_message))
-                self._all_ok = False
+                logger.debug(
+                    "No IPv4 found for interface {} on machine {}. That's okay, no IPv4 will be configured".format(int_name, machine)
+                )
             else:
                 # Validate the given IP
                 try:

@@ -1,0 +1,30 @@
+# Basically a copy from exmaple.yaml, but without any IP addressing
+#
+# host1 --- router1 -- host3
+#
+
+switches: 2
+
+machines:
+  host21:
+    type: host
+    interfaces:
+      eth12:
+        mac: 00:00:00:00:00:11
+        bridge: 0
+  # This is a stupid router that should be configured by hand
+  router21:
+    type: router
+    interfaces:
+      eth12:
+        mac: 00:00:00:00:00:12
+        bridge: 0
+      eth23:
+        mac: 00:00:00:00:00:22
+        bridge: 1
+  host23:
+    type: host
+    interfaces:
+      eth23:
+        mac: 00:00:00:00:00:23
+        bridge: 1
