@@ -11,7 +11,7 @@ setup(
     name="vnet-manager",
     version=VERSION,
     url="https://github.com/Erik-Lamers1/vnet-manager",
-    packages=find_packages(),
+    packages=find_packages(exclude=["tools", "tools.*", "tests", "tests.*", "*.tests", "*.tests.*"]),
     author="Erik Lamers",
     license="MIT",
     # PyLXD 2.2.11 is currently broken: https://github.com/lxc/pylxd/issues/404

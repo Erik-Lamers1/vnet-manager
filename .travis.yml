@@ -13,8 +13,10 @@ python:
 install: pip install -r requirements/test.txt
 env:
   - SETTINGS_MODULE=vnet_manager.settings.test
-before_script: "black --check --diff --line-length 140 --target-version py36 vnet_manager"
-script: "pytest --cov vnet_manager && pylint vnet_manager"
+before_script:
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+  - black --check --diff --line-length 140 --target-version py36 vnet_manager
+script: "pytest --cov vnet_manager && python tools/yaml_syntax_validator.py && pylint vnet_manager"
 # Push the results back to codecov
 after_success:
   - codecov

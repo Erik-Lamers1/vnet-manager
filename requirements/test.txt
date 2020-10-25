@@ -6,3 +6,4 @@ pylint==2.5.2
 black==19.10b0
 codecov==2.1.7
 pytest-cov==2.10.0
+yamllint==1.25.0

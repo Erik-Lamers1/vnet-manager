@@ -5,6 +5,8 @@ from os import getenv
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
+YAMLLINT_CONFIG_FILE = join(PROJECT_DIR, "yamllint.yaml")
+CONFIG_FILE_DIR = join(PROJECT_DIR, "config")
 
 # Log settings
 LOGGING = {
