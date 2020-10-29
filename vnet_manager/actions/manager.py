@@ -175,7 +175,8 @@ class ActionManager:
             # Execute the show action instead
             self.execute("show")
         elif isdir(self.config_path):
-            yaml_files = get_yaml_file_from_disk_path(self.config_path)
+            # We exclude the default.yaml config file because it is not a valid user config
+            yaml_files = get_yaml_file_from_disk_path(self.config_path, excludes_files=settings.CONFIG_DEFAULTS_LOCATION)
             for path in yaml_files:
                 self.config_path = path
                 if not self.parse_config():
