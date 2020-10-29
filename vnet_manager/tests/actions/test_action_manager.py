@@ -36,7 +36,7 @@ class TestActionManager(VNetTestCase):
         self.display_help_for_action = self.set_up_patch("vnet_manager.actions.manager.display_help_for_action")
         self.isfile = self.set_up_patch("vnet_manager.actions.manager.isfile")
         self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
-        self.get_yaml_file_from_disk_path = self.set_up_patch("vnet_manager.actions.manager.get_yaml_file_from_disk_path")
+        self.get_yaml_file_from_disk_path = self.set_up_patch("vnet_manager.actions.manager.get_yaml_files_from_disk_path")
         self.get_yaml_file_from_disk_path.return_value = ["file1"]
 
     def test_action_raises_not_implemented_error_if_unsupported_action(self):
@@ -103,7 +103,7 @@ class TestActionManager(VNetTestCase):
         self.isfile.return_value = False
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
-        self.get_yaml_file_from_disk_path.assert_called_once_with("blaap")
+        self.get_yaml_file_from_disk_path.assert_called_once_with("blaap", excludes_files=settings.CONFIG_DEFAULTS_LOCATION)
 
     def test_action_manager_calls_show_status_with_return_values_of_get_yaml_files(self):
         self.get_yaml_file_from_disk_path.return_value = ["file1", "file2", "file3"]

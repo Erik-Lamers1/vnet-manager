@@ -7,7 +7,7 @@ from yamllint import linter
 
 from vnet_manager.conf import settings
 from vnet_manager.log import setup_console_logging
-from vnet_manager.utils.files import get_yaml_file_from_disk_path
+from vnet_manager.utils.files import get_yaml_files_from_disk_path
 
 
 logger = getLogger("tools.yaml_syntax_validator")
@@ -44,7 +44,7 @@ def main():
     parser = ArgumentParser(description="Verify (example) config files for valid YAML syntax")
     parser.parse_args()
 
-    yaml_files = get_yaml_file_from_disk_path(settings.CONFIG_FILE_DIR)
+    yaml_files = get_yaml_files_from_disk_path(settings.CONFIG_FILE_DIR)
     errors = check_yaml_file_syntax(yaml_files)
 
     logger.debug("#" * 80)
