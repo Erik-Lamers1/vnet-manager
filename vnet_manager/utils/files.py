@@ -34,7 +34,7 @@ def write_file_to_disk(path, content):
         fh.write(content)
 
 
-def get_yaml_file_from_disk_path(path, excludes_files=None):
+def get_yaml_files_from_disk_path(path, excludes_files=None):
     """
     Returns a list of yaml files from a path (recursive search)
     :param path: str: The path to search in
@@ -45,8 +45,7 @@ def get_yaml_file_from_disk_path(path, excludes_files=None):
     def should_be_excluded(root_path, file):
         if excludes_files:
             return file in excludes_files or join(root_path, file) in excludes_files or root_path in excludes_files
-        else:
-            return False
+        return False
 
     yaml_files = []
     logger.debug("Retrieving yaml files from path: {}".format(path))

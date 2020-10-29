@@ -8,7 +8,7 @@ from vnet_manager.config.config import get_config
 from vnet_manager.config.validate import ValidateConfig
 from vnet_manager.utils.version import show_version
 from vnet_manager.utils.user import request_confirmation, generate_bash_completion_script
-from vnet_manager.utils.files import write_file_to_disk, get_yaml_file_from_disk_path
+from vnet_manager.utils.files import write_file_to_disk, get_yaml_files_from_disk_path
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment, cleanup_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
 from vnet_manager.operations.files import put_files_on_machine, generate_vnet_hosts_file, place_vnet_hosts_file_on_machines
@@ -176,7 +176,7 @@ class ActionManager:
             self.execute("show")
         elif isdir(self.config_path):
             # We exclude the default.yaml config file because it is not a valid user config
-            yaml_files = get_yaml_file_from_disk_path(self.config_path, excludes_files=settings.CONFIG_DEFAULTS_LOCATION)
+            yaml_files = get_yaml_files_from_disk_path(self.config_path, excludes_files=settings.CONFIG_DEFAULTS_LOCATION)
             for path in yaml_files:
                 self.config_path = path
                 if not self.parse_config():
