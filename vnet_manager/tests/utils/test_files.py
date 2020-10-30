@@ -25,10 +25,6 @@ class TestGetYAMLFilesFromDiskPath(VNetTestCase):
         ret = get_yaml_files_from_disk_path("path", excludes_files=["spam.yaml"])
         self.assertEqual(ret, ["/foo/bar/eggs.yml"])
 
-    def test_get_yaml_files_from_disk_path_excludes_path(self):
-        ret = get_yaml_files_from_disk_path("path", excludes_files=["/foo/bar"])
-        self.assertEqual(ret, [])
-
     def test_get_yaml_files_from_disk_path_excludes_path_and_filename(self):
         ret = get_yaml_files_from_disk_path("path", excludes_files=["/foo/bar/spam.yaml"])
         self.assertEqual(ret, ["/foo/bar/eggs.yml"])
