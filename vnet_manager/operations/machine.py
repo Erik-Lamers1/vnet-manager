@@ -331,7 +331,7 @@ def configure_lxc_ip_forwarding(container_name, enable=True):
     :param bool enable: Whether to enable IP forwarding or disable it
     """
     value = 1 if enable else 0
-    logger.info("Enabling IP forwarding on LXC container {}".format(container_name))
+    logger.info("{} IP forwarding on LXC container {}".format("Enabling" if enable else "Disabling", container_name))
     write_file_to_lxc_container(container_name, "/etc/sysctl.d/20-net.ipv4.ip_forward.conf", "net.ipv4.ip_forward={}\n".format(value))
     write_file_to_lxc_container(
         container_name, "/etc/sysctl.d/20-net.ipv6.conf.all.forwarding.conf", "net.ipv6.conf.all.forwarding={}\n".format(value)
