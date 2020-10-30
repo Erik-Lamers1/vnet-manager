@@ -210,7 +210,7 @@ class TestGenerateVNetHostsFile(VNetTestCase):
         self.excepted_hosts_file = (
             settings.VNET_STATIC_HOSTS_FILE_PART
             + "192.168.0.2   router100\nfd00:12::2   router100\n192.168.0.1   router101\nfd00:12::1   router101\n10.0.0.1   "
-            "router101\nfd00:23::1   router101\n10.0.0.2   router102\nfd00:23::2   router102"
+            "router101\nfd00:23::1   router101\n10.0.0.2   host102\nfd00:23::2   host102"
         )
 
     @patch("builtins.open", new_callable=mock_open)

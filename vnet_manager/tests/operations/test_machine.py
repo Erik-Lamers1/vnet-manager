@@ -32,7 +32,7 @@ class TestShowStatus(VNetTestCase):
         self.config = deepcopy(settings.CONFIG)
         # Only 1 machine for less output
         self.config["machines"].pop("router101", None)
-        self.config["machines"].pop("router102", None)
+        self.config["machines"].pop("host102", None)
 
     def test_show_status_call_get_lxc_machine_status(self):
         show_status(self.config)
@@ -258,13 +258,13 @@ class TestCreateLXCMachinesFromBaseImage(VNetTestCase):
         self.place_lxc_interface_configuration_on_container.assert_called_once_with(self.config, "router100")
 
     def test_create_lxc_machine_from_base_image_calls_create_functions_on_the_basis_of_the_number_of_containers(self):
-        create_lxc_machines_from_base_image(self.config, ["router100", "router101", "router102"])
+        create_lxc_machines_from_base_image(self.config, ["router100", "router101", "host102"])
         self.assertEqual(self.client.containers.create.call_count, 3)
         self.assertEqual(self.place_lxc_interface_configuration_on_container.call_count, 3)
 
     def test_create_lxc_machines_from_base_image_calls_request_confirmation_if_containers_already_created(self):
         self.check_if_lxc_machine_exists.return_value = True
-        create_lxc_machines_from_base_image(self.config, ["router100", "router102"])
+        create_lxc_machines_from_base_image(self.config, ["router100", "host102"])
         self.request_confirm.assert_called_once_with(
             message="Some containers already existed, the next operation will overwrite network, "
             "host and user config files on those containers"
@@ -279,7 +279,7 @@ class TestDestroyMachines(VNetTestCase):
     def test_destroy_machines_calls_request_confirmation(self):
         destroy_machines(settings.CONFIG)
         self.request_confirm.assert_called_once_with(
-            message="Requesting confirmation of deletion for the following machines: router100, router101, router102",
+            message="Requesting confirmation of deletion for the following machines: router100, router101, host102",
             prompt="This operation cannot be undone. Are you sure?! (yes/no) ",
         )
 
@@ -411,7 +411,9 @@ class TestEnableTypeSpecificMachineConfiguration(VNetTestCase):
 
     def test_enable_type_specific_machine_configuration_calls_configure_lxc_forwarding_for_each_machine(self):
         enable_type_specific_machine_configuration(settings.CONFIG)
-        self.configure_lxc_ip_forwarding.assert_has_calls([call("router100"), call("router101"), call("router102")])
+        self.configure_lxc_ip_forwarding.assert_has_calls(
+            [call("router100", enable=True), call("router101", enable=True), call("host102", enable=False)]
+        )
         self.assertEqual(self.configure_lxc_ip_forwarding.call_count, 3)
 
 

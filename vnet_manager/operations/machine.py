@@ -306,14 +306,36 @@ def enable_type_specific_machine_configuration(config):
             getattr(modules[__name__], func)(machine_name)
 
 
-def configure_lxc_ip_forwarding(container_name):
+def enable_lxc_ip_forwarding(container_name):
+    """
+    Enables LXC IP forwarding for a machine
+    (Wrapper function for configure_lxc_ip_forwarding)
+    :param container_name: str The name of the container
+    """
+    configure_lxc_ip_forwarding(container_name, enable=True)
+
+
+def disable_lxc_ip_forwarding(container_name):
+    """
+    Disables LXC IP forwarding for a machine
+    (Wrapper function for configure_lxc_ip_forwarding)
+    :param container_name: str The name of the container
+    """
+    configure_lxc_ip_forwarding(container_name, enable=False)
+
+
+def configure_lxc_ip_forwarding(container_name, enable=True):
     """
     Configure a LXC machine to enable IP forwarding
     :param str container_name: The name of the container to enable IP forwarding on
+    :param bool enable: Whether to enable IP forwarding or disable it
     """
+    value = 1 if enable else 0
     logger.info("Enabling IP forwarding on LXC container {}".format(container_name))
-    write_file_to_lxc_container(container_name, "/etc/sysctl.d/20-net.ipv4.ip_forward.conf", "net.ipv4.ip_forward=1\n")
-    write_file_to_lxc_container(container_name, "/etc/sysctl.d/20-net.ipv6.conf.all.forwarding.conf", "net.ipv6.conf.all.forwarding=1\n")
+    write_file_to_lxc_container(container_name, "/etc/sysctl.d/20-net.ipv4.ip_forward.conf", "net.ipv4.ip_forward={}\n".format(value))
+    write_file_to_lxc_container(
+        container_name, "/etc/sysctl.d/20-net.ipv6.conf.all.forwarding.conf", "net.ipv6.conf.all.forwarding={}\n".format(value)
+    )
 
 
 def place_lxc_interface_configuration_on_container(config, container):

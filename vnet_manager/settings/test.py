@@ -30,10 +30,10 @@ CONFIG = {
             },
             "files": {"router101": "/etc/frr/"},
         },
-        "router102": {
-            "type": "router",
+        "host102": {
+            "type": "host",
             "interfaces": {"eth23": {"ipv4": "10.0.0.2/8", "ipv6": "fd00:23::2/64", "mac": "00:00:00:00:03:23", "bridge": 1}},
-            "files": {"router102": "/etc/frr/"},
+            "files": {"host102": "/etc/frr/"},
         },
     },
     "veths": {"vnet-veth1": {"bridge": "vnet-br1", "stp": True}, "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": False},},
@@ -64,8 +64,8 @@ VALIDATED_CONFIG = {
             },
             "files": {"/root/vnet-manager/config/ripng/router101": "/etc/frr/"},
         },
-        "router102": {
-            "type": "router",
+        "host102": {
+            "type": "host",
             "interfaces": {"eth23": {"ipv4": "10.0.0.2/8", "ipv6": "fd00:23::2/64", "mac": "00:00:00:00:03:23", "bridge": 1}},
         },
     },
