@@ -298,7 +298,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
     def test_validate_machine_config_succeeds_when_machine_files_not_present(self):
         del self.validator.config["machines"]["router100"]["files"]
         del self.validator.config["machines"]["router101"]["files"]
-        del self.validator.config["machines"]["router102"]["files"]
+        del self.validator.config["machines"]["host102"]["files"]
         self.validator.validate_machine_config()
         self.assertTrue(self.validator.config_validation_successful)
         self.assertFalse(self.validate_files.called)
@@ -319,7 +319,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
     def test_validate_machine_config_fails_if_interfaces_is_not_a_dict(self):
         self.validator.config["machines"]["router100"]["interfaces"] = 42
         self.validator.config["machines"]["router101"]["interfaces"] = 42
-        self.validator.config["machines"]["router102"]["interfaces"] = 42
+        self.validator.config["machines"]["host102"]["interfaces"] = 42
         self.validator.validate_machine_config()
         self.assertFalse(self.validator.config_validation_successful)
         calls = [

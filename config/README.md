@@ -14,7 +14,7 @@ switches: int  # Switches defines the number of vnet-bridges that should be crea
 
 machines: dict  # The machine dict defines that vnet machines that are part of this virtual network.
   host1: dict  # This dict defines a vnet machine.
-    type: str  # This define what type the machine will be, current options are host or router.
+    type: str  # This define what type the machine will be, see `Machine types`
     interfaces: dict  # This dict defines what virtual interfaces should be assigned to a machine.
       eth1: dict  # This dict defines a vnet interface, which is part of a vnet machine.
         ipv4: ipv4_address/cidr  # This IPv4 address will be assigned to the interface.
@@ -49,6 +49,11 @@ veths: dict  # Veths can be used to link two vnet bridges together (optional).
     stp: bool  # Weather to enable STP on the corresponding bridge interface (optional).
   vnet-vethN: ...
 ```
+
+### Machine types
+The machine type determines the specific configuration that will be placed on the machine. The following machine types are supported:
+- Host, simple endpoint, explicitly disables IP forwarding (set in /etc/sysctl.d/)
+- Router, IP forwarding enabled (set in /etc/sysctl.d/)
 
 ## Defaults config
 The defaults config defines some parameters that are used by VNet-manager for configuration. Most notably, the provider settings.

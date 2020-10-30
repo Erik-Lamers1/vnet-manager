@@ -80,8 +80,8 @@ MACHINE_TYPE_PROVIDER_MAPPING = {
 }
 MACHINE_TYPE_CONFIG_FUNCTION_MAPPING = {
     # For each machine type specify the type specific functions that should be called for it
-    "host": [],
-    "router": ["configure_{}_ip_forwarding".format(MACHINE_TYPE_PROVIDER_MAPPING["router"])],
+    "host": ["disable_{}_ip_forwarding".format(MACHINE_TYPE_PROVIDER_MAPPING["router"])],
+    "router": ["enable_{}_ip_forwarding".format(MACHINE_TYPE_PROVIDER_MAPPING["router"])],
 }
 VALID_STATUSES = ["start", "stop"]
 VNET_FORCE_ENV_VAR = "VNET_FORCE"
