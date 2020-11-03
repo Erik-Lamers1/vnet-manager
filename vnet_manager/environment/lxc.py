@@ -97,6 +97,9 @@ def configure_lxc_base_machine(config):
         # No DNS connectivity (yet), try again
         sleep(2)
     if not dns:
+        # Shutdown base if DNS check fails
+        logger.debug("Stopping base machine")
+        machine.stop(wait=True)
         raise RuntimeError("Base machine started without working DNS, unable to continue")
 
     # Set the FRR routing source and key
