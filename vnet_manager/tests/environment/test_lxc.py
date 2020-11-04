@@ -122,6 +122,12 @@ class TestConfigureLXCBaseMachine(VNetTestCase):
             configure_lxc_base_machine(self.config)
         self.assertTrue(self.sleep.called)
 
+    def test_configure_lxc_base_machine_stops_base_if_no_dns_connectivity(self):
+        self.machine.execute.return_value = [1]
+        with self.assertRaises(RuntimeError):
+            configure_lxc_base_machine(self.config)
+        self.machine.stop.assert_called_once_with()
+
     def test_configure_lxc_base_machine_calls_correct_configure_cmds(self):
         calls = [
             call(shlex.split("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'")),
