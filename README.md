@@ -56,8 +56,8 @@ VNET_FORCE               - Internal env var, used with --yes. Do not set manuall
 ### Rebuilding the Base Container
 Sometimes you will have to rebuild the base container, for instance if you want to install additional packages. To do this you will first have to destroy the base container and then when creating the new setup the base container will be automagically recreated. This might take a bit longer for that reason.
 ```
-$ vnet-manager destroy -b
-$ vnet-manager create
+$ vnet-manager destroy -b /path/to/your/config.yaml
+$ vnet-manager create /path/to/your/config.yaml
 ```
 ### Installing Additional Packages
 In the defaults.yaml configuration file there is a list with 'guest-packages' simply add any packages to this list that you want to have installed in the base container. Do note that in order for the changes to take effect you have to recreate the base container.
