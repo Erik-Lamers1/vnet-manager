@@ -53,6 +53,45 @@ VNET_SNIFFER_PCAP_DIR    - Sets the directory where the sniffer PCAP files will 
 VNET_LXC_BASE_IMAGE      - Sets the alias for the LXC base image, only set when using a custom base image
 VNET_FORCE               - Internal env var, used with --yes. Do not set manually
 ```
+### Rebuilding the Base Container
+Sometimes you will have to rebuild the base container, for instance if you want to install additional packages. To do this you will first have to destroy the base container and then when creating the new setup the base container will be automagically recreated. This might take a bit longer for that reason.
+```
+$ vnet-manager destroy -b /path/to/your/config.yaml
+$ vnet-manager create /path/to/your/config.yaml
+```
+### Installing Additional Packages
+In the defaults.yaml configuration file there is a list with 'guest-packages' simply add any packages to this list that you want to have installed in the base container. Do note that in order for the changes to take effect you have to recreate the base container.
+```
+providers:
+  lxc:
+    supported_operating_systems:
+      - "bionic"
+      - "focal"
+    dns-nameserver: 8.8.8.8
+    required_host_packages:
+      - lxd
+      - lxc
+      - bridge-utils
+      - tcpdump
+      - net-tools
+      - curl
+    guest_packages: #<-- add packages to this list. e.g. nmap 
+      - man
+      - net-tools
+      - traceroute
+      - nano
+      - vim
+      - bridge-utils
+      - radvd
+      - frr
+      - frr-pythontools
+      - vlan
+      - nmap # new package added
+    base_image:
+      os: "18.04"
+      server: "https://cloud-images.ubuntu.com/daily"
+      protocol: simplestreams
+```
 
 ## Development
 Opening pull requests for new features and bug fixes is highly appreciated!  
