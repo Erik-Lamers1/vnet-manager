@@ -1,9 +1,9 @@
 -r base.txt
 
 # These requirements are only needed when running the tests (Pytest atm)
-pytest==5.4.2
-pylint==2.5.2
+pytest==6.1.2
+pylint==2.6.0
 black==19.10b0
-codecov==2.1.7
-pytest-cov==2.10.0
+codecov==2.1.10
+pytest-cov==2.10.1
 yamllint==1.25.0
