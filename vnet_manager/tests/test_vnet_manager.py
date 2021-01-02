@@ -49,6 +49,11 @@ class TestVNetManagerMain(VNetTestCase):
         self.manager = Mock()
         self.action_manager = self.set_up_patch("vnet_manager.vnet_manager.ActionManager")
         self.action_manager.return_value = self.manager
+        self.environ = dict(environ)
+
+    def tearDown(self) -> None:
+        environ.clear()
+        environ.update(self.environ)
 
     def test_main_sets_vnet_force_env_variable_to_false_by_default(self):
         main(default_args)

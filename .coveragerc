@@ -1,0 +1,2 @@
+[run]
+omit = vnet_manager/tests/*

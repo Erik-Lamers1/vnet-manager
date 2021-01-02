@@ -7,3 +7,4 @@ build/
 dist/
 vnet_manager.egg-info/
 .tox
+vnet_manager/settings/dev.py

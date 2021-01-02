@@ -14,7 +14,7 @@ def check_if_lxc_storage_pool_exists(name=settings.LXC_STORAGE_POOL_NAME):
     :return: bool: True if the pool exists, False otherwise
     """
     logger.debug("Checking for the existence of LXC {} storage pool".format(name))
-    return get_lxd_client().storage_pools.exists(settings.LXC_STORAGE_POOL_NAME)
+    return get_lxd_client().storage_pools.exists(name)
 
 
 def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings.LXC_STORAGE_POOL_DRIVER):
