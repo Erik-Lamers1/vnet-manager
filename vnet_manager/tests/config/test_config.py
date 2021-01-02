@@ -14,10 +14,9 @@ class TestGetConfig(VNetTestCase):
         self.config_dir.return_value = "config_dir"
         self.maxDiff = None
 
-    def test_get_config_calls_get_yaml_contents_with_correct_paths(self):
-        calls = [call("blaap"), call(settings.CONFIG_DEFAULTS_LOCATION)]
+    def test_get_config_calls_get_yaml_contents_with_correct_path(self):
         get_config("blaap")
-        self.get_yaml_content.assert_has_calls(calls)
+        self.get_yaml_content.assert_called_once_with("blaap")
 
     def test_get_config_user_config_takes_precedence_over_defaults_config(self):
         config = get_config("blaap")

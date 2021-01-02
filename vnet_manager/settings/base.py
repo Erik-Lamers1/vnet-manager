@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from os.path import join, expanduser
+from os.path import join
 from os import getenv
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
