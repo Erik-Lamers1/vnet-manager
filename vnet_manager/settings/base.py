@@ -67,7 +67,7 @@ PROVIDERS = {
     }
 }
 # The 'list' action also requires a config, but because it is handled differently we don't add it to CONFIG_REQUIRED_ACTIONS
-CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "create", "destroy"]
+CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "status", "create", "destroy"]
 VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["list", "clean", "version", "bash-completion"]
 HELP_TEXT_ACTION_MAPPING = {
     "list": """Lists the status of the config files in a particular directory.
@@ -83,6 +83,8 @@ This action will also bring up/start required VNet interfaces and enable sniffer
     """,
     "stop": """Stops a previously started config.
 This action will also bring down the corresponding VNet interfaces.
+    """,
+    "status": """Shows the current status of the supplied config file.
     """,
     "destroy": """Destroys a previously built config.
 This action will delete the corresponding machines and VNet interfaces.

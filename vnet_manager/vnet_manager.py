@@ -38,6 +38,9 @@ def parse_args(args=None):
     args = parser.parse_args(args=args)
 
     # User input sanity checks
+    if args.action == "status":
+        # For people who are used to status calls
+        args.action = "show"
     if args.config == "default" and args.action in settings.CONFIG_REQUIRED_ACTIONS:
         parser.error("This action requires a config file to be passed")
     if args.sniffer and not args.action == "start":

@@ -41,6 +41,10 @@ class TestParseArgs(VNetTestCase):
             parse_args(["list", "config", "--no-hosts"])
         self.assertTrue(stderr.getvalue().strip().endswith("The no_hosts option only makes sense with the 'create' action"))
 
+    def test_parse_args_sets_show_action_on_status_action(self):
+        args = parse_args(["status", "config"])
+        self.assertEqual(args.action, "show")
+
 
 class TestVNetManagerMain(VNetTestCase):
     def setUp(self) -> None:
