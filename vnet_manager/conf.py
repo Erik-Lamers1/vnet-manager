@@ -17,8 +17,8 @@ class Settings(collections.abc.Mapping):
         """Enable dict-like access to the settings"""
         try:
             return getattr(self, item)
-        except AttributeError:
-            raise KeyError(item)
+        except AttributeError as e:
+            raise KeyError(item) from e
 
     def __iter__(self):
         # return all upper case variables, but not internals
@@ -46,7 +46,7 @@ def import_from_string(val, setting_name):
         return getattr(module, class_name)
     except (ImportError, AttributeError) as e:
         msg = "Could not import '{}' for setting '{}'. {}: {}.".format(val, setting_name, e.__class__.__name__, e)
-        raise ImportError(msg)
+        raise ImportError(msg) from e
 
 
 def perform_import(val, setting_name):
