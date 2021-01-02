@@ -336,28 +336,28 @@ class TestCreateLXCBaseImageContainer(VNetTestCase):
         self.lxd_client.return_value = self.client
 
     def test_create_lxc_base_image_container_calls_check_if_machine_exists(self):
-        create_lxc_base_image_container(settings.CONFIG)
+        create_lxc_base_image_container()
         self.check_if_machine_exists.assert_called_once_with(settings.LXC_BASE_IMAGE_MACHINE_NAME)
 
     def test_create_lxc_base_image_container_does_not_call_destroy_lxc_machine_when_machine_does_not_exist(self):
-        create_lxc_base_image_container(settings.CONFIG)
+        create_lxc_base_image_container()
         self.assertFalse(self.request_confirm.called)
         self.assertFalse(self.destroy_lxc_machine.called)
 
     def test_create_lxc_base_image_container_calls_confirm_when_machine_already_exists(self):
         self.check_if_machine_exists.return_value = True
-        create_lxc_base_image_container(settings.CONFIG)
+        create_lxc_base_image_container()
         self.request_confirm.assert_called_once_with(
             message="Recreating it will destroy any local changes", prompt="Recreate the LXC base image machine? "
         )
 
     def test_create_lxc_base_image_container_calls_destroy_lxc_machine_when_machine_already_exists(self):
         self.check_if_machine_exists.return_value = True
-        create_lxc_base_image_container(settings.CONFIG)
+        create_lxc_base_image_container()
         self.destroy_lxc_machine.assert_called_once_with(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=True)
 
     def test_create_lxc_base_image_calls_get_lxd_client(self):
-        create_lxc_base_image_container(settings.CONFIG)
+        create_lxc_base_image_container()
         self.lxd_client.assert_called_once_with()
 
     def test_create_lxc_base_image_calls_client_create_function(self):
@@ -378,12 +378,12 @@ class TestCreateLXCBaseImageContainer(VNetTestCase):
             },
             "source": {
                 "type": "image",
-                "protocol": str(settings.CONFIG["providers"]["lxc"]["base_image"]["protocol"]),
-                "server": settings.CONFIG["providers"]["lxc"]["base_image"]["server"],
-                "alias": str(settings.CONFIG["providers"]["lxc"]["base_image"]["os"]),
+                "protocol": str(settings["PROVIDERS"]["lxc"]["base_image"]["protocol"]),
+                "server": settings["PROVIDERS"]["lxc"]["base_image"]["server"],
+                "alias": str(settings["PROVIDERS"]["lxc"]["base_image"]["os"]),
             },
         }
-        create_lxc_base_image_container(settings.CONFIG)
+        create_lxc_base_image_container()
         self.client.containers.create.assert_called_once_with(excepted_config, wait=True)
 
 
