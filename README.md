@@ -37,18 +37,13 @@ vnet-manager start config/example.yaml
 lxc exec host1 -- ping -c 2 router1
 ```
 ## How to use it
-First, you need to create a config file for VNet-manager to work with.
-In your config file, you define the topology of your network. See the [config](config) directory for examples. See the [README](config/README.md) in the config directory for a detailed explanation.
-
-There are two important config files. First, off the config file, you use to create your topology (the user config file).
-The second config file is the defaults config, which stores general information you might want to edit if you are an advanced user.
-The user config file should always be passed to VNet-manager as an argument. This allows for multiple topologies to exist at once.
-The defaults config file can be set using the `VNET_DEFAULT_CONFIG_PATH` environment variable. If this variable does not exist, VNet-manager will assume `~/vnet-manager/config/defaults.yaml`, which is usually fine.
+In order to run VNet-manager you need to create a config file for the program to works with. In this config file you can create your network topology.
+When this config file is created it should always be passed to VNet-manager as an argument. This ensures that the program itself does not have to store any state.
+See the [README](config/README.md) for a more detailed explanation on how to create a config file. There are also some [example config files](config)
 
 ### Advanced usage
 There are a couple of things that can be tweaked when using VNet-manager. This can be done using specific environment variables.
 ```yaml
-VNET_DEFAULT_CONFIG_PATH - Sets the absolute location of the defaults.yaml config
 VNET_SNIFFER_PCAP_DIR    - Sets the directory where the sniffer PCAP files will be created
 VNET_LXC_BASE_IMAGE      - Sets the alias for the LXC base image, only set when using a custom base image
 VNET_FORCE               - Internal env var, used with --yes. Do not set manually
@@ -60,38 +55,8 @@ $ vnet-manager destroy -b /path/to/your/config.yaml
 $ vnet-manager create /path/to/your/config.yaml
 ```
 ### Installing Additional Packages
-In the defaults.yaml configuration file there is a list with 'guest-packages' simply add any packages to this list that you want to have installed in the base container. Do note that in order for the changes to take effect you have to recreate the base container.
-```
-providers:
-  lxc:
-    supported_operating_systems:
-      - "bionic"
-      - "focal"
-    dns-nameserver: 8.8.8.8
-    required_host_packages:
-      - lxd
-      - lxc
-      - bridge-utils
-      - tcpdump
-      - net-tools
-      - curl
-    guest_packages: #<-- add packages to this list. e.g. nmap 
-      - man
-      - net-tools
-      - traceroute
-      - nano
-      - vim
-      - bridge-utils
-      - radvd
-      - frr
-      - frr-pythontools
-      - vlan
-      - nmap # new package added
-    base_image:
-      os: "18.04"
-      server: "https://cloud-images.ubuntu.com/daily"
-      protocol: simplestreams
-```
+The provider specific packages list can be found in the settings under [`PROVIDERS`](vnet_manager/settings/base.py). 
+Here you can specify which packages the host should have and which to install on the base container.
 
 ## Development
 Opening pull requests for new features and bug fixes is highly appreciated!  

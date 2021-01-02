@@ -1,7 +1,6 @@
 # VNet-manager config
-VNet-manager works with YAML configs in order to define virtual networks. There are two types of config.
-- The user config, which is passed to the vnet-manager command as an argument.
-- The defaults config, which recedes in the config directory or can be set with the `VNET_DEFAULT_CONFIG_PATH` env variable.
+VNet-manager works with YAML configs in order to define virtual networks.
+- The user config, is passed to the vnet-manager command as an argument.
 
 ## User config
 The user config defines a virtual network. The hosts, routers and interfaces should be defined in this config.
@@ -55,21 +54,3 @@ The machine type determines the specific configuration that will be placed on th
 - Host, simple endpoint, explicitly disables IP forwarding (set in /etc/sysctl.d/)
 - Router, IP forwarding enabled (set in /etc/sysctl.d/)
 
-## Defaults config
-The defaults config defines some parameters that are used by VNet-manager for configuration. Most notably, the provider settings.
-Below the defaults, config options are defined.
-
-```yaml
-providers: dict  # Defines which providers are available for this VNet-manager instance.
-                 # Note, it is not possible (yet) to simply define a new provider here,
-                 # whiteout witting procedural support for it first.
-  lxc: dict  # This defines an individual provider.
-    supported_operating_systems: list  # Of host operating systems that this provider supports.
-    dns-nameserver: str  # The name server that should be used for machines that use this provider (optional).
-    required_host_packages: list  # The packages that should be installed on the host machine before this provider can be used.
-    guest_packages: list  # Of packages that should be installed on the guests/machines.
-    base_image: dict  # This defines the base image parameters for this provider.
-      os: str  # Which operating system should be used for this base image.
-      server: str  # The URL where the base image can be downloaded from.
-      protocol: str  # The protocol that should be used to download the base image.
-```
