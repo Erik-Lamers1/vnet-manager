@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = "0.5.1"
+VERSION = "0.6.0"
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -11,6 +11,7 @@ setup(
     name="vnet-manager",
     version=VERSION,
     url="https://github.com/Erik-Lamers1/vnet-manager",
+    download_url="https://github.com/Erik-Lamers1/vnet-manager/archive/{}.tar.gz".format(VERSION),
     packages=find_packages(exclude=["tools", "tools.*", "tests", "tests.*", "*.tests", "*.tests.*"]),
     author="Erik Lamers",
     license="MIT",
