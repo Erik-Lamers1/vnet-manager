@@ -35,7 +35,7 @@ def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings
         logger.info("Storage pool {} with driver {} successfully created".format(name, driver))
     except LXDAPIException as e:
         logger.critical("Got API error while creating storage pool {}. Error: {}".format(name, e))
-        raise RuntimeError("Received API error while creating storage pool {}".format(name))
+        raise RuntimeError("Received API error while creating storage pool {}".format(name)) from e
 
 
 def delete_lxc_storage_pool(name):
@@ -56,4 +56,4 @@ def delete_lxc_storage_pool(name):
         client.storage_pools.get(name).delete()
     except LXDAPIException as e:
         logger.critical("Got API error while deleting storage pool {}. Error: {}".format(name, e))
-        raise RuntimeError("Received API error while deleting storage pool {}".format(name))
+        raise RuntimeError("Received API error while deleting storage pool {}".format(name)) from e

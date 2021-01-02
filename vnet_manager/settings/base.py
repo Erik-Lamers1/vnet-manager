@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from os.path import join, expanduser
+from os.path import join
 from os import getenv
 
 PYTHON_PACKAGE_NAME = "vnet-manager"
@@ -39,6 +39,33 @@ LOGGING = {
 }
 
 # VNet Manager static settings / config
+# provider config
+# The provider config defines some parameters that are used by VNet-manager for configuration. Most notably, the provider settings.
+# Below the provider, config options are defined.
+PROVIDERS = {
+    "lxc": {
+        "supported_operating_systems": ["bionic", "focal"],  # Will not run on any other OSes
+        "dns-nameserver": "8.8.8.8",
+        "required_host_packages": ["lxd", "lxc", "bridge-utils", "tcpdump", "net-tools", "curl"],  # List of packages required on the host
+        "guest_packages": [
+            "man",  # List of packages to install on the guest
+            "net-tools",
+            "traceroute",
+            "nano",
+            "vim",
+            "bridge-utils",
+            "radvd",
+            "frr",
+            "frr-pythontools",
+            "vlan",
+        ],
+        "base_image": {  # Download info for the base image
+            "os": "18.04",
+            "server": "https://cloud-images.ubuntu.com/daily",
+            "protocol": "simplestreams",
+        },
+    }
+}
 # The 'list' action also requires a config, but because it is handled differently we don't add it to CONFIG_REQUIRED_ACTIONS
 CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "create", "destroy"]
 VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["list", "clean", "version", "bash-completion"]
@@ -70,7 +97,6 @@ This action will create a base image for all providers present in the configurat
     """,
     "bash-completion": """Places the VNet-manager bash completion script""",
 }
-CONFIG_DEFAULTS_LOCATION = getenv("VNET_DEFAULT_CONFIG_PATH", join(expanduser("~"), PYTHON_PACKAGE_NAME, "config/defaults.yaml"))
 VNET_BRIDGE_NAME = "vnet-br"
 VNET_SNIFFER_PCAP_DIR = getenv("VNET_SNIFFER_PCAP_DIR", "/tmp")
 SUPPORTED_MACHINE_TYPES = ["host", "router"]

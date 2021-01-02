@@ -5,15 +5,6 @@ del LOGGING["handlers"]["syslog"]["address"]
 
 # Fixture config
 CONFIG = {
-    "providers": {
-        "lxc": {
-            "supported_operating_systems": ["bionic", "focal"],
-            "dns-nameserver": "1.1.1.1",
-            "required_host_packages": ["lxd", "lxc", "bridge-utils", "tcpdump", "net-tools", "curl"],
-            "guest_packages": ["man", "net-tools", "traceroute", "nano", "vim", "bridge-utils", "radvd", "frr", "frr-pythontools"],
-            "base_image": {"os": "18.04", "server": "https://cloud-images.ubuntu.com/daily", "protocol": "simplestreams"},
-        }
-    },
     "switches": 2,
     "machines": {
         "router100": {
@@ -40,15 +31,6 @@ CONFIG = {
 }
 
 VALIDATED_CONFIG = {
-    "providers": {
-        "lxc": {
-            "supported_operating_systems": ["bionic", "focal"],
-            "dns-nameserver": "8.8.8.8",
-            "required_host_packages": ["lxd", "lxc", "bridge-utils", "tcpdump", "net-tools", "curl"],
-            "guest_packages": ["man", "net-tools", "traceroute", "nano", "vim", "bridge-utils", "radvd", "frr", "frr-pythontools"],
-            "base_image": {"os": "18.04", "server": "https://cloud-images.ubuntu.com/daily", "protocol": "simplestreams"},
-        }
-    },
     "switches": 2,
     "machines": {
         "router100": {

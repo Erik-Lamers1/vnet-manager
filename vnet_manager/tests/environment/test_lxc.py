@@ -79,9 +79,9 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
     def test_ensure_vnet_lxc_environment_calls_base_image_creation_funtions_when_it_does_not_exist(self):
         self.check_if_lxc_image_exists.return_value = False
         ensure_vnet_lxc_environment(self.config)
-        self.create_lxc_base_image_container.assert_called_once_with(self.config)
+        self.create_lxc_base_image_container.assert_called_once_with()
         self.change_lxc_machine_status.assert_called_once_with(settings.LXC_BASE_IMAGE_MACHINE_NAME, status="start")
-        self.configure_lxc_base_machine.assert_called_once_with(self.config)
+        self.configure_lxc_base_machine.assert_called_once_with()
         self.create_lxc_image_from_container.assert_called_once_with(
             settings.LXC_BASE_IMAGE_MACHINE_NAME, alias=settings.LXC_BASE_IMAGE_ALIAS
         )
@@ -110,22 +110,21 @@ class TestConfigureLXCBaseMachine(VNetTestCase):
         self.client.containers.get.return_value = self.machine
         self.machine.execute.return_value = [0]
         self.sleep = self.set_up_patch("vnet_manager.environment.lxc.sleep")
-        self.config = settings.CONFIG
 
     def test_configure_lxc_base_machine_check_for_dns(self):
-        configure_lxc_base_machine(self.config)
+        configure_lxc_base_machine()
         self.machine.execute.assert_has_calls([call(shlex.split("host -t A google.com"))])
 
     def test_configure_lxc_base_machine_does_not_continue_if_no_dns_connectivity(self):
         self.machine.execute.return_value = [1]
         with self.assertRaises(RuntimeError):
-            configure_lxc_base_machine(self.config)
+            configure_lxc_base_machine()
         self.assertTrue(self.sleep.called)
 
     def test_configure_lxc_base_machine_stops_base_if_no_dns_connectivity(self):
         self.machine.execute.return_value = [1]
         with self.assertRaises(RuntimeError):
-            configure_lxc_base_machine(self.config)
+            configure_lxc_base_machine()
         self.machine.stop.assert_called_once_with()
 
     def test_configure_lxc_base_machine_calls_correct_configure_cmds(self):
@@ -145,7 +144,7 @@ class TestConfigureLXCBaseMachine(VNetTestCase):
             call(
                 shlex.split(
                     "apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
-                        " ".join(self.config["providers"]["lxc"]["guest_packages"])
+                        " ".join(settings["PROVIDERS"]["lxc"]["guest_packages"])
                     )
                 ),
                 environment={"DEBIAN_FRONTEND": "noninteractive"},
@@ -160,9 +159,9 @@ class TestConfigureLXCBaseMachine(VNetTestCase):
                 )
             ),
         ]
-        configure_lxc_base_machine(self.config)
+        configure_lxc_base_machine()
         self.machine.execute.assert_has_calls(calls)
 
     def test_configure_lxc_base_machine_call_machine_stop_(self):
-        configure_lxc_base_machine(self.config)
+        configure_lxc_base_machine()
         self.machine.stop.assert_called_once_with(wait=True)

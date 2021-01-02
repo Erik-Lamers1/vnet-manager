@@ -103,7 +103,7 @@ class TestActionManager(VNetTestCase):
         self.isfile.return_value = False
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
-        self.get_yaml_file_from_disk_path.assert_called_once_with("blaap", excludes_files=settings.CONFIG_DEFAULTS_LOCATION)
+        self.get_yaml_file_from_disk_path.assert_called_once_with("blaap")
 
     def test_action_manager_calls_show_status_with_return_values_of_get_yaml_files(self):
         self.get_yaml_file_from_disk_path.return_value = ["file1", "file2", "file3"]

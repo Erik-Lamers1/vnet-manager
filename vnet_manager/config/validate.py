@@ -56,77 +56,10 @@ class ValidateConfig:
         Run all validation functions
         """
         self._all_ok = True
-        self.validate_provider_config()
         self.validate_switch_config()
         self.validate_machine_config()
         if "veths" in self.config:
             self.validate_veth_config()
-
-    def validate_provider_config(self):
-        """
-        Validates the provider part of the config
-        """
-        self._validators_ran += 1
-        if "providers" not in self.config:
-            logger.error(
-                "Providers dict not found in config, this usually means the default config is not correct{}".format(self.default_message)
-            )
-            self._all_ok = False
-        elif not isinstance(self.config["providers"], dict):
-            logger.error("Providers is not a dict, this means the default config is corrupt{}".format(self.default_message))
-            self._all_ok = False
-        else:
-            for name, values in self.config["providers"].items():
-                if "supported_operating_systems" not in values:
-                    logger.error("No supported operating systems found for provider {}{}".format(name, self.default_message))
-                    self._all_ok = False
-                elif not isinstance(values["supported_operating_systems"], list):
-                    logger.error("supported_operating_systems for provider {} is not a list{}".format(name, self.default_message))
-                    self._all_ok = False
-                if "dns-nameserver" not in values or not isinstance(values["dns-nameserver"], str):
-                    logger.warning("DNS nameserver not correctly set for provider {}. Defaulting to 8.8.8.8".format(name))
-                    self._new_config["providers"][name]["dns-nameserver"] = "8.8.8.8"
-                if "required_host_packages" not in values or not isinstance(values["required_host_packages"], list):
-                    logger.warning("Required host packages not correctly set for provider {}. Defaulting to empty list".format(name))
-                    self._new_config["providers"][name]["required_host_packages"] = list()
-                if "guest_packages" not in values or not isinstance(values["guest_packages"], list):
-                    logger.warning("Guest packages not correctly set for provider {}. Defaulting to empty list".format(name))
-                    self._new_config["providers"][name]["guest_packages"] = list()
-                if "base_image" not in values:
-                    logger.error("No base_image found for provider {}{}".format(name, self.default_message))
-                    self._all_ok = False
-                elif not isinstance(values["base_image"], dict):
-                    logger.error("'base_image' for provider {} is not a dict{}".format(name, self.default_message))
-                    self._all_ok = False
-                # Validate the base image
-                else:
-                    self.validate_base_image_parameters(name)
-
-    def validate_base_image_parameters(self, provider):
-        """
-        Validates the provider base image parameters for a particiar provider
-        Assumes the base_image dict exists for that provider
-        :param str provider: The provider base image parameters to verify
-        """
-        base_image_config = self.config["providers"][provider]["base_image"]
-        if "os" not in base_image_config:
-            logger.error("Provider {} is missing OS in the base image config{}".format(provider, self.default_message))
-            self._all_ok = False
-        elif not isinstance(base_image_config["os"], str):
-            logger.error("Provider {} OS for base image config is not a string{}".format(provider, self.default_message))
-            self._all_ok = False
-        if "server" not in base_image_config:
-            logger.error("Provider {} is missing server in the base image config{}".format(provider, self.default_message))
-            self._all_ok = False
-        elif not isinstance(base_image_config["server"], str):
-            logger.error("Provider {} server for base image config is not a string{}".format(provider, self.default_message))
-            self._all_ok = False
-        if "protocol" not in base_image_config:
-            logger.error("Provider {} is missing protocol in the base image config{}".format(provider, self.default_message))
-            self._all_ok = False
-        elif not isinstance(base_image_config["protocol"], str):
-            logger.error("Provider {} protocol for base image config is not a string{}".format(provider, self.default_message))
-            self._all_ok = False
 
     def validate_switch_config(self):
         """
