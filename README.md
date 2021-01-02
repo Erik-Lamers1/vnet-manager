@@ -19,10 +19,7 @@ apt-get update
 apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
 # LXD defaults are fine
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n" | lxd init
-cd ~
-git clone https://github.com/Erik-Lamers1/vnet-manager.git
-cd vnet-manager
-python3 setup.py install
+pip3 install vnet-manager
 # The following is only needed on Xenial
 apt-get install btrfs-tools
 # Now you are able to use
@@ -30,7 +27,9 @@ vnet-manager --help
 ```
 
 #### Quick start
+Use one of the [example](config) configs to see if your environment is working correctly.
 ```bash
+git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
 cd ~/vnet-manager
 vnet-manager create config/example.yaml
 vnet-manager start config/example.yaml
