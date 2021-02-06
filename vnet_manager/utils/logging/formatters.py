@@ -10,7 +10,9 @@ except ImportError:
 
 if colorama:
     default_palette = {
-        "asctime": {"*": [colorama.Fore.BLACK, colorama.Style.BRIGHT],},
+        "asctime": {
+            "*": [colorama.Fore.BLACK, colorama.Style.BRIGHT],
+        },
         "level": {
             DEBUG: [colorama.Fore.WHITE, colorama.Style.DIM],
             WARNING: [colorama.Fore.YELLOW],

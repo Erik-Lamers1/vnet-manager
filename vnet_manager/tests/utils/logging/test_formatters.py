@@ -6,7 +6,14 @@ from vnet_manager.utils.logging.formatters import ConsoleFormatter
 
 class TestConsoleFormatter(VNetTestCase):
     def setUp(self) -> None:
-        self.record = makeLogRecord({"name": "salty.sub", "levelno": WARNING, "levelname": "WARNING", "msg": "mocked log",})
+        self.record = makeLogRecord(
+            {
+                "name": "salty.sub",
+                "levelno": WARNING,
+                "levelname": "WARNING",
+                "msg": "mocked log",
+            }
+        )
         self.formatter = ConsoleFormatter()
         self.fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 

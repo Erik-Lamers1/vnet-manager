@@ -21,18 +21,28 @@ LOGGING = {
         "syslog": {"format": "[%(process)d] %(name)s [%(levelname)s]: %(message)s"},
     },
     "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "console",},
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+        },
         "syslog": {
             "class": "logging.handlers.SysLogHandler",
             "formatter": "syslog",
             "address": "/dev/log",  # remove this to use UDP port 514
         },
     },
-    "root": {"handlers": ["console", "syslog"], "level": "DEBUG",},
+    "root": {
+        "handlers": ["console", "syslog"],
+        "level": "DEBUG",
+    },
     # Silence debug heavy loggers here
     "loggers": {
-        "urllib3": {"level": "INFO",},
-        "ws4py": {"level": "WARNING",},
+        "urllib3": {
+            "level": "INFO",
+        },
+        "ws4py": {
+            "level": "WARNING",
+        },
         "pyroute2": {"level": "INFO"},
         "pyroute2.ndb": {"level": "WARNING"},
     },

@@ -361,7 +361,13 @@ def generate_machine_netplan_config(config: dict, machine: str) -> dict:
         "dhcp6": "no",
     }
     machine_config = config.get("machines").get(machine)
-    network_conf = {"network": {"version": 2, "renderer": "networkd", "ethernets": {},}}
+    network_conf = {
+        "network": {
+            "version": 2,
+            "renderer": "networkd",
+            "ethernets": {},
+        }
+    }
     for int_name, int_data in machine_config["interfaces"].items():
         addresses = []
         if "ipv4" in int_data:
@@ -369,7 +375,9 @@ def generate_machine_netplan_config(config: dict, machine: str) -> dict:
         if "ipv6" in int_data:
             addresses.append(int_data["ipv6"])
         network_conf["network"]["ethernets"][int_name] = {
-            "match": {"macaddress": int_data["mac"],},
+            "match": {
+                "macaddress": int_data["mac"],
+            },
             "set-name": int_name,
             "addresses": addresses,
         }

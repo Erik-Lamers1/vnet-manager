@@ -27,7 +27,11 @@ def create_vnet_lxc_profile(name: str):
 
     devices = {
         # Disk config
-        "root": {"path": "/", "pool": settings.LXC_STORAGE_POOL_NAME, "type": "disk",}
+        "root": {
+            "path": "/",
+            "pool": settings.LXC_STORAGE_POOL_NAME,
+            "type": "disk",
+        }
     }
     logger.info("Creating LXC profile for storage pool {}".format(settings.LXC_STORAGE_POOL_NAME))
     client.profiles.create(name, config={}, devices=devices)
