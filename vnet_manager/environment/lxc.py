@@ -1,6 +1,7 @@
 import shlex
 from logging import getLogger
 from time import sleep
+from typing import Tuple, AnyStr
 
 from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_image_from_container
 from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_vnet_lxc_profile, delete_vnet_lxc_profile
@@ -14,7 +15,7 @@ from vnet_manager.utils.user import request_confirmation
 logger = getLogger(__name__)
 
 
-def ensure_vnet_lxc_environment(config):
+def ensure_vnet_lxc_environment(config: dict):
     """
     Checks and creates the LXC environment
     param: dict config: The config created by get_config()
@@ -81,7 +82,7 @@ def configure_lxc_base_machine():
     client = get_lxd_client()
     machine = client.containers.get(settings.LXC_BASE_IMAGE_MACHINE_NAME)
 
-    def execute_and_log(command, **kwargs):
+    def execute_and_log(command: str, **kwargs) -> Tuple[int, AnyStr, AnyStr]:
         result = machine.execute(shlex.split(command), **kwargs)
         logger.debug(result)
         return result

@@ -4,7 +4,7 @@ import logging.config
 from vnet_manager.conf import settings
 
 
-def setup_console_logging(verbosity=logging.INFO):
+def setup_console_logging(verbosity: int = logging.INFO):
     """
     :param int verbosity: Verbosity level logging.<verbosity>
     """

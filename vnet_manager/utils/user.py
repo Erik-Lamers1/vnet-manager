@@ -1,13 +1,14 @@
 import sys
 from os import geteuid, getenv
 from logging import getLogger
+from typing import Any, AnyStr, Callable, Iterable
 
 from vnet_manager.conf import settings
 
 logger = getLogger(__name__)
 
 
-def check_for_root_user():
+def check_for_root_user() -> bool:
     """
     Checks if the user running this is root
     :return: bool: True if the user is root, False otherwise
@@ -15,7 +16,13 @@ def check_for_root_user():
     return geteuid() == 0
 
 
-def request_confirmation(message=None, prompt="Continue? (yes/no) ", func=sys.exit, args=None, kwargs=None):
+def request_confirmation(
+    message: AnyStr = None,
+    prompt: AnyStr = "Continue? (yes/no) ",
+    func: Callable[[Any], Any] = sys.exit,
+    args: Iterable = None,
+    kwargs: dict = None,
+):
     # pylint: disable=comparison-with-callable
     """
     Prompt user for confirmation before continuing program execution.
@@ -58,7 +65,7 @@ def request_confirmation(message=None, prompt="Continue? (yes/no) ", func=sys.ex
         response = input(prompt).lower()
 
 
-def generate_bash_completion_script():
+def generate_bash_completion_script() -> str:
     """
     Generates the contents of the bash completion script that can be used with VNet-manager
     :returns: str: The bash completion script that can be written to disk

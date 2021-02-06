@@ -5,7 +5,7 @@ from vnet_manager.conf import settings
 logger = getLogger(__name__)
 
 
-def display_help_for_action(action):
+def display_help_for_action(action: str) -> None:
     """
     Print a help text for the supplied action
     :param str action: The action to display the help text for

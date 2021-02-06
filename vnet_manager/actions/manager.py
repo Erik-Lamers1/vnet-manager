@@ -2,6 +2,7 @@ from logging import getLogger
 from os import EX_OK, EX_USAGE
 from os.path import isdir, isfile
 from warnings import warn
+from typing import Optional, Tuple, List
 
 from vnet_manager.conf import settings
 from vnet_manager.config.config import get_config
@@ -37,7 +38,7 @@ class ActionManager:
     Use this class to initiate specific VNet action in a controlled manner
     """
 
-    def __init__(self, config_path=None, sniffer=False, base_image=False, no_hosts=False):
+    def __init__(self, config_path: str = None, sniffer: bool = False, base_image: bool = False, no_hosts: bool = False):
         """
         :param str config_path: The path to the config
         :param bool sniffer: Whether to enable sniffers on 'start'
@@ -52,19 +53,19 @@ class ActionManager:
         self._config_validated = False
 
     @property
-    def machines(self):
+    def machines(self) -> Optional[List[str]]:
         return self._machines
 
     @machines.setter
-    def machines(self, machines):
+    def machines(self, machines: List[str]):
         """
         Only preform actions on a certain amount of machines.
         Note that this only applies to the machine actions, all general actions will ignore this value.
-        :param tpl/list: machines: The machine names to preform actions on, defaults to all
+        :param list machines: The machine names to preform actions on, defaults to all
         """
         self._machines = machines
 
-    def execute(self, action):
+    def execute(self, action: str) -> int:
         """
         Execute an action
         :param str action: The name of the action to execute
@@ -91,7 +92,7 @@ class ActionManager:
         getattr(self, "preform_{}_action".format(action.replace("-", "_")))()
         return EX_OK
 
-    def parse_config(self):
+    def parse_config(self) -> bool:
         """
         Parses the user config
         Updates the config accordingly
@@ -105,7 +106,7 @@ class ActionManager:
             return False
         return True
 
-    def check_and_update_config(self):
+    def check_and_update_config(self) -> Tuple[bool, dict]:
         """
         Validates the config passed to this instance.
         The validator can also fix some minor config issues, these are returned.
