@@ -2,11 +2,12 @@ from os.path import isfile, join
 from os import walk
 from yaml import safe_load
 from logging import getLogger
+from typing import AnyStr, List
 
 logger = getLogger(__name__)
 
 
-def get_yaml_content(path):
+def get_yaml_content(path: str) -> dict:
     """
     Loads a YAML config file and returns the contents
     :param str path: The YAML file to load
@@ -22,7 +23,7 @@ def get_yaml_content(path):
     return content
 
 
-def write_file_to_disk(path, content):
+def write_file_to_disk(path: str, content: AnyStr):
     """
     Write a file to disk
     Overwrites if file already exists
@@ -34,7 +35,7 @@ def write_file_to_disk(path, content):
         fh.write(content)
 
 
-def get_yaml_files_from_disk_path(path, excludes_files=None):
+def get_yaml_files_from_disk_path(path: str, excludes_files: List[str] = None) -> List[str]:
     """
     Returns a list of yaml files from a path (recursive search)
     :param path: str: The path to search in

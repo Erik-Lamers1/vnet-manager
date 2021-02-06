@@ -1,7 +1,7 @@
 from random import randint
 
 
-def random_mac_generator():
+def random_mac_generator() -> str:
     """
     Generates a random MAC address
     :return: str: The generated MAC address

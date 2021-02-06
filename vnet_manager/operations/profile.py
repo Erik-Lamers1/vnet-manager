@@ -6,7 +6,7 @@ from vnet_manager.conf import settings
 logger = getLogger(__name__)
 
 
-def check_if_lxc_profile_exists(name):
+def check_if_lxc_profile_exists(name: str) -> bool:
     """
     Check if an LXC profile exists
     :param str name: The LXC profile to check for
@@ -15,7 +15,7 @@ def check_if_lxc_profile_exists(name):
     return get_lxd_client().profiles.exists(name)
 
 
-def create_vnet_lxc_profile(name):
+def create_vnet_lxc_profile(name: str):
     """
     Create a VNet specific LXC profile
     :param str name: The LXC profile to create
@@ -27,13 +27,17 @@ def create_vnet_lxc_profile(name):
 
     devices = {
         # Disk config
-        "root": {"path": "/", "pool": settings.LXC_STORAGE_POOL_NAME, "type": "disk",}
+        "root": {
+            "path": "/",
+            "pool": settings.LXC_STORAGE_POOL_NAME,
+            "type": "disk",
+        }
     }
     logger.info("Creating LXC profile for storage pool {}".format(settings.LXC_STORAGE_POOL_NAME))
     client.profiles.create(name, config={}, devices=devices)
 
 
-def delete_vnet_lxc_profile(name):
+def delete_vnet_lxc_profile(name: str):
     """
     Deletes a VNet specific LXC profile
     Profile must not be used when deleting

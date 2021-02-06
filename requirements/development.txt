@@ -1,4 +1,4 @@
 -r test.txt
 
 # These requirements are only used for testing and development purposes
-pre-commit==2.8.2
+pre-commit==2.10.0

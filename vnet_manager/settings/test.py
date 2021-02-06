@@ -10,7 +10,9 @@ CONFIG = {
         "router100": {
             "type": "router",
             "interfaces": {"eth12": {"ipv4": "192.168.0.2/24", "ipv6": "fd00:12::2/64", "mac": "00:00:00:00:01:11", "bridge": 0}},
-            "vlans": {"vlan.100": {"id": 100, "link": "eth12", "addresses": ["10.0.100.1/24"]},},
+            "vlans": {
+                "vlan.100": {"id": 100, "link": "eth12", "addresses": ["10.0.100.1/24"]},
+            },
             "files": {"router100": "/etc/frr/"},
         },
         "router101": {
@@ -27,7 +29,10 @@ CONFIG = {
             "files": {"host102": "/etc/frr/"},
         },
     },
-    "veths": {"vnet-veth1": {"bridge": "vnet-br1", "stp": True}, "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": False},},
+    "veths": {
+        "vnet-veth1": {"bridge": "vnet-br1", "stp": True},
+        "vnet-veth0": {"peer": "vnet-veth1", "bridge": "vnet-br0", "stp": False},
+    },
 }
 
 VALIDATED_CONFIG = {

@@ -1,7 +1,8 @@
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from logging import INFO, DEBUG, getLogger
 from os import EX_NOPERM, environ
+from typing import Sequence
 
 from vnet_manager.conf import settings
 from vnet_manager.log import setup_console_logging
@@ -11,7 +12,7 @@ from vnet_manager.utils.user import check_for_root_user
 logger = getLogger(__name__)
 
 
-def parse_args(args=None):
+def parse_args(args: Sequence = None) -> Namespace:
     parser = ArgumentParser(description="VNet-manager a virtual network manager - manages containers to create virtual networks")
     parser.add_argument(
         "action",
@@ -52,7 +53,7 @@ def parse_args(args=None):
     return args
 
 
-def main(args=None):
+def main(args: Sequence = None) -> int:
     """
     Program entry point
     :param list args: The pre-cooked arguments to pass to the ArgParser

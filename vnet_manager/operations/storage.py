@@ -7,7 +7,7 @@ from vnet_manager.conf import settings
 logger = getLogger(__name__)
 
 
-def check_if_lxc_storage_pool_exists(name=settings.LXC_STORAGE_POOL_NAME):
+def check_if_lxc_storage_pool_exists(name: str = settings.LXC_STORAGE_POOL_NAME) -> bool:
     """
     Check for the existence of the LXC storage pool defined in the settings
     :param str name: The name of the storage pool to check for (default from the settings)
@@ -17,7 +17,7 @@ def check_if_lxc_storage_pool_exists(name=settings.LXC_STORAGE_POOL_NAME):
     return get_lxd_client().storage_pools.exists(name)
 
 
-def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings.LXC_STORAGE_POOL_DRIVER):
+def create_lxc_storage_pool(name: str = settings.LXC_STORAGE_POOL_NAME, driver: str = settings.LXC_STORAGE_POOL_DRIVER):
     """
     Creates a new LXC storage pool with the passed driver and name
     :param str name: The name of the storage pool to create (default from settings)
@@ -38,7 +38,7 @@ def create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings
         raise RuntimeError("Received API error while creating storage pool {}".format(name)) from e
 
 
-def delete_lxc_storage_pool(name):
+def delete_lxc_storage_pool(name: str):
     """
     Deletes a LXC storage pool
     Pool must be empty before deletion

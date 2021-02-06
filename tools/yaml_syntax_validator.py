@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from yamllint.config import YamlLintConfig
 from yamllint.cli import show_problems
 from yamllint import linter
+from typing import List
 
 from vnet_manager.conf import settings
 from vnet_manager.log import setup_console_logging
@@ -13,7 +14,7 @@ from vnet_manager.utils.files import get_yaml_files_from_disk_path
 logger = getLogger("tools.yaml_syntax_validator")
 
 
-def check_yaml_file_syntax(files):
+def check_yaml_file_syntax(files: List[str]) -> int:
     """
     Check each file with yamllint and print the errors if any
     :param files: The files to put through yamllint

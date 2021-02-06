@@ -14,7 +14,7 @@ except (ImportError, ModuleNotFoundError):
     logger.warning("Will not preform host checks without apt module")
 
 
-def check_for_supported_os(provider):
+def check_for_supported_os(provider: str) -> bool:
     """
     Checks if VNet is running on a supported OS for a provider
     :param str provider: The provider to check OS support for
@@ -24,7 +24,7 @@ def check_for_supported_os(provider):
     return codename().lower() in settings["PROVIDERS"][provider]["supported_operating_systems"]
 
 
-def check_for_installed_packages(provider):
+def check_for_installed_packages(provider: str) -> bool:
     """
     Checks if the required host packages have been installed
     :param str provider: The provider to check the required host packages for

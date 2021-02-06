@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/Erik-Lamers1/vnet-manager/branch/master/graph/badge.svg)](https://codecov.io/gh/Erik-Lamers1/vnet-manager)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 VNet-manager a virtual network manager - manages containers to create virtual networks.
 

@@ -7,7 +7,7 @@ from vnet_manager.operations.machine import change_lxc_machine_status
 logger = getLogger(__name__)
 
 
-def check_if_lxc_image_exists(image, by_alias=True):
+def check_if_lxc_image_exists(image: str, by_alias: bool = True) -> bool:
     """
     Check if an LXC image exists
     :param str image: The image fingerprint or alias
@@ -26,7 +26,7 @@ def check_if_lxc_image_exists(image, by_alias=True):
     return client.images.exists(image)
 
 
-def create_lxc_image_from_container(container, alias=None, description=None):
+def create_lxc_image_from_container(container: str, alias: str = None, description: str = None):
     """
     Create a LXC image from a container
     :param str container: The container to create the image from
@@ -49,7 +49,7 @@ def create_lxc_image_from_container(container, alias=None, description=None):
         img.add_alias(alias, description)
 
 
-def destroy_lxc_image(image, by_alias=True):
+def destroy_lxc_image(image: str, by_alias: bool = True):
     """
     Destroy a LXC image
     :param str image: The fingerprint or alias of the image to destroy

@@ -449,7 +449,15 @@ class TestGenerateMachineNetplanConfig(VNetTestCase):
                         "addresses": ["192.168.0.2/24", "fd00:12::2/64"],
                     },
                 },
-                "vlans": {"vlan.100": {"id": 100, "link": "eth12", "addresses": ["10.0.100.1/24"], "dhcp4": "no", "dhcp6": "no",}},
+                "vlans": {
+                    "vlan.100": {
+                        "id": 100,
+                        "link": "eth12",
+                        "addresses": ["10.0.100.1/24"],
+                        "dhcp4": "no",
+                        "dhcp6": "no",
+                    }
+                },
             }
         }
 
