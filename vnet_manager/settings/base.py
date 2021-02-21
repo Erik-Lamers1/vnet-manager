@@ -99,10 +99,11 @@ This action will also bring down the corresponding VNet interfaces.
     "destroy": """Destroys a previously built config.
 This action will delete the corresponding machines and VNet interfaces.
 Use this action in combination with the --base-image parameter to delete the VNet base images.
+When the --base-image parameter is given any config file can be passed.
     """,
     "clean": """Purge VNet specific provider configuration from the system.
-This action can only if all VNet config on the system are destroyed.
-Only use this action when you wish to reset or uninstall VNet manager.
+This action can only be executed if all VNet configs on the system are destroyed.
+Only use this action when you wish to reset or uninstall VNet-manager.
     """,
     "create": """Builds a VNet configuration so it can be started using the 'start' action.
 This action will create a base image for all providers present in the configuration if they do not exist yet.
