@@ -12,33 +12,44 @@ VNet-manager allows you to create quick virtual network setups using LXC contain
 VNet-manager will create and manage the containers you need to create a virtual network.
 This is done in combination with [FRRouting](https://frrouting.org/).  
 Because VNet-manager makes heavy use of LXC, the current supported operating systems are Ubuntu Bionic (18.04) and Focal Fossa (20.04).
-## Setup
-```bash
-# These commands must be run as the root user
-apt-get update
-apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
-# LXD defaults are fine
-echo -e "\n\n\n\n\n\n\n\n\n\n\n\n" | lxd init
-pip3 install vnet-manager
-# The following is only needed on Xenial
-apt-get install btrfs-tools
-# Now you are able to use
-vnet-manager --help
-```
 
-#### Quick start
-Use one of the [example](config) configs to see if your environment is working correctly.
-```bash
-git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
-cd ~/vnet-manager
-vnet-manager create config/example.yaml
-vnet-manager start config/example.yaml
-lxc exec host1 -- ping -c 2 router1
-```
 ## How to use it
 In order to run VNet-manager you need to create a config file for the program to works with. In this config file you can create your network topology.
 When this config file is created it should always be passed to VNet-manager as an argument. This ensures that the program itself does not have to store any state.
 See the [README](config/README.md) for a more detailed explanation on how to create a config file. There are also some [example config files](config)
+
+
+## Setup
+
+#### Install the required packages
+```bash
+apt-get update
+apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
+```
+
+#### Clone the repo
+```bash
+git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
+cd ~/vnet-manager
+```
+
+#### Setup LXD
+If you are running a clean LXD install you can import the provided preseed file;
+```bash
+source /etc/os-release
+lxd init --preseed < config/lxd/ubuntu$VERSION_ID.yaml
+```
+
+If you already had LXD installed, make sure that the there is a the default storage pool, profile and `lxdbr0` network bridge are present.
+Depending on your configuration it might still be safe to run the preseed file using `lxd init`.
+
+### Quick start
+Use one of the [example](config) configs to see if your environment is working correctly.
+```bash
+vnet-manager create config/example.yaml
+vnet-manager start config/example.yaml
+lxc exec host1 -- ping -c 2 router1
+```
 
 ### Advanced usage
 There are a couple of things that can be tweaked when using VNet-manager. This can be done using specific environment variables.
