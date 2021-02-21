@@ -30,6 +30,7 @@ apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils
 #### Clone the repo
 ```bash
 git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
+pip3 install vnet-manager
 cd ~/vnet-manager
 ```
 
