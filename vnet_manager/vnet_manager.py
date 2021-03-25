@@ -1,4 +1,4 @@
-import sys
+from sys import exit
 from argparse import ArgumentParser, Namespace
 from logging import INFO, DEBUG, getLogger
 from os import EX_NOPERM, environ
@@ -76,4 +76,4 @@ def main(args: Sequence = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exit(main())
