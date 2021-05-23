@@ -459,7 +459,14 @@ class TestGenerateMachineNetplanConfig(VNetTestCase):
                         "dhcp6": "no",
                     }
                 },
-                "bridges": {"br1": {"interfaces": ["eth12"], "addresses": ["192.168.0.1/24", "ff00::1/64"]}},
+                "bridges": {
+                    "br1": {
+                        "interfaces": ["eth12"],
+                        "addresses": ["192.168.0.1/24", "ff00::1/64"],
+                        "dhcp4": "no",
+                        "dhcp6": "no",
+                    }
+                },
             }
         }
 
@@ -475,6 +482,6 @@ class TestGenerateMachineNetplanConfig(VNetTestCase):
         self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, self.machine))
 
     def test_generate_machine_netplan_config_returns_excepted_config_without_bridges(self):
-        del self.config["machines"][self.machine]
+        del self.config["machines"][self.machine]["bridges"]
         del self.expected_config["network"]["bridges"]
         self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, self.machine))

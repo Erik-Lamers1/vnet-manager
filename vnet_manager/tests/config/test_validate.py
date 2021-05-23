@@ -79,6 +79,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.validate_interface_config = self.validate_interfaces
         self.validator.validate_machine_files_parameters = self.validate_files
         self.validate_vlan_config = self.set_up_patch("vnet_manager.config.validate.ValidateConfig.validate_vlan_config")
+        self.validate_bridge_config = self.set_up_patch("vnet_manager.config.validate.ValidateConfig.validate_machine_bridge_config")
 
     def test_validate_machine_config_runs_ok_with_good_config(self):
         self.validator.validate_machine_config()
@@ -184,6 +185,21 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
             "Machine router100 has a VLAN config but it does not appear to be a dict, "
             "this usually means a typo in the config{}".format(self.validator.default_message)
         )
+
+    def test_validate_machine_config_does_not_call_validate_bridge_config_if_no_bridges(self):
+        del self.validator.config["machines"]["router100"]["bridges"]
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validate_bridge_config.called)
+
+    def test_validate_machine_config_calls_validate_bridge_config_for_machines_with_bridges(self):
+        self.validator.validate_machine_config()
+        self.validate_bridge_config.assert_called_once_with("router100")
+
+    def test_validate_machine_config_fails_if_bridge_config_is_not_a_dict(self):
+        self.validator.config["machines"]["router100"]["bridges"] = 1337
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
 
 
 class TestValidateConfigValidateMachineFilesParameters(VNetTestCase):
@@ -420,11 +436,6 @@ class TestValidateConfigValidateMachineBridgeConfig(VNetTestCase):
         self.machine = "router100"
 
     def test_validate_machine_bridge_config_is_successful_with_correct_bridge_config(self):
-        self.validator.validate_machine_bridge_config(self.machine)
-        self.assertTrue(self.validator.config_validation_successful)
-
-    def test_validate_machine_bridge_config_is_successful_with_no_bridge_config(self):
-        del self.validator.config["machines"][self.machine]["bridges"]
         self.validator.validate_machine_bridge_config(self.machine)
         self.assertTrue(self.validator.config_validation_successful)
 

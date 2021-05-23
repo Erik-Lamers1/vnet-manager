@@ -136,6 +136,18 @@ class ValidateConfig:
                 else:
                     self.validate_vlan_config(name)
 
+                # Bridges?
+                if "bridges" not in values:
+                    logger.debug("Machine {} does not appear to have any Bridge interfaces, that's okay".format(name))
+                elif not isinstance(values["bridges"], dict):
+                    logger.error(
+                        "Machine {} has a bridge config defined, but it is not a dictionary, "
+                        "this usally means a typo in the config{}".format(name, self.default_message)
+                    )
+                    self._all_ok = False
+                else:
+                    self.validate_machine_bridge_config(name)
+
     def validate_vlan_config(self, machine):
         """
         Validates the VLAN config of a particular machine
