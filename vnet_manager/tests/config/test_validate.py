@@ -411,3 +411,64 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.assertTrue(
             self.logger.error.call_args_list[0].startswith("Address banaan for VLAN vlan.100 on machine {}".format(self.machine))
         )
+
+
+class TestValidateConfigValidateMachineBridgeConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+        self.machine = "router101"
+
+    def test_validate_machine_bridge_config_is_successful_with_correct_bridge_config(self):
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_is_successful_with_no_bridge_config(self):
+        del self.validator.config["machines"][self.machine]["bridges"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_accepts_missing_ipv4(self):
+        del self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv4"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_accepts_missing_ipv6(self):
+        del self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv6"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_fails_if_incorrect_ipv4(self):
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv4"] = "blaap"
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
+
+    def test_validate_machine_bridge_config_fails_if_incorrect_ipv6(self):
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv6"] = "blaap"
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
+
+    def test_validate_machine_bridge_config_fails_if_slaves_not_in_bridge_params(self):
+        del self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with("Bridge {} on machine {} does not have any slaves".format("br1", self.machine))
+
+    def test_validate_machine_bridge_config_fails_if_slaves_param_is_not_a_list(self):
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"] = "blaap"
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Slaves on bridge {} for machine {}, is not formatted as a list".format("br1", self.machine)
+        )
+
+    def test_validate_machine_bridge_config_fails_if_slave_not_present_in_interfaces_config(self):
+        iface = "blaap1"
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"].append(iface)
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Undefined slave interface {} assigned to bridge {} on machine {}".format(iface, "br1", self.machine)
+        )
