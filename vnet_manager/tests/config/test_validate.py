@@ -417,7 +417,7 @@ class TestValidateConfigValidateMachineBridgeConfig(VNetTestCase):
     def setUp(self) -> None:
         self.validator = ValidateConfig(deepcopy(settings.CONFIG))
         self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
-        self.machine = "router101"
+        self.machine = "router100"
 
     def test_validate_machine_bridge_config_is_successful_with_correct_bridge_config(self):
         self.validator.validate_machine_bridge_config(self.machine)

@@ -13,6 +13,13 @@ CONFIG = {
             "vlans": {
                 "vlan.100": {"id": 100, "link": "eth12", "addresses": ["10.0.100.1/24"]},
             },
+            "bridges": {
+                "br1": {
+                    "slaves": ["eth12"],
+                    "ipv4": "192.168.0.1/24",
+                    "ipv6": "ff00::1/64",
+                }
+            },
             "files": {"router100": "/etc/frr/"},
         },
         "router101": {
@@ -20,13 +27,6 @@ CONFIG = {
             "interfaces": {
                 "eth12": {"ipv4": "192.168.0.1/24", "ipv6": "fd00:12::1/64", "mac": "00:00:00:00:02:12", "bridge": 0},
                 "eth23": {"ipv4": "10.0.0.1/8", "ipv6": "fd00:23::1/64", "mac": "00:00:00:00:02:22", "bridge": 1},
-            },
-            "bridges": {
-                "br1": {
-                    "slaves": ["eth12", "eth23"],
-                    "ipv4": "192.168.0.1/24",
-                    "ipv6": "ff00::1/64",
-                }
             },
             "files": {"router101": "/etc/frr/"},
         },

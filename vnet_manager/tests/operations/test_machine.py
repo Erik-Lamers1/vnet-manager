@@ -435,6 +435,7 @@ class TestConfigureLXCIPForwarding(VNetTestCase):
 class TestGenerateMachineNetplanConfig(VNetTestCase):
     def setUp(self) -> None:
         self.maxDiff = None
+        self.machine = "router100"
         self.config = deepcopy(settings.CONFIG)
         self.expected_config = {
             "network": {
@@ -458,16 +459,22 @@ class TestGenerateMachineNetplanConfig(VNetTestCase):
                         "dhcp6": "no",
                     }
                 },
+                "bridges": {"br1": {"interfaces": ["eth12"], "addresses": ["192.168.0.1/24", "ff00::1/64"]}},
             }
         }
 
     def test_generate_machine_netplan_config_returns_a_dict(self):
-        self.assertIsInstance(generate_machine_netplan_config(self.config, "router100"), dict)
+        self.assertIsInstance(generate_machine_netplan_config(self.config, self.machine), dict)
+
+    def test_generate_machine_netplan_config_returns_expected_config_with_all(self):
+        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, self.machine))
 
     def test_generate_machine_netplan_config_returns_expected_config_without_vlans(self):
-        del self.config["machines"]["router100"]["vlans"]
+        del self.config["machines"][self.machine]["vlans"]
         del self.expected_config["network"]["vlans"]
-        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, "router100"))
+        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, self.machine))
 
-    def test_generate_machine_netplan_config_returns_expected_config_with_vlans(self):
-        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, "router100"))
+    def test_generate_machine_netplan_config_returns_excepted_config_without_bridges(self):
+        del self.config["machines"][self.machine]
+        del self.expected_config["network"]["bridges"]
+        self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, self.machine))
