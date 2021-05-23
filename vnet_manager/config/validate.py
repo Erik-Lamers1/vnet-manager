@@ -136,6 +136,18 @@ class ValidateConfig:
                 else:
                     self.validate_vlan_config(name)
 
+                # Bridges?
+                if "bridges" not in values:
+                    logger.debug("Machine {} does not appear to have any Bridge interfaces, that's okay".format(name))
+                elif not isinstance(values["bridges"], dict):
+                    logger.error(
+                        "Machine {} has a bridge config defined, but it is not a dictionary, "
+                        "this usally means a typo in the config{}".format(name, self.default_message)
+                    )
+                    self._all_ok = False
+                else:
+                    self.validate_machine_bridge_config(name)
+
     def validate_vlan_config(self, machine):
         """
         Validates the VLAN config of a particular machine
@@ -267,6 +279,40 @@ class ValidateConfig:
                     "(starting at iface number 0)".format(int_name, machine)
                 )
                 self._all_ok = False
+
+    def validate_machine_bridge_config(self, machine: str):
+        bridges = self.config["machines"][machine]["bridges"]
+        for br_name, br_vals in bridges.items():
+            if "ipv4" not in br_vals:
+                logger.debug("Bridge {} on machine {} has no IPv4 assigned, that's okay".format(br_name, machine))
+            else:
+                # Validate the given IP
+                try:
+                    IPv4Interface(br_vals["ipv4"])
+                except ValueError as e:
+                    logger.error("Unable to parse IPv4 address for bridge {} on machine {}, got error: {}".format(br_name, machine, e))
+                    self._all_ok = False
+            if "ipv6" not in br_vals:
+                logger.debug("Bridge {} on machine {} has no IPv6 address, that's okay".format(br_name, machine))
+            else:
+                try:
+                    # Validate the IPv6 address
+                    IPv6Interface(br_vals["ipv6"])
+                except ValueError as e:
+                    logger.error("Unable to parse IPv6 address for bridge {} on machine {}, got error: {}".format(br_name, machine, e))
+                    self._all_ok = False
+            if "slaves" not in br_vals:
+                logger.error("Bridge {} on machine {} does not have any slaves".format(br_name, machine))
+                self._all_ok = False
+            elif not isinstance(br_vals["slaves"], list):
+                logger.error("Slaves on bridge {} for machine {}, is not formatted as a list".format(br_name, machine))
+                self._all_ok = False
+            else:
+                # For each slave, check if the interface exists
+                for slave in br_vals["slaves"]:
+                    if slave not in self.config["machines"][machine]["interfaces"].keys():
+                        logger.error("Undefined slave interface {} assigned to bridge {} on machine {}".format(slave, br_name, machine))
+                        self._all_ok = False
 
     def validate_veth_config(self):
         """

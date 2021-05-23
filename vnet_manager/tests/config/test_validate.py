@@ -79,6 +79,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.validate_interface_config = self.validate_interfaces
         self.validator.validate_machine_files_parameters = self.validate_files
         self.validate_vlan_config = self.set_up_patch("vnet_manager.config.validate.ValidateConfig.validate_vlan_config")
+        self.validate_bridge_config = self.set_up_patch("vnet_manager.config.validate.ValidateConfig.validate_machine_bridge_config")
 
     def test_validate_machine_config_runs_ok_with_good_config(self):
         self.validator.validate_machine_config()
@@ -184,6 +185,21 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
             "Machine router100 has a VLAN config but it does not appear to be a dict, "
             "this usually means a typo in the config{}".format(self.validator.default_message)
         )
+
+    def test_validate_machine_config_does_not_call_validate_bridge_config_if_no_bridges(self):
+        del self.validator.config["machines"]["router100"]["bridges"]
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validate_bridge_config.called)
+
+    def test_validate_machine_config_calls_validate_bridge_config_for_machines_with_bridges(self):
+        self.validator.validate_machine_config()
+        self.validate_bridge_config.assert_called_once_with("router100")
+
+    def test_validate_machine_config_fails_if_bridge_config_is_not_a_dict(self):
+        self.validator.config["machines"]["router100"]["bridges"] = 1337
+        self.validator.validate_machine_config()
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
 
 
 class TestValidateConfigValidateMachineFilesParameters(VNetTestCase):
@@ -410,4 +426,60 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.assertFalse(self.validator.config_validation_successful)
         self.assertTrue(
             self.logger.error.call_args_list[0].startswith("Address banaan for VLAN vlan.100 on machine {}".format(self.machine))
+        )
+
+
+class TestValidateConfigValidateMachineBridgeConfig(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+        self.machine = "router100"
+
+    def test_validate_machine_bridge_config_is_successful_with_correct_bridge_config(self):
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_accepts_missing_ipv4(self):
+        del self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv4"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_accepts_missing_ipv6(self):
+        del self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv6"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertTrue(self.validator.config_validation_successful)
+
+    def test_validate_machine_bridge_config_fails_if_incorrect_ipv4(self):
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv4"] = "blaap"
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
+
+    def test_validate_machine_bridge_config_fails_if_incorrect_ipv6(self):
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["ipv6"] = "blaap"
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once()
+
+    def test_validate_machine_bridge_config_fails_if_slaves_not_in_bridge_params(self):
+        del self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"]
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with("Bridge {} on machine {} does not have any slaves".format("br1", self.machine))
+
+    def test_validate_machine_bridge_config_fails_if_slaves_param_is_not_a_list(self):
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"] = "blaap"
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Slaves on bridge {} for machine {}, is not formatted as a list".format("br1", self.machine)
+        )
+
+    def test_validate_machine_bridge_config_fails_if_slave_not_present_in_interfaces_config(self):
+        iface = "blaap1"
+        self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"].append(iface)
+        self.validator.validate_machine_bridge_config(self.machine)
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Undefined slave interface {} assigned to bridge {} on machine {}".format(iface, "br1", self.machine)
         )

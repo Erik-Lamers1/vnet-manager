@@ -13,6 +13,13 @@ CONFIG = {
             "vlans": {
                 "vlan.100": {"id": 100, "link": "eth12", "addresses": ["10.0.100.1/24"]},
             },
+            "bridges": {
+                "br1": {
+                    "slaves": ["eth12"],
+                    "ipv4": "192.168.0.1/24",
+                    "ipv6": "ff00::1/64",
+                }
+            },
             "files": {"router100": "/etc/frr/"},
         },
         "router101": {

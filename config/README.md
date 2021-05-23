@@ -16,7 +16,7 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
     type: str  # This define what type the machine will be, see `Machine types`
     interfaces: dict  # This dict defines what virtual interfaces should be assigned to a machine.
       eth1: dict  # This dict defines a vnet interface, which is part of a vnet machine.
-        ipv4: ipv4_address/cidr  # This IPv4 address will be assigned to the interface.
+        ipv4: ipv4_address/cidr  # This IPv4 address will be assigned to the interface (optional).
         ipv6: ipv6_address/cidr  # This IPv6 address will be assigned to the interface (optional).
         mac: mac_address  # This mac address will be assigned to the interface.
         bridge: int  # The bridge number that this interface will be connected to.
@@ -29,6 +29,12 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
         link: str  # The parent interface, this must correspond to a interface configured above.
         addresses: list  # The IP addresses to assign to this vlan interface (optional).
       vlan.N: ...
+    bridges: dict  # This defines the bridge interfaces that will be created on the machine (optional).
+      bridge1:  dict  # This dict defines a bridge interface.
+        slaves: list  # A list of interfaces that will be assigned to this bridge.
+        ipv4: ipv4_address/cidr  # Assign the following IPv4 address to the bridge (optional).
+        ipv6: ipv6_address/cidr  # Assign the following IPv6 address to the bridge (optional).
+      bridgeN: ...
     files: dict  # This defines the files that will be copied to the machine (optional).
       host1: str  # Key should be set to the absolute or relative path as seen from the user config.
                       # This can be a directory or a single file.

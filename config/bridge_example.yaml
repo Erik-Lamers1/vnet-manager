@@ -1,0 +1,40 @@
+---
+
+#
+# host1 --- bridge1 -- host3
+#
+
+switches: 2
+
+machines:
+  host1:
+    type: host
+    interfaces:
+      eth12:
+        ipv4: 10.0.0.1/24
+        ipv6: fd00::1/64
+        mac: 00:00:00:00:00:11
+        bridge: 0
+  # Bridge the two interfaces together, to make a single LAN
+  bridge1:
+    type: router  # Set this to router, to automatically enable IP forwarding
+    interfaces:
+      eth12:
+        mac: 00:00:00:00:00:12
+        bridge: 0
+      eth23:
+        mac: 00:00:00:00:00:22
+        bridge: 1
+    bridges:
+      bridge1:
+        slaves:
+          - eth12
+          - eth23
+  host3:
+    type: host
+    interfaces:
+      eth23:
+        ipv4: 10.0.0.3/24
+        ipv6: fd00::1/64
+        mac: 00:00:00:00:00:23
+        bridge: 1
