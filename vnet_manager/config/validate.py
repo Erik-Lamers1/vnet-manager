@@ -268,6 +268,40 @@ class ValidateConfig:
                 )
                 self._all_ok = False
 
+    def validate_machine_bridge_config(self, machine: str):
+        bridges = self.config["machines"][machine]["bridges"]
+        for br_name, br_vals in bridges.items():
+            if "ipv4" not in br_vals:
+                logger.debug("Bridge {} on machine {} has no IPv4 assigned, that's okay".format(br_name, machine))
+            else:
+                # Validate the given IP
+                try:
+                    IPv4Interface(br_vals["ipv4"])
+                except ValueError as e:
+                    logger.error("Unable to parse IPv4 address for bridge {} on machine {}, got error: {}".format(br_name, machine, e))
+                    self._all_ok = False
+            if "ipv6" not in br_vals:
+                logger.debug("Bridge {} on machine {} has no IPv6 address, that's okay".format(br_name, machine))
+            else:
+                try:
+                    # Validate the IPv6 address
+                    IPv6Interface(br_vals["ipv6"])
+                except ValueError as e:
+                    logger.error("Unable to parse IPv6 address for bridge {} on machine {}, got error: {}".format(br_name, machine, e))
+                    self._all_ok = False
+            if "slaves" not in br_vals:
+                logger.error("Bridge {} on machine {} does not have any slaves".format(br_name, machine))
+                self._all_ok = False
+            elif not isinstance(br_vals["slaves"], list):
+                logger.error("Slaves on bridge {} for machine {}, is not formatted as a list".format(br_name, machine))
+                self._all_ok = False
+            else:
+                # For each slave, check if the interface exists
+                for slave in br_vals["slaves"]:
+                    if slave not in self.config["machines"][machine]["interfaces"].keys():
+                        logger.error("Undefined slave interface {} assigned to bridge {} on machine {}".format(slave, br_name, machine))
+                        self._all_ok = False
+
     def validate_veth_config(self):
         """
         Validates the veth config if present

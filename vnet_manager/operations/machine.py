@@ -387,4 +387,17 @@ def generate_machine_netplan_config(config: dict, machine: str) -> dict:
         for vlan, vlan_data in machine_config["vlans"].items():
             network_conf["network"]["vlans"][vlan] = {"id": vlan_data["id"], "link": vlan_data["link"], "addresses": vlan_data["addresses"]}
             network_conf["network"]["vlans"][vlan].update(no_dhcp)
+    if "bridges" in machine_config:
+        network_conf["network"]["bridges"] = {}
+        for br_name, br_data in machine_config["bridges"].items():
+            addresses = []
+            if "ipv4" in br_data:
+                addresses.append(br_data["ipv4"])
+            if "ipv6" in br_data:
+                addresses.append(br_data["ipv6"])
+            network_conf["network"]["bridges"][br_name] = {
+                "interfaces": br_data["slaves"],
+                "addresses": addresses,
+            }
+            network_conf["network"]["bridges"][br_name].update(no_dhcp)
     return network_conf
