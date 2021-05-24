@@ -47,6 +47,7 @@ LOGGING = {
         "pyroute2.ndb": {"level": "WARNING"},
     },
 }
+LOGGING_DEFAULT_VERBOSITY = 3  # logging.INFO
 
 # VNet Manager static settings / config
 # provider config
