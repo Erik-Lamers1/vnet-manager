@@ -14,7 +14,6 @@ def get_logging_verbosity(args: Namespace, default_verbosity: int = settings.LOG
     """
     logging_verbs = {0: logging.CRITICAL, 1: logging.ERROR, 2: logging.WARNING, 3: logging.INFO, 4: logging.DEBUG}
     # Compare the amount of verbosity args against the default verbosity
-    print(default_verbosity, args)
     mod = default_verbosity + args.verbose - args.quite
     # Return the appropriate logging level (must be within the defined logging levels)
     return logging_verbs[max(min(len(logging_verbs) - 1, mod), 0)]
