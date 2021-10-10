@@ -19,6 +19,7 @@ machines: dict  # The machine dict defines that vnet machines that are part of t
         ipv4: ipv4_address/cidr  # This IPv4 address will be assigned to the interface (optional).
         ipv6: ipv6_address/cidr  # This IPv6 address will be assigned to the interface (optional).
         mac: mac_address  # This mac address will be assigned to the interface.
+        routes: list  # A list of routes to add to this interface, see: https://netplan.io/reference/#routing
         bridge: int  # The bridge number that this interface will be connected to.
                      # Note that counting starts from 0.
                      # So, if you want to connect to the first bridge, this value should be set to 0.
