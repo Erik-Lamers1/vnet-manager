@@ -29,7 +29,7 @@ jobs:
           PYTHONPATH: "/usr/lib/python3.8/dist-packages:/usr/lib/python3/dist-packages:${PYTHONPATH}"
           PYTHONDONTWRITEBYTECODE: 1
         run: |
-          pytest --cov vnet_manager
+          pytest --cov vnet_manager --cov-report term --cov-report xml:coverage.xml
       - name: Push to codecov
         uses: codecov/codecov-action@v2
         with:
