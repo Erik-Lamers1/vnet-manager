@@ -382,6 +382,8 @@ def generate_machine_netplan_config(config: dict, machine: str) -> dict:
             "addresses": addresses,
         }
         network_conf["network"]["ethernets"][int_name].update(no_dhcp)
+        if "routes" in int_data:
+            network_conf["network"]["ethernets"][int_name]["routes"] = int_data["routes"]
     if "vlans" in machine_config:
         network_conf["network"]["vlans"] = {}
         for vlan, vlan_data in machine_config["vlans"].items():
