@@ -1,4 +1,4 @@
-from ipaddress import IPv4Interface, IPv6Interface, ip_interface
+from ipaddress import IPv4Interface, IPv6Interface, ip_interface, ip_network, ip_address
 from re import fullmatch
 from logging import getLogger
 from os.path import isdir, isfile, join
@@ -229,6 +229,8 @@ class ValidateConfig:
                 self._all_ok = False
 
     def validate_interface_config(self, machine: str):
+        # TODO: Refactor
+        # pylint: disable=too-many-branches
         """
         Validates the interface config of a particular machine
         Assumes the interfaces dict exists for that machine
@@ -279,6 +281,54 @@ class ValidateConfig:
                     "(starting at iface number 0)".format(int_name, machine)
                 )
                 self._all_ok = False
+            if "routes" in int_vals:
+                if not isinstance(int_vals["routes"], list):
+                    logger.error(
+                        "routes passed to interface {} for machine {}, found type {}, expected type 'list'{}".format(
+                            int_name, machine, type(int_vals["routes"]).__name__, self.default_message
+                        )
+                    )
+                    self._all_ok = False
+                else:
+                    self.validate_interface_routes(int_vals["routes"], int_name, machine)
+
+    def validate_interface_routes(self, routes: list, int_name: str, machine: str):
+        for idx, route in enumerate(routes):
+            if "to" not in route:
+                logger.error(
+                    "'to' keyword missing from route {} on interface {} for machine {}{}".format(
+                        idx + 1, int_name, machine, self.default_message
+                    )
+                )
+                self._all_ok = False
+            else:
+                try:
+                    ip_network(route["to"])
+                except ValueError:
+                    if route["to"] != "default":
+                        logger.error(
+                            "Invalid 'to' value {} for route {} on interface {} for machine {}{}".format(
+                                route["to"], idx + 1, int_name, machine, self.default_message
+                            )
+                        )
+                        self._all_ok = False
+            if "via" not in route:
+                logger.error(
+                    "'via' keyword missing from route {} on interface {} for machine {}{}".format(
+                        idx + 1, int_name, machine, self.default_message
+                    )
+                )
+                self._all_ok = False
+            else:
+                try:
+                    ip_address(route["via"])
+                except ValueError:
+                    logger.error(
+                        "Invalid 'via' value {} (not an IP address) for route {} on interface {} for machine {}{}".format(
+                            route["via"], idx + 1, int_name, machine, self.default_message
+                        )
+                    )
+                    self._all_ok = False
 
     def validate_machine_bridge_config(self, machine: str):
         bridges = self.config["machines"][machine]["bridges"]
