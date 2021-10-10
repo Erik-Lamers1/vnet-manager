@@ -232,6 +232,7 @@ class TestValidateConfigValidateInterfaceConfig(VNetTestCase):
     def setUp(self) -> None:
         self.validator = ValidateConfig(deepcopy(settings.CONFIG))
         self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+        self.validate_routes = self.set_up_patch("vnet_manager.config.validate.ValidateConfig.validate_interface_routes")
 
     def test_validate_interface_config_runs_ok_with_good_config(self):
         self.validator.validate_interface_config("router100")
@@ -285,6 +286,76 @@ class TestValidateConfigValidateInterfaceConfig(VNetTestCase):
             "Invalid bridge number detected for interface eth12 on machine router100. "
             "The bridge keyword should correspond to the interface number of the vnet bridge to connect to "
             "(starting at iface number 0)"
+        )
+
+    def test_validate_interface_config_fails_when_routes_is_not_a_list(self):
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["routes"] = "blaap"
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "routes passed to interface eth12 for machine router100, found type str, expected type 'list'{}".format(
+                self.validator.default_message
+            )
+        )
+
+    def test_validate_interface_config_calls_validate_routes_when_routes_passed_in_config(self):
+        self.validator.validate_interface_config("router100")
+        self.validate_routes.assert_called_once_with(
+            self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["routes"], "eth12", "router100"
+        )
+
+    def test_validate_interface_config_does_not_call_validate_routes_when_no_routes_passed(self):
+        del self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["routes"]
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validate_routes.called)
+
+
+class TestValidateInterfaceRoutes(VNetTestCase):
+    def setUp(self) -> None:
+        self.validator = ValidateConfig(deepcopy(settings.CONFIG))
+        self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
+        self.routes = [
+            {"to": "172.16.0.0/24", "via": "172.16.0.1"},
+            {"to": "default", "via": "192.168.0.1", "metric": 500},
+        ]
+
+    def test_validate_routes_validates_correct_routes(self):
+        self.validator.validate_interface_routes(self.routes, "eth1", "test1")
+        self.assertTrue(self.validator.config_validation_successful)
+        self.assertFalse(self.logger.error.called)
+
+    def test_validate_routes_fails_if_route_missing_to(self):
+        del self.routes[0]["to"]
+        self.validator.validate_interface_routes(self.routes, "eth1", "test2")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "'to' keyword missing from route 1 on interface eth1 for machine test2{}".format(self.validator.default_message)
+        )
+
+    def test_validate_routes_fails_if_to_is_malformed(self):
+        self.routes[0]["to"] = "1negen2.168.0.1"
+        self.validator.validate_interface_routes(self.routes, "eth1", "test3")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Invalid 'to' value 1negen2.168.0.1 for route 1 on interface eth1 for machine test3{}".format(self.validator.default_message)
+        )
+
+    def test_validate_routes_fails_if_route_missing_via(self):
+        del self.routes[0]["via"]
+        self.validator.validate_interface_routes(self.routes, "eth1", "test4")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "'via' keyword missing from route 1 on interface eth1 for machine test4{}".format(self.validator.default_message)
+        )
+
+    def test_validate_routes_fails_if_via_is_malformed(self):
+        self.routes[1]["via"] = "blaap"
+        self.validator.validate_interface_routes(self.routes, "eth1", "test5")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            "Invalid 'via' value blaap (not an IP address) for route 2 on interface eth1 for machine test5{}".format(
+                self.validator.default_message
+            )
         )
 
 
