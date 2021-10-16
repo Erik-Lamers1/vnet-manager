@@ -1,0 +1,85 @@
+---
+
+# iBGP example, with BFD
+
+#
+# host1 - router1 --------- router2 - host2
+#                \          /
+#                 \        /
+#                  \      /
+#                  router3
+#                     |
+#                   host3
+
+switches: 6
+
+machines:
+  host1:
+    type: host
+    interfaces:
+      eth1:
+        ipv4: 192.168.0.2/24
+        routes:
+          - to: default
+            via: 192.168.0.1
+        bridge: 0
+  router1:
+    type: router
+    interfaces:
+      eth1:
+        ipv4: 192.168.0.1/24
+        bridge: 0
+      eth12:
+        ipv4: 10.0.1.12/24
+        bridge: 1
+      eth13:
+        ipv4: 10.0.2.13/24
+        bridge: 2
+    files:
+      router1: /etc/frr/
+  host2:
+    type: host
+    interfaces:
+      eth2:
+        ipv4: 172.16.0.2/24
+        routes:
+          - to: 0.0.0.0/0
+            via: 172.16.0.1
+        bridge: 3
+  router2:
+    type: router
+    interfaces:
+      eth2:
+        ipv4: 172.16.0.1/24
+        bridge: 3
+      eth21:
+        ipv4: 10.0.1.21/24
+        bridge: 1
+      eth23:
+        ipv4: 10.0.4.23/24
+        bridge: 4
+    files:
+      router2: /etc/frr/
+  host3:
+    type: host
+    interfaces:
+      eth3:
+        ipv4: 10.0.5.2/24
+        routes:
+          - to: default
+            via: 10.0.5.1
+        bridge: 5
+  router3:
+    type: router
+    interfaces:
+      eth3:
+        ipv4: 10.0.5.1/24
+        bridge: 5
+      eth31:
+        ipv4: 10.0.2.31/24
+        bridge: 2
+      eth32:
+        ipv4: 10.0.4.32/24
+        bridge: 4
+    files:
+      router3: /etc/frr/
