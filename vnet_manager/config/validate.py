@@ -305,7 +305,13 @@ class ValidateConfig:
                 try:
                     ip_network(route["to"])
                 except ValueError:
-                    if route["to"] != "default":
+                    if route["to"] == "default":
+                        logger.debug(
+                            "Updating 'default' to destination for route {} on interface {} for machine "
+                            "{} to 0.0.0.0/0 for backwards compatibility".format(idx + 1, int_name, machine)
+                        )
+                        self._new_config["machines"][machine]["interfaces"][int_name]["routes"][idx]["to"] = "0.0.0.0/0"
+                    else:
                         logger.error(
                             "Invalid 'to' value {} for route {} on interface {} for machine {}{}".format(
                                 route["to"], idx + 1, int_name, machine, self.default_message
