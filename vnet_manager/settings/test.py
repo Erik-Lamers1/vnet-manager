@@ -15,7 +15,7 @@ CONFIG = {
                     "ipv6": "fd00:12::2/64",
                     "mac": "00:00:00:00:01:11",
                     "bridge": 0,
-                    "routes": [{"to": "default", "via": "192.168.0.1"}],
+                    "routes": [{"to": "172.16.0.0/24", "via": "172.16.0.1"}, {"to": "default", "via": "192.168.0.1"}],
                 }
             },
             "vlans": {
@@ -61,7 +61,7 @@ VALIDATED_CONFIG = {
                     "ipv6": "fd00:12::2/64",
                     "mac": "00:00:00:00:01:11",
                     "bridge": 0,
-                    "routes": [{"to": "default", "via": "192.168.0.1"}],
+                    "routes": [{"to": "172.16.0.0/24", "via": "172.16.0.1"}, {"to": "0.0.0.0/0", "via": "192.168.0.1"}],
                 }
             },
             "files": {"/root/vnet-manager/config/ripng/router100": "/etc/frr/"},
