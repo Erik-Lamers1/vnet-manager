@@ -446,7 +446,7 @@ class TestGenerateMachineNetplanConfig(VNetTestCase):
                         "dhcp4": "no",
                         "dhcp6": "no",
                         "match": {"macaddress": "00:00:00:00:01:11"},
-                        "routes": [{"to": "default", "via": "192.168.0.1"}],
+                        "routes": [{"to": "172.16.0.0/24", "via": "172.16.0.1"}, {"to": "default", "via": "192.168.0.1"}],
                         "set-name": "eth12",
                         "addresses": ["192.168.0.2/24", "fd00:12::2/64"],
                     },

@@ -314,49 +314,53 @@ class TestValidateInterfaceRoutes(VNetTestCase):
     def setUp(self) -> None:
         self.validator = ValidateConfig(deepcopy(settings.CONFIG))
         self.logger = self.set_up_patch("vnet_manager.config.validate.logger")
-        self.routes = [
-            {"to": "172.16.0.0/24", "via": "172.16.0.1"},
-            {"to": "default", "via": "192.168.0.1", "metric": 500},
-        ]
+        self.machine = "router100"
+        self.routes = deepcopy(settings.CONFIG["machines"]["router100"]["interfaces"]["eth12"]["routes"])
 
     def test_validate_routes_validates_correct_routes(self):
-        self.validator.validate_interface_routes(self.routes, "eth1", "test1")
+        self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertTrue(self.validator.config_validation_successful)
         self.assertFalse(self.logger.error.called)
 
     def test_validate_routes_fails_if_route_missing_to(self):
         del self.routes[0]["to"]
-        self.validator.validate_interface_routes(self.routes, "eth1", "test2")
+        self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "'to' keyword missing from route 1 on interface eth1 for machine test2{}".format(self.validator.default_message)
+            "'to' keyword missing from route 1 on interface eth12 for machine {}{}".format(self.machine, self.validator.default_message)
         )
 
     def test_validate_routes_fails_if_to_is_malformed(self):
         self.routes[0]["to"] = "1negen2.168.0.1"
-        self.validator.validate_interface_routes(self.routes, "eth1", "test3")
+        self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Invalid 'to' value 1negen2.168.0.1 for route 1 on interface eth1 for machine test3{}".format(self.validator.default_message)
+            "Invalid 'to' value 1negen2.168.0.1 for route 1 on interface eth12 for machine {}{}".format(
+                self.machine, self.validator.default_message
+            )
         )
 
     def test_validate_routes_fails_if_route_missing_via(self):
         del self.routes[0]["via"]
-        self.validator.validate_interface_routes(self.routes, "eth1", "test4")
+        self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "'via' keyword missing from route 1 on interface eth1 for machine test4{}".format(self.validator.default_message)
+            "'via' keyword missing from route 1 on interface eth12 for machine {}{}".format(self.machine, self.validator.default_message)
         )
 
     def test_validate_routes_fails_if_via_is_malformed(self):
         self.routes[1]["via"] = "blaap"
-        self.validator.validate_interface_routes(self.routes, "eth1", "test5")
+        self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Invalid 'via' value blaap (not an IP address) for route 2 on interface eth1 for machine test5{}".format(
-                self.validator.default_message
+            "Invalid 'via' value blaap (not an IP address) for route 2 on interface eth12 for machine {}{}".format(
+                self.machine, self.validator.default_message
             )
         )
+
+    def test_validate_routes_updates_default_route_to_quad_zero(self):
+        self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
+        self.assertEqual(self.validator.updated_config["machines"][self.machine]["interfaces"]["eth12"]["routes"][1]["to"], "0.0.0.0/0")
 
 
 class TestValidateConfigValidateVethConfig(VNetTestCase):
