@@ -69,6 +69,8 @@ PROVIDERS = {
             "frr",
             "frr-pythontools",
             "vlan",
+            "avahi-daemon",
+            "avahi-utils",
         ],
         "base_image": {  # Download info for the base image
             "os": "18.04",
