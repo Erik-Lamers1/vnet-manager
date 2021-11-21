@@ -127,6 +127,9 @@ class ActionManager:
         if "veths" in self.config:
             show_vnet_veth_interface_status(self.config)
 
+    def preform_status_action(self):
+        self.preform_show_action()
+
     def preform_start_action(self):
         bring_up_vnet_interfaces(self.config, sniffer=self.sniffer)
         change_machine_status(self.config, machines=self._machines, status="start")
