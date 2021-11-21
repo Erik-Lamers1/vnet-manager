@@ -7,12 +7,6 @@ from vnet_manager.conf import settings
 def parse_vnet_args(args: Sequence = None) -> Namespace:
     # Global Options
     parser = ArgumentParser(description="VNet-manager a virtual network manager - manages containers to create virtual networks")
-    parser.add_argument(
-        "-m",
-        "--machines",
-        nargs="*",
-        help="Just apply the actions on the following machine names " "(default is all machines defined in the config file)",
-    )
     parser.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions")
     logging_group = parser.add_argument_group("Verbosity options", "Control output verbosity (can be supplied multiple times)")
     logging_group.add_argument("-v", "--verbose", action="count", default=0, help="Be more verbose")
@@ -20,6 +14,12 @@ def parse_vnet_args(args: Sequence = None) -> Namespace:
 
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("config", help="The yaml config file to use")
+    parent_parser.add_argument(
+        "-m",
+        "--machines",
+        nargs="*",
+        help="Just apply the actions on the following machine names " "(default is all machines defined in the config file)",
+    )
 
     # Subcommand Options
     subparsers = parser.add_subparsers(dest="action", required=True)
