@@ -28,10 +28,7 @@ def main(args: Sequence = None) -> int:
         logger.critical("This program should only be run as root")
         return EX_NOPERM
     # Let the action manager handle the rest
-    manager = ActionManager(config_path=args.config, sniffer=args.sniffer, base_image=args.base_image, no_hosts=args.no_hosts)
-    if args.machines:
-        manager.machines = args.machines
-    return manager.execute(args.action)
+    return ActionManager(**vars(args)).execute(args.action)
 
 
 if __name__ == "__main__":

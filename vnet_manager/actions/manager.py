@@ -38,32 +38,19 @@ class ActionManager:
     Use this class to initiate specific VNet action in a controlled manner
     """
 
-    def __init__(self, config_path: str = None, sniffer: bool = False, base_image: bool = False, no_hosts: bool = False):
+    def __init__(self, config: str = None, sniffer: bool = False, base_image: bool = False, no_hosts: bool = False, machines: List[str] = None, **kwargs):
         """
         :param str config_path: The path to the config
         :param bool sniffer: Whether to enable sniffers on 'start'
         :param bool base_image: Whether to delete the base image on 'destroy'
         """
-        self.config_path = config_path
+        self.config_path = config
         self.config = None
         self.sniffer = sniffer
         self.base_image = base_image
         self.no_hosts = no_hosts
-        self._machines = None
+        self.machines = machines
         self._config_validated = False
-
-    @property
-    def machines(self) -> Optional[List[str]]:
-        return self._machines
-
-    @machines.setter
-    def machines(self, machines: List[str]):
-        """
-        Only preform actions on a certain amount of machines.
-        Note that this only applies to the machine actions, all general actions will ignore this value.
-        :param list machines: The machine names to preform actions on, defaults to all
-        """
-        self._machines = machines
 
     def execute(self, action: str) -> int:
         """
@@ -132,12 +119,12 @@ class ActionManager:
 
     def preform_start_action(self):
         bring_up_vnet_interfaces(self.config, sniffer=self.sniffer)
-        change_machine_status(self.config, machines=self._machines, status="start")
+        change_machine_status(self.config, machines=self.machines, status="start")
 
     def preform_stop_action(self):
-        change_machine_status(self.config, machines=self._machines, status="stop")
+        change_machine_status(self.config, machines=self.machines, status="stop")
         # If specific machines are specified, we don't want to mess with the interfaces
-        if self._machines:
+        if self.machines:
             logger.warning("Not bringing down VNet interfaces as we are only stopping specific machines, this may leave lingering sniffers")
         else:
             bring_down_vnet_interfaces(self.config)
@@ -146,7 +133,7 @@ class ActionManager:
         # Make sure the provider environments are correct
         ensure_vnet_lxc_environment(self.config)
         # Make the machines
-        create_machines(self.config, machines=self._machines)
+        create_machines(self.config, machines=self.machines)
         # Put user requested file on the machines
         put_files_on_machine(self.config)
         if not self.no_hosts:
@@ -161,9 +148,9 @@ class ActionManager:
             request_confirmation(prompt="Are you sure you want to delete the VNet base images (y/n)? ")
             destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
         else:
-            destroy_machines(self.config, machines=self._machines)
+            destroy_machines(self.config, machines=self.machines)
             # If specific machines are specified, we don't want to mess with the interfaces
-            if self._machines:
+            if self.machines:
                 logger.warning(
                     "Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers"
                 )
