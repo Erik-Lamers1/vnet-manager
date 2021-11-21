@@ -23,12 +23,11 @@ def parse_vnet_args(args: Sequence = None) -> Namespace:
 
     # Subcommand Options
     subparsers = parser.add_subparsers(dest="action", required=True)
-    show_parser = subparsers.add_parser("show", parents=[parent_parser])
+    show_parser = subparsers.add_parser("show", parents=[parent_parser], aliases=["status"])
     start_parser = subparsers.add_parser("start", parents=[parent_parser])
     start_parser.add_argument("-s", "--sniffer", action="store_true", help="Start a TCPdump sniffer on the VNet interfaces")
     start_parser.add_argument("-nh", "--no-hosts", action="store_true", help="Disable creation of /etc/hosts")
     stop_parser = subparsers.add_parser("stop", parents=[parent_parser])
-    status_parser = subparsers.add_parser("status", parents=[parent_parser])
     create_parser = subparsers.add_parser("create", parents=[parent_parser])
     destroy_parser = subparsers.add_parser("destroy", parents=[parent_parser])
     destroy_parser.add_argument("-b", "--base-image", action="store_true", help="Destroy the base image instead of the machines")
