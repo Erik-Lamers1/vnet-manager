@@ -38,7 +38,15 @@ class ActionManager:
     Use this class to initiate specific VNet action in a controlled manner
     """
 
-    def __init__(self, config: str = None, sniffer: bool = False, base_image: bool = False, no_hosts: bool = False, machines: List[str] = None, **kwargs):
+    def __init__(
+        self,
+        config: str = None,
+        sniffer: bool = False,
+        base_image: bool = False,
+        no_hosts: bool = False,
+        machines: List[str] = None,
+        **kwargs,
+    ):
         """
         :param str config_path: The path to the config
         :param bool sniffer: Whether to enable sniffers on 'start'
