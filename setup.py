@@ -7,6 +7,10 @@ VERSION = "0.9.1"
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
+# Get the requirements from requirements folder
+with open("requirements/base.txt", "r") as fh:
+    requirements = fh.read().splitlines()
+
 setup(
     name="vnet-manager",
     version=VERSION,
@@ -15,8 +19,7 @@ setup(
     packages=find_packages(exclude=["tools", "tools.*", "tests", "tests.*", "*.tests", "*.tests.*"]),
     author="Erik Lamers",
     license="MIT",
-    # PyLXD 2.2.11 is currently broken: https://github.com/lxc/pylxd/issues/404
-    install_requires=["colorama", "PyYAML", "tabulate", "pylxd==2.2.10", "pyroute2", "psutil", "distro"],
+    install_requires=requirements,
     entry_points={
         "console_scripts": [
             "vnet-manager = vnet_manager.vnet_manager:main",
