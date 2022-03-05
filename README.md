@@ -33,6 +33,10 @@ git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
 pip3 install vnet-manager
 cd ~/vnet-manager
 ```
+Optionally, vnet-manager can be installed from the cloned repo directly if you want to make changes to the repo locally;
+```bash
+python3 setup.py install
+```
 
 #### Setup LXD
 If you are running a clean LXD install you can import the provided preseed file;
@@ -68,6 +72,19 @@ $ vnet-manager create /path/to/your/config.yaml
 ### Installing Additional Packages
 The provider specific packages list can be found in the settings under [`PROVIDERS`](vnet_manager/settings/base.py). 
 Here you can specify which packages the host should have and which to install on the base container.
+### Extending settings
+The default [settings](vnet_manager/settings/base.py) file can be extended with anything you think should be added (or removed) to make your local project work.
+The way this can be done is similar to the way settings are loaded in Django, meaning you can set the `SETTINGS_MODULE` env var to let vnet-manager know you are using a custom settings module.
+For example, say we want to add support for Gentoo, you can create a custom setting file like this in `vnet_manager/settings/dev.py`;
+```python
+from .base import *  # pylint: disable=W0401
+
+PROVIDERS["lxc"]["supported_operating_systems"].append("gentoo")
+```
+Then set your `SETTINGS_MODULE` to point to this file
+```bash
+export SETTINGS_MODULE=vnet_manager.settings.dev
+```
 
 ## Development
 Opening pull requests for new features and bug fixes is highly appreciated!  
