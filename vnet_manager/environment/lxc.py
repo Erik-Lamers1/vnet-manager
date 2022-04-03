@@ -3,7 +3,7 @@ from logging import getLogger
 from time import sleep
 from typing import Tuple, AnyStr
 
-from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_image_from_container
+from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_image_from_container, destroy_lxc_image
 from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_vnet_lxc_profile, delete_vnet_lxc_profile
 from vnet_manager.operations.storage import check_if_lxc_storage_pool_exists, create_lxc_storage_pool, delete_lxc_storage_pool
 from vnet_manager.operations.machine import create_lxc_base_image_container, change_lxc_machine_status, destroy_lxc_machine
@@ -67,7 +67,9 @@ def cleanup_vnet_lxc_environment():
     Cleans up specific VNet LXC configuration
     No environments should be active when calling this function
     """
-    request_confirmation(message="Cleanup will delete the VNet LXC configurations, such as profile and storage pools")
+    request_confirmation(message="Cleanup will delete the VNet LXC configurations, such as base_image, profile and storage pools")
+    logger.info("Destroying VNet-manager base image")
+    destroy_lxc_image(settings.LXC_BASE_IMAGE_MACHINE_NAME, by_alias=True)
     logger.info("Cleaning up VNet LXC configuration")
     delete_vnet_lxc_profile(settings.LXC_VNET_PROFILE)
     delete_lxc_storage_pool(settings.LXC_STORAGE_POOL_NAME)
