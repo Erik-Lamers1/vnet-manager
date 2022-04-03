@@ -28,13 +28,16 @@ def ensure_vnet_lxc_environment(config: dict):
 
     # Check if we are on a supported OS
     if not check_for_supported_os("lxc"):
-        logger.critical("Unable to create LXC environment on your machine, OS not supported")
-        raise RuntimeError("OS not supported for provider LXC")
+        request_confirmation(
+            message="Unsupported OS detected, LXC is tested on the following systems; {}".format(
+                ", ".join(settings["PROVIDERS"]["lxc"]["supported_operating_systems"])
+            ),
+            prompt="Continue anyway? (y/n) ",
+        )
 
     # Check if all required packages have been installed
     if not check_for_installed_packages("lxc"):
-        logger.critical("Not all required host packages seem to be installed, please fix this before proceeding")
-        raise RuntimeError("Missing host packages")
+        request_confirmation(message="Missing APT packages detected, this might break operations", prompt="Continue anyway? (y/n) ")
 
     # Check if the storage pool exists
     if not check_if_lxc_storage_pool_exists(settings.LXC_STORAGE_POOL_NAME):

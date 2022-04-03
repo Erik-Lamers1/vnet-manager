@@ -23,6 +23,7 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         self.create_lxc_image_from_container = self.set_up_patch("vnet_manager.environment.lxc.create_lxc_image_from_container")
         self.destroy_lxc_machine = self.set_up_patch("vnet_manager.environment.lxc.destroy_lxc_machine")
         self.logger = self.set_up_patch("vnet_manager.environment.lxc.logger")
+        self.confirm = self.set_up_patch("vnet_manager.environment.lxc.request_confirmation")
 
     def test_ensure_vnet_lxc_environment_does_nothing_if_no_lxc_machines_in_config(self):
         self.config["machines"] = {}
@@ -30,18 +31,18 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         self.logger.debug.assert_called_once_with("Skipping LXC environment creation, no LXC machines in config")
         self.assertFalse(self.create_lxc_storage_pool.called)
 
-    def test_ensure_vnet_lxc_environment_throws_runtime_error_when_running_on_unsupported_os(self):
+    def test_ensure_vnet_lxc_environment_displays_warning_when_os_not_supported(self):
         self.check_for_supported_os.return_value = False
-        with self.assertRaises(RuntimeError):
-            ensure_vnet_lxc_environment(self.config)
-        self.logger.critical.assert_called_once_with("Unable to create LXC environment on your machine, OS not supported")
+        ensure_vnet_lxc_environment(self.config)
+        self.confirm.assert_called_once_with(
+            message="Unsupported OS detected, LXC is tested on the following systems; bionic, focal", prompt="Continue anyway? (y/n) "
+        )
 
-    def test_ensure_vnet_lxc_environment_throws_runtime_error_when_check_for_installed_packages_fails(self):
+    def test_ensure_vnet_lxc_environment_displays_warning_when_missing_apt_packages_detected(self):
         self.check_for_installed_packages.return_value = False
-        with self.assertRaises(RuntimeError):
-            ensure_vnet_lxc_environment(self.config)
-        self.logger.critical.assert_called_once_with(
-            "Not all required host packages seem to be installed, please fix this before proceeding"
+        ensure_vnet_lxc_environment(self.config)
+        self.confirm.assert_called_once_with(
+            message="Missing APT packages detected, this might break operations", prompt="Continue anyway? (y/n) "
         )
 
     def test_ensure_vnet_lxc_environment_does_not_call_create_vnet_storage_pool_if_it_exists(self):
