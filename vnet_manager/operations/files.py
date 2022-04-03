@@ -1,9 +1,9 @@
-from logging import getLogger
-from pylxd.exceptions import NotFound
-from os.path import isfile, isdir, join, basename
 from os import listdir
+from os.path import isfile, isdir, join, basename
 from sys import modules
 from typing import AnyStr
+from logging import getLogger
+from pylxd.exceptions import NotFound
 
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.conf import settings

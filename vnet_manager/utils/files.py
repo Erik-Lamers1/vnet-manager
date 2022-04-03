@@ -1,8 +1,8 @@
 from os.path import isfile, join
 from os import walk
-from yaml import safe_load
 from logging import getLogger
 from typing import AnyStr, List
+from yaml import safe_load
 
 logger = getLogger(__name__)
 

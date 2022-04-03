@@ -1,10 +1,10 @@
-from pylxd.exceptions import NotFound, LXDAPIException
 from sys import modules
 from logging import getLogger
-from tabulate import tabulate
 from time import sleep
-from yaml import safe_dump
 from typing import List
+from tabulate import tabulate
+from yaml import safe_dump
+from pylxd.exceptions import NotFound, LXDAPIException
 
 from vnet_manager.conf import settings
 from vnet_manager.operations.files import write_file_to_lxc_container

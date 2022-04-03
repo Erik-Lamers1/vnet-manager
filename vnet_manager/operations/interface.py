@@ -1,11 +1,11 @@
 import shlex
-from pyroute2 import IPRoute, NDB
+from typing import List
 from logging import getLogger
 from subprocess import check_call, CalledProcessError, Popen, DEVNULL
 from os.path import join
+from pyroute2 import IPRoute, NDB
 from psutil import process_iter
 from tabulate import tabulate
-from typing import List
 
 from vnet_manager.conf import settings
 from vnet_manager.utils.mac import random_mac_generator

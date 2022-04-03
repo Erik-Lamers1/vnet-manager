@@ -1,6 +1,6 @@
-from distro import codename
 from logging import getLogger
 from sys import modules
+from distro import codename
 
 from vnet_manager.conf import settings
 
