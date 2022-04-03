@@ -72,7 +72,7 @@ def cleanup_vnet_lxc_environment():
     """
     request_confirmation(message="Cleanup will delete the VNet LXC configurations, such as base_image, profile and storage pools")
     logger.info("Destroying VNet-manager base image")
-    destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
+    destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True, wait=True)
     logger.info("Cleaning up VNet LXC configuration")
     delete_vnet_lxc_profile(settings.LXC_VNET_PROFILE)
     delete_lxc_storage_pool(settings.LXC_STORAGE_POOL_NAME)

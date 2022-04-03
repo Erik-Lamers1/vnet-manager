@@ -128,4 +128,4 @@ class TestDestroyLXCImage(VNetTestCase):
 
     def test_destroy_lxc_image_calls_image_delete_method(self):
         destroy_lxc_image("test")
-        self.image.delete.assert_called_once_with()
+        self.image.delete.assert_called_once_with(wait=False)

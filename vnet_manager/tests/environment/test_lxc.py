@@ -103,7 +103,7 @@ class TestCleanupVNetLXCEnvironment(VNetTestCase):
         )
         self.delete_vnet_lxc_profile.assert_called_once_with(settings.LXC_VNET_PROFILE)
         self.delete_lxc_storage_pool.assert_called_once_with(settings.LXC_STORAGE_POOL_NAME)
-        self.destroy_image.assert_called_once_with(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
+        self.destroy_image.assert_called_once_with(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True, wait=True)
 
 
 class TestConfigureLXCBaseMachine(VNetTestCase):

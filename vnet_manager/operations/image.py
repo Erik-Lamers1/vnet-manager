@@ -49,11 +49,12 @@ def create_lxc_image_from_container(container: str, alias: str = None, descripti
         img.add_alias(alias, description)
 
 
-def destroy_lxc_image(image: str, by_alias: bool = True):
+def destroy_lxc_image(image: str, by_alias: bool = True, wait: bool = False):
     """
     Destroy a LXC image
     :param str image: The fingerprint or alias of the image to destroy
     :param bool by_alias: Search by alias instead of fingerprint
+    :param bool wait: Whether to wait for deletion to be completed or return after the delete call
     """
     # Check if it even exists
     if not check_if_lxc_image_exists(image, by_alias=by_alias):
@@ -63,4 +64,4 @@ def destroy_lxc_image(image: str, by_alias: bool = True):
     logger.info("Deleting LXC image {}".format(image))
     client = get_lxd_client()
     image = client.images.get_by_alias(image) if by_alias else client.images.get(image)
-    image.delete()
+    image.delete(wait=wait)
