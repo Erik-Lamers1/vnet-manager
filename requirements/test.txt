@@ -7,3 +7,4 @@ black==22.3.0
 codecov==2.1.12
 pytest-cov==2.12.1
 yamllint==1.26.3
+click==8.0.1
