@@ -532,6 +532,4 @@ class TestStartTcpdumpOnVNetInterface(VNetTestCase):
 
     def test_start_tcpdump_on_vnet_interface_makes_correct_popen_call(self):
         start_tcpdump_on_vnet_interface("dev1")
-        self.popen.assert_called_once_with(
-            shlex.split("tcpdump -i dev1 -U -w {}".format(join(settings.VNET_SNIFFER_PCAP_DIR, "dev1.pcap")))
-        )
+        self.popen.assert_called_once_with(shlex.split(f"tcpdump -i dev1 -U -w {join(settings.VNET_SNIFFER_PCAP_DIR, 'dev1.pcap')}"))

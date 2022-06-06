@@ -122,8 +122,8 @@ MACHINE_TYPE_PROVIDER_MAPPING = {
 }
 MACHINE_TYPE_CONFIG_FUNCTION_MAPPING = {
     # For each machine type specify the type specific functions that should be called for it
-    "host": ["disable_{}_ip_forwarding".format(MACHINE_TYPE_PROVIDER_MAPPING["router"])],
-    "router": ["enable_{}_ip_forwarding".format(MACHINE_TYPE_PROVIDER_MAPPING["router"])],
+    "host": [f"disable_{MACHINE_TYPE_PROVIDER_MAPPING['router']}_ip_forwarding"],
+    "router": [f"enable_{MACHINE_TYPE_PROVIDER_MAPPING['router']}_ip_forwarding"],
 }
 VALID_STATUSES = ["start", "stop"]
 VNET_FORCE_ENV_VAR = "VNET_FORCE"
@@ -160,7 +160,7 @@ _{name}_completions() {{
 }}
 complete -F _{name}_completions {name}
 """
-VNET_BASH_COMPLETION_PATH = "/etc/bash_completion.d/{}.bash".format(PYTHON_PACKAGE_NAME)
+VNET_BASH_COMPLETION_PATH = f"/etc/bash_completion.d/{PYTHON_PACKAGE_NAME}.bash"
 
 # LXC specific settings
 LXC_MAX_STATUS_WAIT_ATTEMPTS = 15

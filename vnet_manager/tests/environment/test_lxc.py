@@ -49,7 +49,7 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         self.check_if_lxc_storage_pool_exists.return_value = True
         ensure_vnet_lxc_environment(self.config)
         self.assertFalse(self.create_lxc_storage_pool.called)
-        self.logger.debug.has_calls(call("VNet LXC storage pool {} found".format(settings.LXC_STORAGE_POOL_NAME)))
+        self.logger.debug.has_calls(call(f"VNet LXC storage pool {settings.LXC_STORAGE_POOL_NAME} found"))
 
     def test_ensure_vnet_lxc_environment_calls_create_vnet_storage_pool_if_does_not_exist(self):
         self.check_if_lxc_storage_pool_exists.return_value = False
@@ -60,7 +60,7 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         self.check_if_lxc_profile_exists.return_value = True
         ensure_vnet_lxc_environment(self.config)
         self.assertFalse(self.create_vnet_lxc_profile.called)
-        self.logger.debug.has_calls(call("VNet profile {} found".format(settings.LXC_VNET_PROFILE)))
+        self.logger.debug.has_calls(call(f"VNet profile {settings.LXC_VNET_PROFILE} found"))
 
     def test_ensure_vnet_lxc_environment_calls_create_vnet_lxc_profile_if_it_does_not_exist(self):
         self.check_if_lxc_profile_exists.return_value = False
@@ -75,7 +75,7 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         self.assertFalse(self.configure_lxc_base_machine.called)
         self.assertFalse(self.create_lxc_image_from_container.called)
         self.assertFalse(self.destroy_lxc_machine.called)
-        self.logger.debug.has_calls(call("Base image {} found".format(settings.LXC_BASE_IMAGE_ALIAS)))
+        self.logger.debug.has_calls(call(f"Base image {settings.LXC_BASE_IMAGE_ALIAS} found"))
 
     def test_ensure_vnet_lxc_environment_calls_base_image_creation_funtions_when_it_does_not_exist(self):
         self.check_if_lxc_image_exists.return_value = False

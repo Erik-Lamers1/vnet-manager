@@ -373,7 +373,7 @@ class TestCreateLXCBaseImageContainer(VNetTestCase):
                     "parent": "lxdbr0",
                     "type": "nic",
                     "nictype": "bridged",
-                    "host_name": "{}-eth0".format(settings.LXC_BASE_IMAGE_MACHINE_NAME),
+                    "host_name": f"{settings.LXC_BASE_IMAGE_MACHINE_NAME}-eth0",
                 }
             },
             "source": {

@@ -25,7 +25,7 @@ def show_status(config: dict):
     for name, info in config["machines"].items():
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[info["type"]]
         # Call the relevant provider get_%s_machine_status function
-        statuses.append(getattr(modules[__name__], "get_{}_machine_status".format(provider))(name))
+        statuses.append(getattr(modules[__name__], f"get_{provider}_machine_status")(name))
     print(tabulate(statuses, headers=header, tablefmt="pretty"))
 
 
@@ -61,17 +61,17 @@ def wait_for_lxc_machine_status(container, status: str):
     :param str status: The status to wait for
     :raise TimeoutError if wait time expires
     """
-    logger.debug("Waiting for LXC container {} to get a {} status".format(container.name, status))
+    logger.debug(f"Waiting for LXC container {container.name} to get a {status} status")
     for i in range(1, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
         # Actually ask for the container.state().status, because container.status is a static value
         if container.state().status.lower() == status.lower():
-            logger.debug("Container successfully converged to {} status".format(status))
+            logger.debug(f"Container successfully converged to {status} status")
             return
         # Container not in desired state yet, wait and try again
         sleep_time = i * (settings.LXC_STATUS_WAIT_SLEEP * settings.LXC_STATUS_BACKOFF_MULTIPLIER)
-        logger.info("Container {} not yet in {} status, waiting for {} seconds".format(container.name, status, sleep_time))
+        logger.info(f"Container {container.name} not yet in {status} status, waiting for {sleep_time} seconds")
         sleep(sleep_time)
-    raise TimeoutError("Wait time for container {} to converge to {} status expired, giving up".format(container.name, status))
+    raise TimeoutError(f"Wait time for container {container.name} to converge to {status} status expired, giving up")
 
 
 def change_machine_status(config: dict, status: str = "stop", machines: List[str] = None):
@@ -83,7 +83,7 @@ def change_machine_status(config: dict, status: str = "stop", machines: List[str
     """
     # Check for valid status change
     if status not in settings.VALID_STATUSES:
-        raise NotImplementedError("Requested machine status change {} unknown".format(status))
+        raise NotImplementedError(f"Requested machine status change {status} unknown")
 
     # Get all the machines from the config if not already provided
     machines = machines if machines else config["machines"].keys()
@@ -92,13 +92,13 @@ def change_machine_status(config: dict, status: str = "stop", machines: List[str
     for machine in machines:
         # First check if the machine exists
         if machine not in config["machines"]:
-            logger.error("Tried to {} machine {}, but there is no config entry for it, skipping...".format(status, machine))
+            logger.error(f"Tried to {status} machine {machine}, but there is no config entry for it, skipping...")
             continue
         # Get the provider
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][machine]["type"]]
         # Call the provider change_status function
-        logger.info("{} machine {} with provider {}".format("Starting" if status == "start" else "Stopping", machine, provider))
-        getattr(modules[__name__], "change_{}_machine_status".format(provider))(machine, status=status)
+        logger.info(f"{'Starting' if status == 'start' else 'Stopping'} machine {machine} with provider {provider}")
+        getattr(modules[__name__], f"change_{provider}_machine_status")(machine, status=status)
 
 
 def change_lxc_machine_status(machine: str, status: str = "stop"):
@@ -111,7 +111,7 @@ def change_lxc_machine_status(machine: str, status: str = "stop"):
     try:
         machine = client.containers.get(machine)
     except NotFound:
-        logger.error("Tried to change machine status of LXC container {}, but it doesn't exist!".format(machine))
+        logger.error(f"Tried to change machine status of LXC container {machine}, but it doesn't exist!")
         return
     # Change the status
     if status == "stop":
@@ -121,16 +121,16 @@ def change_lxc_machine_status(machine: str, status: str = "stop"):
             # On start we wait, as we might catch invalid configs
             machine.start(wait=True)
         except LXDAPIException as e:
-            logger.error("Unable to start LXC container {}, got error: {}".format(machine.name, e))
+            logger.error(f"Unable to start LXC container {machine.name}, got error: {e}")
             return
     # Take a short nap after issuing the start/stop command, so we might pass the first status check
     sleep(1)
     try:
         required_state = "Stopped" if status == "stop" else "Running"
         wait_for_lxc_machine_status(machine, required_state)
-        logger.debug("LXC container {} is {}".format(machine.name, machine.state().status))
+        logger.debug(f"LXC container {machine.name} is {machine.state().status}")
     except TimeoutError:
-        logger.error("Unable to change LXC status container {}, got timeout after issuing {} command".format(machine.name, status))
+        logger.error(f"Unable to change LXC status container {machine.name}, got timeout after issuing {status} command")
 
 
 def create_machines(config: dict, machines: List[str] = None):
@@ -157,24 +157,22 @@ def create_lxc_machines_from_base_image(config: dict, containers: List[str]):
     for container in containers:
         # Check if the requested machine name is present in the config
         if container not in config["machines"]:
-            logger.error(
-                "Tried to get provider for container {}, but the container was not found in the config, skipping".format(container)
-            )
+            logger.error(f"Tried to get provider for container {container}, but the container was not found in the config, skipping")
         # Quick check if the machine already exists
         elif check_if_lxc_machine_exists(container):
-            logger.error("A LXC container with the name {} already exists, skipping".format(container))
+            logger.error(f"A LXC container with the name {container} already exists, skipping")
             containers_already_created = True
         # Check if LXC is the provider
         elif settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][container]["type"]].lower() == "lxc":
-            logger.debug("Selecting LXC machine {} for creation".format(container))
+            logger.debug(f"Selecting LXC machine {container} for creation")
             containers_to_create.append(container)
         else:
-            logger.debug("Machine {} is not provided by LXC, skipping LXC container creation".format(container))
+            logger.debug(f"Machine {container} is not provided by LXC, skipping LXC container creation")
 
     # Create it
     client = get_lxd_client()
     for container in containers_to_create:
-        logger.debug("Generating LXC config for container {}".format(container))
+        logger.debug(f"Generating LXC config for container {container}")
         # Interface config
         # First add eth0 (default), which does nothing
         device_config = {"eth0": {"type": "none"}}
@@ -182,8 +180,8 @@ def create_lxc_machines_from_base_image(config: dict, containers: List[str]):
         for inet_name, inet_config in config["machines"][container]["interfaces"].items():
             device_config[inet_name] = {
                 "name": inet_name,  # The name of the interface inside the instance
-                "host_name": "{}-{}".format(container, inet_name),  # The name of the interface inside the host
-                "parent": "{}{}".format(settings.VNET_BRIDGE_NAME, inet_config["bridge"]),  # The name of the host device
+                "host_name": f"{container}-{inet_name}",  # The name of the interface inside the host
+                "parent": f"{settings.VNET_BRIDGE_NAME}{inet_config['bridge']}",  # The name of the host device
                 "type": "nic",
                 "nictype": "bridged",
                 "hwaddr": inet_config["mac"],
@@ -196,7 +194,7 @@ def create_lxc_machines_from_base_image(config: dict, containers: List[str]):
             "devices": device_config,
             "profiles": [settings.LXC_VNET_PROFILE],
         }
-        logger.info("Creating LXC container {}".format(container))
+        logger.info(f"Creating LXC container {container}")
         # TODO: Make this nicer by not waiting here but doing the configuration after we've created all containers
         client.containers.create(container_config, wait=True)
         place_lxc_interface_configuration_on_container(config, container)
@@ -220,19 +218,19 @@ def destroy_machines(config: dict, machines: List[str] = None):
 
     # Ask the user if he is sure
     request_confirmation(
-        message="Requesting confirmation of deletion for the following machines: {}".format(", ".join(machines)),
+        message=f"Requesting confirmation of deletion for the following machines: {', '.join(machines)}",
         prompt="This operation cannot be undone. Are you sure?! (yes/no) ",
     )
 
     for machine in machines:
         # First check if the machine exists
         if machine not in config["machines"]:
-            logger.error("Tried to get the config for machine {}, but there is no config entry for this machine, skipping".format(machine))
+            logger.error(f"Tried to get the config for machine {machine}, but there is no config entry for this machine, skipping")
             continue
         # Get the provider
         provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[config["machines"][machine]["type"]]
         # Call the provider destroy function
-        getattr(modules[__name__], "destroy_{}_machine".format(provider))(machine)
+        getattr(modules[__name__], f"destroy_{provider}_machine")(machine)
 
 
 def destroy_lxc_machine(machine: str, wait: bool = False):
@@ -245,13 +243,13 @@ def destroy_lxc_machine(machine: str, wait: bool = False):
     try:
         container = client.containers.get(machine)
     except NotFound:
-        logger.warning("Tried to delete LXC machine {}, but it does not exist. Maybe it was already deleted?".format(machine))
+        logger.warning(f"Tried to delete LXC machine {machine}, but it does not exist. Maybe it was already deleted?")
         return
     # Check if the container is still running
     if container.status.lower() == "running":
-        logger.info("Stopping LXC container {}".format(machine))
+        logger.info(f"Stopping LXC container {machine}")
         container.stop(wait=True)
-    logger.info("Deleting LXC container {}".format(machine))
+    logger.info(f"Deleting LXC container {machine}")
     container.delete(wait=wait)
 
 
@@ -281,7 +279,7 @@ def create_lxc_base_image_container():
                 "parent": "lxdbr0",
                 "type": "nic",
                 "nictype": "bridged",
-                "host_name": "{}-eth0".format(settings.LXC_BASE_IMAGE_MACHINE_NAME),
+                "host_name": f"{settings.LXC_BASE_IMAGE_MACHINE_NAME}-eth0",
             }
         },
         "source": {
@@ -330,10 +328,10 @@ def configure_lxc_ip_forwarding(container_name: str, enable: bool = True):
     :param bool enable: Whether to enable IP forwarding or disable it
     """
     value = 1 if enable else 0
-    logger.info("{} IP forwarding on LXC container {}".format("Enabling" if enable else "Disabling", container_name))
-    write_file_to_lxc_container(container_name, "/etc/sysctl.d/20-net.ipv4.ip_forward.conf", "net.ipv4.ip_forward={}\n".format(value))
+    logger.info(f"{'Enabling' if enable else 'Disabling'} IP forwarding on LXC container {container_name}")
+    write_file_to_lxc_container(container_name, "/etc/sysctl.d/20-net.ipv4.ip_forward.conf", f"net.ipv4.ip_forward={value}\n")
     write_file_to_lxc_container(
-        container_name, "/etc/sysctl.d/20-net.ipv6.conf.all.forwarding.conf", "net.ipv6.conf.all.forwarding={}\n".format(value)
+        container_name, "/etc/sysctl.d/20-net.ipv6.conf.all.forwarding.conf", f"net.ipv6.conf.all.forwarding={value}\n"
     )
 
 
@@ -343,9 +341,9 @@ def place_lxc_interface_configuration_on_container(config: dict, container: str)
     :param dict config: The config generated by get_config()
     :param str container: The name of the container to place the interfaces configuration on
     """
-    logger.debug("Generating network config for LXC container {}".format(container))
+    logger.debug(f"Generating network config for LXC container {container}")
     network_conf = generate_machine_netplan_config(config, container)
-    logger.info("Placing network config on LXC container {}".format(container))
+    logger.info(f"Placing network config on LXC container {container}")
     write_file_to_lxc_container(container, settings.VNET_NETPLAN_CONFIG_FILE_PATH, safe_dump(network_conf))
 
 

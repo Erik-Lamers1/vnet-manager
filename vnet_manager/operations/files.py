@@ -16,7 +16,7 @@ def put_files_on_machine(config: dict):
     for name, data in config["machines"].items():
         if "files" in data:
             provider = settings.MACHINE_TYPE_PROVIDER_MAPPING[data["type"]]
-            logger.info("Putting requested files on machine {}".format(name))
+            logger.info(f"Putting requested files on machine {name}")
             select_files_and_put_on_machine(name, data["files"], provider)
 
 
@@ -30,17 +30,15 @@ def select_files_and_put_on_machine(machine: str, files: dict, provider: str):
     # Get the files
     for host_path, guest_path in files.items():
         if isdir(host_path):
-            logger.debug("Getting files from file dir {}".format(host_path))
+            logger.debug(f"Getting files from file dir {host_path}")
             files = [join(host_path, f) for f in listdir(host_path)]
             for file_path in files:
                 # Place the file on the machine
-                getattr(modules[__name__], "place_file_on_{}_machine".format(provider))(
-                    machine, file_path, join(guest_path, basename(file_path))
-                )
+                getattr(modules[__name__], f"place_file_on_{provider}_machine")(machine, file_path, join(guest_path, basename(file_path)))
         elif isfile(host_path):
-            getattr(modules[__name__], "place_file_on_{}_machine".format(provider))(machine, host_path, guest_path)
+            getattr(modules[__name__], f"place_file_on_{provider}_machine")(machine, host_path, guest_path)
         else:
-            logger.error("Tried to select file {} for copying, but it is neither a file nor a directory".format(host_path))
+            logger.error(f"Tried to select file {host_path} for copying, but it is neither a file nor a directory")
 
 
 def write_file_to_lxc_container(container: str, file_path: str, data: AnyStr):
@@ -54,7 +52,7 @@ def write_file_to_lxc_container(container: str, file_path: str, data: AnyStr):
         machine = get_lxd_client().containers.get(container)
         machine.files.put(file_path, data)
     except NotFound:
-        logger.error("Tried to write data to path {} on LXC container {}, but the container does not exist".format(file_path, container))
+        logger.error(f"Tried to write data to path {file_path} on LXC container {container}, but the container does not exist")
 
 
 def place_file_on_lxc_machine(container: str, host_file_path: str, guest_file_path: str):
@@ -66,14 +64,14 @@ def place_file_on_lxc_machine(container: str, host_file_path: str, guest_file_pa
     """
     # Some sanity checks
     if not isfile(host_file_path):
-        logger.error("Tried to copy {} to LXC container {}, but the file doesn't exists".format(host_file_path, container))
+        logger.error(f"Tried to copy {host_file_path} to LXC container {container}, but the file doesn't exists")
         return
 
     # Get the file contents
     with open(host_file_path, "r") as fh:
         file_data = fh.read()
     # Place the file content
-    logger.debug("Copying {} to container {} at path {}".format(host_file_path, container, guest_file_path))
+    logger.debug(f"Copying {host_file_path} to container {container} at path {guest_file_path}")
     write_file_to_lxc_container(container, guest_file_path, file_data)
 
 
@@ -88,9 +86,9 @@ def generate_vnet_hosts_file(config: dict):
     for machine_name, machine_data in config["machines"].items():
         for int_data in machine_data["interfaces"].values():
             if "ipv4" in int_data:
-                vnet_hosts.append("{}   {}".format(int_data["ipv4"].split("/")[0], machine_name))
+                vnet_hosts.append(f"{int_data['ipv4'].split('/')[0]}   {machine_name}")
             if "ipv6" in int_data:
-                vnet_hosts.append("{}   {}".format(int_data["ipv6"].split("/")[0], machine_name))
+                vnet_hosts.append(f"{int_data['ipv6'].split('/')[0]}   {machine_name}")
     vnet_etc_hosts_data = settings.VNET_STATIC_HOSTS_FILE_PART + "\n".join(vnet_hosts)
     write_file_to_disk(settings.VNET_ETC_HOSTS_FILE_PATH, vnet_etc_hosts_data)
 

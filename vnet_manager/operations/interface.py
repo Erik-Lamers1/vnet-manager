@@ -104,7 +104,7 @@ def create_vnet_interface(ifname: str):
     Creates a VNet bridge interface
     :param str ifname: The name of the interface to create
     """
-    logger.info("Creating VNet bridge interface {}".format(ifname))
+    logger.info(f"Creating VNet bridge interface {ifname}")
     IPRoute().link("add", ifname=ifname, kind="bridge")
     # Bring up the interface
     configure_vnet_interface(ifname)
@@ -127,17 +127,17 @@ def create_vnet_interface_iptables_rules(ifname: str):
     So this function makes some IPtables rules to make sure the VNet interface cannot talk to the outside.
     :param str ifname: The interface the create IPtables rules for
     """
-    rule = "OUTPUT -o {} -j DROP".format(ifname)
+    rule = f"OUTPUT -o {ifname} -j DROP"
     # First we check if the rule already exists
     try:
-        check_call(shlex.split("iptables -C {}".format(rule)), stderr=DEVNULL)
-        logger.debug("IPtables DROP rule for VNet interface {} already exists, skipping creation".format(ifname))
+        check_call(shlex.split(f"iptables -C {rule}"), stderr=DEVNULL)
+        logger.debug(f"IPtables DROP rule for VNet interface {ifname} already exists, skipping creation")
     except CalledProcessError:
-        logger.info("Creating IPtables DROP rule to the outside world for VNet interface {}".format(ifname))
+        logger.info(f"Creating IPtables DROP rule to the outside world for VNet interface {ifname}")
         try:
-            check_call(shlex.split("iptables -A {}".format(rule)))
+            check_call(shlex.split(f"iptables -A {rule}"))
         except CalledProcessError as e:
-            logger.error("Unable to create IPtables rule, got output: {}".format(e.output))
+            logger.error(f"Unable to create IPtables rule, got output: {e.output}")
 
 
 def configure_vnet_interface(ifname: str):
@@ -161,7 +161,7 @@ def configure_veth_interface(name: str, data: dict):
     :param str name: The name of the veth interface
     :param dict data: The veth interface data (bridge name)
     """
-    logger.info("Creating VNet veth interface {}".format(name))
+    logger.info(f"Creating VNet veth interface {name}")
     ip = IPRoute()
     dev = ip.link_lookup(ifname=name)[0]
     bridge = ip.link_lookup(ifname=data["bridge"])[0]
@@ -200,7 +200,7 @@ def ensure_vnet_veth_interfaces(config: dict):
     for name, data in config["veths"].items():
         # Set STP on the master if required
         if "stp" in data:
-            logger.info("{} STP on VNet interface {}".format("Enabling" if data["stp"] else "Disabling", data["bridge"]))
+            logger.info(f"{'Enabling' if data['stp'] else 'Disabling'} STP on VNet interface {data['bridge']}")
             state = 1 if data["stp"] else 0
             nbd = NDB(log=False)
             with nbd.interfaces[data["bridge"]] as bridge:
@@ -221,7 +221,7 @@ def check_if_sniffer_exists(ifname: str) -> bool:
     for process in process_iter():
         process_line = process.cmdline()
         if "tcpdump" in process_line and ifname in process_line:
-            logger.debug("A TCPdump sniffer for interface {} already exists".format(ifname))
+            logger.debug(f"A TCPdump sniffer for interface {ifname} already exists")
             return True
     return False
 
@@ -236,16 +236,16 @@ def bring_down_vnet_interfaces(config: dict):
     if "veths" in config:
         for name in config["veths"].keys():
             if check_if_interface_exists(name):
-                logger.info("Bringing down VNet veth interface {}".format(name))
+                logger.info(f"Bringing down VNet veth interface {name}")
                 ip.link("set", ifname=name, state="down")
     for ifname in get_vnet_interface_names_from_config(config):
         # Set the interface to down status
         if check_if_interface_exists(ifname):
-            logger.info("Bringing down VNet interface {}".format(ifname))
+            logger.info(f"Bringing down VNet interface {ifname}")
             ip.link("set", ifname=ifname, state="down")
         else:
             # Device doesn't exist
-            logger.warning("Tried to bring down VNet interface {}, but the interface doesn't exist".format(ifname))
+            logger.warning(f"Tried to bring down VNet interface {ifname}, but the interface doesn't exist")
 
 
 def delete_vnet_interfaces(config: dict):
@@ -258,16 +258,16 @@ def delete_vnet_interfaces(config: dict):
         for name, data in config["veths"].items():
             # Veth interfaces are deleted in pairs, so we only delete the ones with a peer
             if "peer" in data and check_if_interface_exists(name):
-                logger.info("Deleting VNet veth interface {}".format(name))
+                logger.info(f"Deleting VNet veth interface {name}")
                 ip.link("del", ifname=name)
     for ifname in get_vnet_interface_names_from_config(config):
         # Delete the interface
         if check_if_interface_exists(ifname):
-            logger.info("Deleting VNet interface {}".format(ifname))
+            logger.info(f"Deleting VNet interface {ifname}")
             ip.link("del", ifname=ifname)
         else:
             # Device doesn't exist
-            logger.info("Tried to delete VNet interface {}, but it is already gone. That's okay".format(ifname))
+            logger.info(f"Tried to delete VNet interface {ifname}, but it is already gone. That's okay")
 
 
 def start_tcpdump_on_vnet_interface(ifname: str):
@@ -275,6 +275,6 @@ def start_tcpdump_on_vnet_interface(ifname: str):
     Starts a tcpdump process on a vnet interface
     :param str ifname: The interface to start the tcpdump on
     """
-    path = join(settings.VNET_SNIFFER_PCAP_DIR, "{}.pcap".format(ifname))
-    logger.info("Starting sniffer on VNet interface {}, PCAP location: {}".format(ifname, path))
-    Popen(shlex.split("tcpdump -i {} -U -w {}".format(ifname, path)))
+    path = join(settings.VNET_SNIFFER_PCAP_DIR, f"{ifname}.pcap")
+    logger.info(f"Starting sniffer on VNet interface {ifname}, PCAP location: {path}")
+    Popen(shlex.split(f"tcpdump -i {ifname} -U -w {path}"))

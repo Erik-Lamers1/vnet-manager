@@ -44,14 +44,14 @@ def ensure_vnet_lxc_environment(config: dict):
         logger.info("VNet LXC storage pool does not exist, creating it")
         create_lxc_storage_pool(name=settings.LXC_STORAGE_POOL_NAME, driver=settings.LXC_STORAGE_POOL_DRIVER)
     else:
-        logger.debug("VNet LXC storage pool {} found".format(settings.LXC_STORAGE_POOL_NAME))
+        logger.debug(f"VNet LXC storage pool {settings.LXC_STORAGE_POOL_NAME} found")
 
     # Check if the profile exists
     if not check_if_lxc_profile_exists(settings.LXC_VNET_PROFILE):
         logger.info("VNet LXC profile does not exist, creating it")
         create_vnet_lxc_profile(settings.LXC_VNET_PROFILE)
     else:
-        logger.debug("VNet profile {} found".format(settings.LXC_VNET_PROFILE))
+        logger.debug(f"VNet profile {settings.LXC_VNET_PROFILE} found")
 
     # Check if the base image exists
     if not check_if_lxc_image_exists(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True):
@@ -62,7 +62,7 @@ def ensure_vnet_lxc_environment(config: dict):
         create_lxc_image_from_container(settings.LXC_BASE_IMAGE_MACHINE_NAME, alias=settings.LXC_BASE_IMAGE_ALIAS)
         destroy_lxc_machine(settings.LXC_BASE_IMAGE_MACHINE_NAME, wait=False)
     else:
-        logger.debug("Base image {} found".format(settings.LXC_BASE_IMAGE_ALIAS))
+        logger.debug(f"Base image {settings.LXC_BASE_IMAGE_ALIAS} found")
 
 
 def cleanup_vnet_lxc_environment():
@@ -83,7 +83,7 @@ def configure_lxc_base_machine():
     Configure the LXC base machine to get a fully functional VNet base machine which we can make an image from
     :raises RuntimeError: If the base machine is started without networking/dns
     """
-    logger.info("Configuring LXC base machine {}, this might take a while".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))
+    logger.info(f"Configuring LXC base machine {settings.LXC_BASE_IMAGE_MACHINE_NAME}, this might take a while")
     client = get_lxd_client()
     machine = client.containers.get(settings.LXC_BASE_IMAGE_MACHINE_NAME)
 
@@ -140,4 +140,4 @@ def configure_lxc_base_machine():
     )
     # All done, stop the container
     machine.stop(wait=True)
-    logger.debug("LXC base machine {} successfully configured".format(settings.LXC_BASE_IMAGE_MACHINE_NAME))
+    logger.debug(f"LXC base machine {settings.LXC_BASE_IMAGE_MACHINE_NAME} successfully configured")

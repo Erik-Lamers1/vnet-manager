@@ -78,7 +78,7 @@ class TestSelectFilesAndPutOnMachine(VNetTestCase):
         self.is_file.return_value = False
         select_files_and_put_on_machine(self.machine, self.files, "lxc")
         self.logger.error.assert_called_once_with(
-            "Tried to select file {} for copying, but it is neither a file nor a directory".format(next(iter(self.files)))
+            f"Tried to select file {next(iter(self.files))} for copying, but it is neither a file nor a directory"
         )
 
 
