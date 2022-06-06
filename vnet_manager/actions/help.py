@@ -12,9 +12,9 @@ def display_help_for_action(action: str) -> None:
     """
     # First check if we have help text for this action
     if action not in settings.HELP_TEXT_ACTION_MAPPING:
-        logger.warning("No help text available for action {}".format(action))
+        logger.warning(f"No help text available for action {action}")
         return
 
     # Display the help text
-    logger.debug("Displaying help text for action {}".format(action))
+    logger.debug(f"Displaying help text for action {action}")
     print(settings.HELP_TEXT_ACTION_MAPPING[action])

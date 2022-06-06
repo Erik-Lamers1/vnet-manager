@@ -57,16 +57,14 @@ class TestValidateConfigValidateSwitchConfig(VNetTestCase):
         del self.validator.config["switches"]
         self.validator.validate_switch_config()
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with("Config item 'switches' missing{}".format(self.validator.default_message))
+        self.logger.error.assert_called_once_with(f"Config item 'switches' missing{self.validator.default_message}")
 
     def test_validate_switch_config_fails_when_switch_config_not_a_int(self):
         self.validator.config["switches"] = "os3"
         self.validator.validate_switch_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Config item 'switches: {}' does not seem to be an integer{}".format(
-                self.validator.config["switches"], self.validator.default_message
-            )
+            f"Config item 'switches: {self.validator.config['switches']}' does not seem to be an integer{self.validator.default_message}"
         )
 
 
@@ -90,21 +88,21 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         del self.validator.config["machines"]
         self.validator.validate_machine_config()
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with("Config item 'machines' missing{}".format(self.validator.default_message))
+        self.logger.error.assert_called_once_with(f"Config item 'machines' missing{self.validator.default_message}")
 
     def test_validate_machine_config_fails_when_machine_config_not_a_dict(self):
         self.validator.config["machines"] = 42
         self.validator.validate_machine_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Machines config is not a dict, this means the user config is incorrect{}".format(self.validator.default_message)
+            f"Machines config is not a dict, this means the user config is incorrect{self.validator.default_message}"
         )
 
     def test_validate_machine_config_fails_when_machine_type_not_present(self):
         del self.validator.config["machines"]["router100"]["type"]
         self.validator.validate_machine_config()
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with("Type not found for machine router100{}".format(self.validator.default_message))
+        self.logger.error.assert_called_once_with(f"Type not found for machine router100{self.validator.default_message}")
 
     def test_validate_machine_config_fails_when_machine_type_not_in_supported_machine_types(self):
         self.validator.config["machines"]["router100"]["type"] = "banana"
@@ -120,9 +118,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.config["machines"]["router100"]["files"] = "banana"
         self.validator.validate_machine_config()
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with(
-            "Files directive for machine router100 is not a dict{}".format(self.validator.default_message)
-        )
+        self.logger.error.assert_called_once_with(f"Files directive for machine router100 is not a dict{self.validator.default_message}")
 
     def test_validate_machine_config_succeeds_when_machine_files_not_present(self):
         del self.validator.config["machines"]["router100"]["files"]
@@ -142,7 +138,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.validate_machine_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Machine router100 does not appear to have any interfaces{}".format(self.validator.default_message)
+            f"Machine router100 does not appear to have any interfaces{self.validator.default_message}"
         )
 
     def test_validate_machine_config_fails_if_interfaces_is_not_a_dict(self):
@@ -265,7 +261,7 @@ class TestValidateConfigValidateInterfaceConfig(VNetTestCase):
         self.validator.validate_interface_config("router100")
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "bridge keyword missing on interface eth12 for machine router100{}".format(self.validator.default_message)
+            f"bridge keyword missing on interface eth12 for machine router100{self.validator.default_message}"
         )
 
     def test_validate_interface_config_fails_when_bridge_not_a_int(self):
@@ -293,9 +289,7 @@ class TestValidateConfigValidateInterfaceConfig(VNetTestCase):
         self.validator.validate_interface_config("router100")
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "routes passed to interface eth12 for machine router100, found type str, expected type 'list'{}".format(
-                self.validator.default_message
-            )
+            f"routes passed to interface eth12 for machine router100, found type str, expected type 'list'{self.validator.default_message}"
         )
 
     def test_validate_interface_config_calls_validate_routes_when_routes_passed_in_config(self):
@@ -327,7 +321,7 @@ class TestValidateInterfaceRoutes(VNetTestCase):
         self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "'to' keyword missing from route 1 on interface eth12 for machine {}{}".format(self.machine, self.validator.default_message)
+            f"'to' keyword missing from route 1 on interface eth12 for machine {self.machine}{self.validator.default_message}"
         )
 
     def test_validate_routes_fails_if_to_is_malformed(self):
@@ -335,9 +329,7 @@ class TestValidateInterfaceRoutes(VNetTestCase):
         self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Invalid 'to' value 1negen2.168.0.1 for route 1 on interface eth12 for machine {}{}".format(
-                self.machine, self.validator.default_message
-            )
+            f"Invalid 'to' value 1negen2.168.0.1 for route 1 on interface eth12 for machine {self.machine}{self.validator.default_message}"
         )
 
     def test_validate_routes_fails_if_route_missing_via(self):
@@ -345,7 +337,7 @@ class TestValidateInterfaceRoutes(VNetTestCase):
         self.validator.validate_interface_routes(self.routes, "eth12", self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "'via' keyword missing from route 1 on interface eth12 for machine {}{}".format(self.machine, self.validator.default_message)
+            f"'via' keyword missing from route 1 on interface eth12 for machine {self.machine}{self.validator.default_message}"
         )
 
     def test_validate_routes_fails_if_via_is_malformed(self):
@@ -378,24 +370,20 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         self.validator.config["veths"] = 42
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with(
-            "Config item: 'veths' does not seem to be a dict {}".format(self.validator.default_message)
-        )
+        self.logger.error.assert_called_once_with(f"Config item: 'veths' does not seem to be a dict {self.validator.default_message}")
 
     def test_validate_veth_config_fails_when_veth_config_name_if_not_a_string(self):
         self.validator.config["veths"][42] = self.validator.config["veths"].pop("vnet-veth1")
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with(
-            "veth interface name: 42 does not seem to be a string{}".format(self.validator.default_message)
-        )
+        self.logger.error.assert_called_once_with(f"veth interface name: 42 does not seem to be a string{self.validator.default_message}")
 
     def test_validate_veth_config_fails_when_veth_config_values_if_not_a_dict(self):
         self.validator.config["veths"]["vnet-veth1"] = "blaap"
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth1 data does not seem to be a dict{}".format(self.validator.default_message)
+            f"veth interface vnet-veth1 data does not seem to be a dict{self.validator.default_message}"
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_bridge_missing(self):
@@ -403,7 +391,7 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth1 is missing the bridge parameter{}".format(self.validator.default_message)
+            f"veth interface vnet-veth1 is missing the bridge parameter{self.validator.default_message}"
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_bridge_is_not_a_string(self):
@@ -411,7 +399,7 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth1 bridge parameter does not seem to be a str{}".format(self.validator.default_message)
+            f"veth interface vnet-veth1 bridge parameter does not seem to be a str{self.validator.default_message}"
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_peer_is_not_a_string(self):
@@ -419,7 +407,7 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth1 peer parameter does not seem to be a string{}".format(self.validator.default_message)
+            f"veth interface vnet-veth1 peer parameter does not seem to be a string{self.validator.default_message}"
         )
 
     def test_validate_veth_config_fails_when_veth_config_parameter_stp_is_not_a_bool(self):
@@ -427,7 +415,7 @@ class TestValidateConfigValidateVethConfig(VNetTestCase):
         self.validator.validate_veth_config()
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "veth interface vnet-veth1 stp parameter does not seem to be a boolean{}".format(self.validator.default_message)
+            f"veth interface vnet-veth1 stp parameter does not seem to be a boolean{self.validator.default_message}"
         )
 
 
@@ -446,7 +434,7 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.validator.validate_vlan_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "VLAN vlan.100 on machine {} is missing it's vlan id{}".format(self.machine, self.validator.default_message)
+            f"VLAN vlan.100 on machine {self.machine} is missing it's vlan id{self.validator.default_message}"
         )
 
     def test_validate_vlan_config_fails_if_id_is_not_castable_to_int(self):
@@ -454,9 +442,7 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.validator.validate_vlan_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Unable to cast VLAN vlan.100 with ID banaan from machine {} to a integer{}".format(
-                self.machine, self.validator.default_message
-            )
+            f"Unable to cast VLAN vlan.100 with ID banaan from machine {self.machine} to a integer{self.validator.default_message}"
         )
 
     def test_validate_vlan_config_fails_if_link_is_not_present(self):
@@ -464,7 +450,7 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.validator.validate_vlan_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "VLAN vlan.100 on machine {} is missing it's link attribute{}".format(self.machine, self.validator.default_message)
+            f"VLAN vlan.100 on machine {self.machine} is missing it's link attribute{self.validator.default_message}"
         )
 
     def test_validate_vlan_config_fails_if_link_is_not_a_string(self):
@@ -472,7 +458,7 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.validator.validate_vlan_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            "Link 42 for VLAN vlan.100 on machine {}, does not seem to be a string{}".format(self.machine, self.validator.default_message)
+            f"Link 42 for VLAN vlan.100 on machine {self.machine}, does not seem to be a string{self.validator.default_message}"
         )
 
     def test_validate_vlan_config_fails_if_link_is_not_found_in_machine_interfaces(self):
@@ -499,9 +485,7 @@ class TestValidateConfigValidateVLANConfig(VNetTestCase):
         self.validator.config["machines"][self.machine]["vlans"]["vlan.100"]["addresses"].append("banaan")
         self.validator.validate_vlan_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
-        self.assertTrue(
-            self.logger.error.call_args_list[0].startswith("Address banaan for VLAN vlan.100 on machine {}".format(self.machine))
-        )
+        self.assertTrue(self.logger.error.call_args_list[0].startswith(f"Address banaan for VLAN vlan.100 on machine {self.machine}"))
 
 
 class TestValidateConfigValidateMachineBridgeConfig(VNetTestCase):
@@ -540,21 +524,17 @@ class TestValidateConfigValidateMachineBridgeConfig(VNetTestCase):
         del self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"]
         self.validator.validate_machine_bridge_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with("Bridge {} on machine {} does not have any slaves".format("br1", self.machine))
+        self.logger.error.assert_called_once_with(f"Bridge br1 on machine {self.machine} does not have any slaves")
 
     def test_validate_machine_bridge_config_fails_if_slaves_param_is_not_a_list(self):
         self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"] = "blaap"
         self.validator.validate_machine_bridge_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with(
-            "Slaves on bridge {} for machine {}, is not formatted as a list".format("br1", self.machine)
-        )
+        self.logger.error.assert_called_once_with(f"Slaves on bridge br1 for machine {self.machine}, is not formatted as a list")
 
     def test_validate_machine_bridge_config_fails_if_slave_not_present_in_interfaces_config(self):
         iface = "blaap1"
         self.validator.config["machines"][self.machine]["bridges"]["br1"]["slaves"].append(iface)
         self.validator.validate_machine_bridge_config(self.machine)
         self.assertFalse(self.validator.config_validation_successful)
-        self.logger.error.assert_called_once_with(
-            "Undefined slave interface {} assigned to bridge {} on machine {}".format(iface, "br1", self.machine)
-        )
+        self.logger.error.assert_called_once_with(f"Undefined slave interface {iface} assigned to bridge br1 on machine {self.machine}")

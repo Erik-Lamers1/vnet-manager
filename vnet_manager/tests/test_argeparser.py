@@ -13,7 +13,7 @@ class TestParseArgs(VNetTestCase):
         known_args = ("action", "config", "machines", "yes", "verbose", "sniffer", "base_image", "no_hosts")
         args = parse_vnet_args(default_args)
         for arg in known_args:
-            self.assertTrue(hasattr(args, arg), msg="Argument {} not found in parse_args return value".format(arg))
+            self.assertTrue(hasattr(args, arg), msg=f"Argument {arg} not found in parse_args return value")
 
     @patch("sys.stderr", new_callable=StringIO)
     def test_parse_args_exists_when_config_required_action_without_config_is_passed(self, stderr):

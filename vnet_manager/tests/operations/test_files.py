@@ -78,7 +78,7 @@ class TestSelectFilesAndPutOnMachine(VNetTestCase):
         self.is_file.return_value = False
         select_files_and_put_on_machine(self.machine, self.files, "lxc")
         self.logger.error.assert_called_once_with(
-            "Tried to select file {} for copying, but it is neither a file nor a directory".format(next(iter(self.files)))
+            f"Tried to select file {next(iter(self.files))} for copying, but it is neither a file nor a directory"
         )
 
 
@@ -99,7 +99,7 @@ class TestPlaceFileOnLXCContainer(VNetTestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="data")
     def test_place_file_on_lxc_machine_calls_open(self, open_mock):
         place_file_on_lxc_machine("router100", self.host_file_p, self.guest_file_p)
-        open_mock.assert_called_once_with(self.host_file_p, "r")
+        open_mock.assert_called_once_with(self.host_file_p, "r", encoding="utf-8")
 
     @patch("builtins.open", new_callable=mock_open, read_data="data")
     def test_place_file_on_lxc_machine_calls_open_read_function(self, open_mock):
@@ -161,7 +161,7 @@ class TestGenerateVNetHostsFile(VNetTestCase):
     @patch("builtins.open", new_callable=mock_open)
     def test_generate_vnet_hosts_file_calls_open(self, open_mock):
         generate_vnet_hosts_file(self.config)
-        open_mock.assert_called_once_with(settings.VNET_ETC_HOSTS_FILE_PATH, "w")
+        open_mock.assert_called_once_with(settings.VNET_ETC_HOSTS_FILE_PATH, "w", encoding="utf-8")
 
     @patch("builtins.open", new_callable=mock_open)
     def test_generate_vnet_hosts_file_generates_correct_hosts_file(self, open_mock):

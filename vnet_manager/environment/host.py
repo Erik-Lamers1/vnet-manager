@@ -20,7 +20,7 @@ def check_for_supported_os(provider: str) -> bool:
     :param str provider: The provider to check OS support for
     :return: bool: True if the current OS is supported, False otherwise
     """
-    logger.debug("Checking if your os is supported for provider {}".format(provider))
+    logger.debug(f"Checking if your os is supported for provider {provider}")
     return codename().lower() in settings["PROVIDERS"][provider]["supported_operating_systems"]
 
 
@@ -30,7 +30,7 @@ def check_for_installed_packages(provider: str) -> bool:
     :param str provider: The provider to check the required host packages for
     :return bool: True if all required packages have been installed, False otherwise
     """
-    logger.debug("Checking if all required host packages have been install for provider {}".format(provider))
+    logger.debug(f"Checking if all required host packages have been install for provider {provider}")
     all_installed = True
     cache = Cache()
     if "apt" not in modules:
@@ -38,6 +38,6 @@ def check_for_installed_packages(provider: str) -> bool:
     else:
         for package in settings["PROVIDERS"][provider]["required_host_packages"]:
             if not cache[package].is_installed:
-                logger.error("Required host package {} for provider {} is not installed".format(package, provider))
+                logger.error(f"Required host package {package} for provider {provider} is not installed")
                 all_installed = False
     return all_installed

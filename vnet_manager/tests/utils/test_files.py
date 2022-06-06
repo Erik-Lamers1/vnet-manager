@@ -20,7 +20,7 @@ class TestGetYAMLContent(VNetTestCase):
     @patch("builtins.open", new_callable=mock_open, read_data=DATA)
     def test_get_yaml_content_opens_path(self, open_mock):
         get_yaml_content("path")
-        open_mock.assert_called_once_with("path", "r")
+        open_mock.assert_called_once_with("path", "r", encoding="utf-8")
 
     @patch("builtins.open", new_callable=mock_open, read_data=DATA)
     def test_get_yaml_content_returns_parsed_yaml(self, _):
@@ -33,7 +33,7 @@ class TestWriteFileToDisk(VNetTestCase):
     @patch("builtins.open", new_callable=mock_open)
     def test_write_file_to_disk_opens_path(self, open_mock):
         write_file_to_disk("path", DATA)
-        open_mock.assert_called_once_with("path", "w")
+        open_mock.assert_called_once_with("path", "w", encoding="utf-8")
 
     @patch("builtins.open", new_callable=mock_open)
     def test_write_file_to_disk_calls_write_function(self, open_mock):

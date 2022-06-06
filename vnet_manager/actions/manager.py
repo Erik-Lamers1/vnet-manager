@@ -75,7 +75,7 @@ class ActionManager:
         """
         # First do a sanity check on the action
         if action not in settings.VALID_ACTIONS:
-            raise NotImplementedError("{} is not a valid action".format(action))
+            raise NotImplementedError(f"{action} is not a valid action")
         # Check if the operator only wants to see the help text
         if self.config_path and self.config_path.lower() == "help":
             display_help_for_action(action)
@@ -83,13 +83,13 @@ class ActionManager:
         # Check if a config is required
         if action in settings.CONFIG_REQUIRED_ACTIONS:
             if not self.config_path:
-                raise RuntimeError("The {} action requires a config to be passed, but it wasn't".format(action))
+                raise RuntimeError(f"The {action} action requires a config to be passed, but it wasn't")
             if not self.parse_config():
                 logger.critical("Config NOT OK, can't proceed")
                 return EX_USAGE
         # Preform the action
-        logger.info("Initiating {} action".format(action))
-        getattr(self, "preform_{}_action".format(action.replace("-", "_")))()
+        logger.info(f"Initiating {action} action")
+        getattr(self, f"preform_{action.replace('-', '_')}_action")()
         return EX_OK
 
     def parse_config(self) -> bool:
@@ -116,7 +116,7 @@ class ActionManager:
         validator.validate()
         if not validator.config_validation_successful:
             logger.error("The config seems to have unrecoverable issues, please fix them before proceeding")
-            return False, dict()
+            return False, {}
         # Everything okay
         logger.debug("Config validation successful")
         return True, validator.updated_config
@@ -181,14 +181,12 @@ class ActionManager:
             for path in yaml_files:
                 self.config_path = path
                 if not self.parse_config():
-                    logger.error("Config {} does not seem to be a valid config, skipping".format(path))
+                    logger.error(f"Config {path} does not seem to be a valid config, skipping")
                     continue
-                logger.info("Showing machine status for {}".format(path))
+                logger.info(f"Showing machine status for {path}")
                 show_status(self.config)
         else:
-            logger.error(
-                "Path {} does not seem to be a file or a directory, did you forget to pass a config directory?".format(self.config_path)
-            )
+            logger.error(f"Path {self.config_path} does not seem to be a file or a directory, did you forget to pass a config directory?")
 
     @staticmethod
     def preform_version_action():

@@ -14,11 +14,11 @@ def get_yaml_content(path: str) -> dict:
     :return: dict: The YAML file contents
     """
     if not isfile(path):
-        logger.error("File {} does not exist".format(path))
-        raise IOError("File {} does not exist".format(path))
+        logger.error(f"File {path} does not exist")
+        raise IOError(f"File {path} does not exist")
 
-    logger.debug("Loading YAML values from {}".format(path))
-    with open(path, "r") as fh:
+    logger.debug(f"Loading YAML values from {path}")
+    with open(path, "r", encoding="utf-8") as fh:
         content = safe_load(fh)
     return content
 
@@ -30,8 +30,8 @@ def write_file_to_disk(path: str, content: AnyStr):
     :param: str: path: The filepath to write the file to
     :param: content: The content to write to the file
     """
-    logger.debug("Writing content to {}".format(path))
-    with open(path, "w") as fh:
+    logger.debug(f"Writing content to {path}")
+    with open(path, "w", encoding="utf-8") as fh:
         fh.write(content)
 
 
@@ -49,7 +49,7 @@ def get_yaml_files_from_disk_path(path: str, excludes_files: List[str] = None) -
         return False
 
     yaml_files = []
-    logger.debug("Retrieving yaml files from path: {}".format(path))
+    logger.debug(f"Retrieving yaml files from path: {path}")
     for root, _, files in walk(path):
         for f in files:
             if (f.endswith("yaml") or f.endswith("yml")) and not should_be_excluded(root, f):
