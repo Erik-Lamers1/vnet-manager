@@ -29,7 +29,7 @@ jobs:
       - name: Test with pytest
         env:
           SETTINGS_MODULE: vnet_manager.settings.test
-          PYTHONPATH: "/usr/lib/python${{ matrix.python-version }}/dist-packages:/usr/lib/python3/dist-packages:${PYTHONPATH}"
+          PYTHONPATH: "/usr/lib/python${{ matrix.python-version }}/dist-packages:/usr/lib/python3.8/dist-packages:/usr/lib/python3/dist-packages:${PYTHONPATH}"
           PYTHONDONTWRITEBYTECODE: 1
         run: |
           pytest --cov vnet_manager --cov-report term --cov-report xml:coverage.xml
