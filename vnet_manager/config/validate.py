@@ -26,9 +26,8 @@ class ValidateConfig:
         self.config = config
 
     def __str__(self) -> str:
-        return "VNet config validator, current_state: {}, amount of validators run: {}".format(
-            "OK" if self._all_ok else "NOT OK", self._validators_ran
-        )
+        return f"VNet config validator, current_state: {'OK' if self._all_ok else 'NOT OK'}, " \
+               f"amount of validators run: {self.validators_ran}"
 
     @property
     def config_validation_successful(self) -> bool:
@@ -93,9 +92,8 @@ class ValidateConfig:
                     self._all_ok = False
                 elif values["type"] not in settings.SUPPORTED_MACHINE_TYPES:
                     logger.error(
-                        "Type {} for machine {} unsupported. I only support the following types: {}{}".format(
-                            values["type"], name, settings.SUPPORTED_MACHINE_TYPES, self.default_message
-                        )
+                        f"Type {values['type']} for machine {name} unsupported. I only support the following types: "
+                        f"{settings.SUPPORTED_MACHINE_TYPES}{self.default_message}"
                     )
                     self._all_ok = False
 
@@ -114,9 +112,8 @@ class ValidateConfig:
                     self._all_ok = False
                 elif not isinstance(values["interfaces"], dict):
                     logger.error(
-                        "The interfaces for machine {} are not given as a dict, this usually means a typo in the config{}".format(
-                            name, self.default_message
-                        )
+                        f"The interfaces for machine {name} are not given as a dict, "
+                        f"this usually means a typo in the config{self.default_message}"
                     )
                     self._all_ok = False
                 else:
@@ -127,8 +124,8 @@ class ValidateConfig:
                     logger.debug(f"Machine {name} does not appear to have any VLAN interfaces, that's okay")
                 elif not isinstance(values["vlans"], dict):
                     logger.error(
-                        "Machine {} has a VLAN config but it does not "
-                        "appear to be a dict, this usually means a typo in the config{}".format(name, self.default_message)
+                        f"Machine {name} has a VLAN config but it does not "
+                        f"appear to be a dict, this usually means a typo in the config{self.default_message}"
                     )
                     self._all_ok = False
                 else:
@@ -139,8 +136,8 @@ class ValidateConfig:
                     logger.debug(f"Machine {name} does not appear to have any Bridge interfaces, that's okay")
                 elif not isinstance(values["bridges"], dict):
                     logger.error(
-                        "Machine {} has a bridge config defined, but it is not a dictionary, "
-                        "this usally means a typo in the config{}".format(name, self.default_message)
+                        f"Machine {name} has a bridge config defined, but it is not a dictionary, "
+                        f"this usally means a typo in the config{self.default_message}"
                     )
                     self._all_ok = False
                 else:
@@ -175,9 +172,8 @@ class ValidateConfig:
             # This check requires a valid interface config, so we only do it if the previous checks have been successful
             elif self._all_ok and values["link"] not in self.config["machines"][machine]["interfaces"]:
                 logger.error(
-                    "Link {} for VLAN {} on machine {} does not correspond to any interfaces on the same machine{}".format(
-                        values["link"], name, machine, self.default_message
-                    )
+                    f"Link {values['link']} for VLAN {name} on machine {machine} "
+                    f"does not correspond to any interfaces on the same machine{self.default_message}"
                 )
                 self._all_ok = False
             if "addresses" not in values:
@@ -191,9 +187,8 @@ class ValidateConfig:
                         ip_interface(address)
                     except ValueError as e:
                         logger.error(
-                            "Address {} for VLAN {} on machine {} does not seem to be a valid address, got parse error {}".format(
-                                address, name, machine, e
-                            )
+                            f"Address {address} for VLAN {name} on machine {machine} does not seem to be a valid address, "
+                            f"got parse error {e}"
                         )
                         self._all_ok = False
 
@@ -258,17 +253,16 @@ class ValidateConfig:
                 self._all_ok = False
             elif not isinstance(int_vals["bridge"], int) or int_vals["bridge"] > self.config["switches"] - 1:
                 logger.error(
-                    "Invalid bridge number detected for interface {} on machine {}. "
+                    f"Invalid bridge number detected for interface {int_name} on machine {machine}. "
                     "The bridge keyword should correspond to the interface number of the vnet bridge to connect to "
-                    "(starting at iface number 0)".format(int_name, machine)
+                    "(starting at iface number 0)"
                 )
                 self._all_ok = False
             if "routes" in int_vals:
                 if not isinstance(int_vals["routes"], list):
                     logger.error(
-                        "routes passed to interface {} for machine {}, found type {}, expected type 'list'{}".format(
-                            int_name, machine, type(int_vals["routes"]).__name__, self.default_message
-                        )
+                        f"routes passed to interface {int_name} for machine {machine}, "
+                        f"found type {type(int_vals['routes']).__name__}, expected type 'list'{self.default_message}"
                     )
                     self._all_ok = False
                 else:
@@ -287,15 +281,14 @@ class ValidateConfig:
                 except ValueError:
                     if route["to"] == "default":
                         logger.debug(
-                            "Updating 'default' to destination for route {} on interface {} for machine "
-                            "{} to 0.0.0.0/0 for backwards compatibility".format(idx + 1, int_name, machine)
+                            f"Updating 'default' to destination for route {idx + 1} on interface {int_name} for machine "
+                            f"{machine} to 0.0.0.0/0 for backwards compatibility"
                         )
                         self._new_config["machines"][machine]["interfaces"][int_name]["routes"][idx]["to"] = "0.0.0.0/0"
                     else:
                         logger.error(
-                            "Invalid 'to' value {} for route {} on interface {} for machine {}{}".format(
-                                route["to"], idx + 1, int_name, machine, self.default_message
-                            )
+                            f"Invalid 'to' value {route['to']} for route {idx + 1} on interface {int_name} "
+                            f"for machine {machine}{self.default_message}"
                         )
                         self._all_ok = False
             if "via" not in route:
@@ -308,9 +301,8 @@ class ValidateConfig:
                     ip_address(route["via"])
                 except ValueError:
                     logger.error(
-                        "Invalid 'via' value {} (not an IP address) for route {} on interface {} for machine {}{}".format(
-                            route["via"], idx + 1, int_name, machine, self.default_message
-                        )
+                        f"Invalid 'via' value {route['via']} (not an IP address) for route {idx + 1} on interface {int_name} "
+                        f"for machine {machine}{self.default_message}"
                     )
                     self._all_ok = False
 

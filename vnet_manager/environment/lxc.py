@@ -29,9 +29,8 @@ def ensure_vnet_lxc_environment(config: dict):
     # Check if we are on a supported OS
     if not check_for_supported_os("lxc"):
         request_confirmation(
-            message="Unsupported OS detected, LXC is tested on the following systems; {}".format(
-                ", ".join(settings["PROVIDERS"]["lxc"]["supported_operating_systems"])
-            ),
+            message="Unsupported OS detected, LXC is tested on the following systems; "
+                    f"{', '.join(settings['PROVIDERS']['lxc']['supported_operating_systems'])}",
             prompt="Continue anyway? (y/n) ",
         )
 
@@ -110,9 +109,8 @@ def configure_lxc_base_machine():
     # Set the FRR routing source and key
     execute_and_log("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'")
     execute_and_log(
-        "bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {} | tee -a /etc/apt/sources.list.d/frr.list'".format(
-            settings.FRR_RELEASE
-        )
+        f"bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {settings.FRR_RELEASE} "
+        f"| tee -a /etc/apt/sources.list.d/frr.list'"
     )
 
     # Update and install packages
@@ -122,9 +120,8 @@ def configure_lxc_base_machine():
         environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
     execute_and_log(
-        "apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' {}".format(
-            " ".join(settings["PROVIDERS"]["lxc"]["guest_packages"])
-        ),
+        f"apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' "
+        f"{' '.join(settings['PROVIDERS']['lxc']['guest_packages'])}",
         environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
 
