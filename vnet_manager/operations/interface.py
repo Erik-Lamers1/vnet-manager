@@ -277,4 +277,4 @@ def start_tcpdump_on_vnet_interface(ifname: str):
     """
     path = join(settings.VNET_SNIFFER_PCAP_DIR, f"{ifname}.pcap")
     logger.info(f"Starting sniffer on VNet interface {ifname}, PCAP location: {path}")
-    Popen(shlex.split(f"tcpdump -i {ifname} -U -w {path}"))
+    Popen(shlex.split(f"tcpdump -i {ifname} -U -w {path}"))  # pylint: disable=consider-using-with

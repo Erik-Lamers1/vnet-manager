@@ -18,7 +18,7 @@ def get_yaml_content(path: str) -> dict:
         raise IOError(f"File {path} does not exist")
 
     logger.debug(f"Loading YAML values from {path}")
-    with open(path, "r") as fh:
+    with open(path, "r", encoding="utf-8") as fh:
         content = safe_load(fh)
     return content
 
@@ -31,7 +31,7 @@ def write_file_to_disk(path: str, content: AnyStr):
     :param: content: The content to write to the file
     """
     logger.debug(f"Writing content to {path}")
-    with open(path, "w") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         fh.write(content)
 
 

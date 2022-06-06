@@ -30,7 +30,7 @@ def ensure_vnet_lxc_environment(config: dict):
     if not check_for_supported_os("lxc"):
         request_confirmation(
             message="Unsupported OS detected, LXC is tested on the following systems; "
-                    f"{', '.join(settings['PROVIDERS']['lxc']['supported_operating_systems'])}",
+            f"{', '.join(settings['PROVIDERS']['lxc']['supported_operating_systems'])}",
             prompt="Continue anyway? (y/n) ",
         )
 

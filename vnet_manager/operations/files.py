@@ -68,7 +68,7 @@ def place_file_on_lxc_machine(container: str, host_file_path: str, guest_file_pa
         return
 
     # Get the file contents
-    with open(host_file_path, "r") as fh:
+    with open(host_file_path, "r", encoding="utf-8") as fh:
         file_data = fh.read()
     # Place the file content
     logger.debug(f"Copying {host_file_path} to container {container} at path {guest_file_path}")

@@ -116,7 +116,7 @@ class ActionManager:
         validator.validate()
         if not validator.config_validation_successful:
             logger.error("The config seems to have unrecoverable issues, please fix them before proceeding")
-            return False, dict()
+            return False, {}
         # Everything okay
         logger.debug("Config validation successful")
         return True, validator.updated_config

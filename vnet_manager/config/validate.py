@@ -26,8 +26,10 @@ class ValidateConfig:
         self.config = config
 
     def __str__(self) -> str:
-        return f"VNet config validator, current_state: {'OK' if self._all_ok else 'NOT OK'}, " \
-               f"amount of validators run: {self.validators_ran}"
+        return (
+            f"VNet config validator, current_state: {'OK' if self._all_ok else 'NOT OK'}, "
+            f"amount of validators run: {self.validators_ran}"
+        )
 
     @property
     def config_validation_successful(self) -> bool:
