@@ -24,8 +24,17 @@ See the [README](config/README.md) for a more detailed explanation on how to cre
 #### Install the required packages
 ```bash
 apt-get update
-apt-get install gcc python3-dev python3-apt python3-pip git lxd lxc bridge-utils tcpdump net-tools curl
+apt-get install gcc python3-dev python3-apt python3-pip git lxc bridge-utils tcpdump net-tools curl
 ```
+For Ubuntu 18.04;
+```bash
+apt-get install lxd
+```
+In later versions of Ubuntu;
+```bash
+snap install lxd
+```
+
 
 #### Clone the repo
 ```bash
