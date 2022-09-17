@@ -34,7 +34,9 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         self.check_for_supported_os.return_value = False
         ensure_vnet_lxc_environment(self.config)
         self.confirm.assert_called_once_with(
-            message="Unsupported OS detected, LXC is tested on the following systems; bionic, focal", prompt="Continue anyway? (y/n) "
+            message="Unsupported OS detected, LXC is tested on the following systems; "
+            f"{', '.join(settings.PROVIDERS['lxc']['supported_operating_systems'])}",
+            prompt="Continue anyway? (y/n) ",
         )
 
     def test_ensure_vnet_lxc_environment_does_not_call_create_vnet_storage_pool_if_it_exists(self):
