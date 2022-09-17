@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install 'black==22.3.0' 'click==8.0.1'
+          pip install 'black==22.8.0'
       - name: Analysing code formatting with Black
         run: |
           black --check --diff --line-length 140 --target-version py38 vnet_manager

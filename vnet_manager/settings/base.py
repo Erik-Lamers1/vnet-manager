@@ -55,9 +55,8 @@ LOGGING_DEFAULT_VERBOSITY = 3  # logging.INFO
 # Below the provider, config options are defined.
 PROVIDERS = {
     "lxc": {
-        "supported_operating_systems": ["bionic", "focal"],  # Will not run on any other OSes
+        "supported_operating_systems": ["bionic", "focal", "jammy"],  # Will not run on any other OSes
         "dns-nameserver": "8.8.8.8",
-        "required_host_packages": ["lxd", "lxc", "bridge-utils", "tcpdump", "net-tools", "curl"],  # List of packages required on the host
         "guest_packages": [
             "man",  # List of packages to install on the guest
             "net-tools",
