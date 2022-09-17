@@ -33,11 +33,14 @@ jobs:
           PYTHONDONTWRITEBYTECODE: 1
         run: |
           pytest --cov vnet_manager --cov-report term --cov-report xml:coverage.xml
-      - name: Run Pylint over config files
+      - name: Run the yamllint over all the YAML files
         env:
           PYTHONPATH: ".:${PYTHONPATH}"
         run: |
           python3 tools/yaml_syntax_validator.py
+      - name: Analysing the code with pylint
+        run: |
+          pylint vnet_manager
       - name: Push to codecov
         uses: codecov/codecov-action@v2
         with:
