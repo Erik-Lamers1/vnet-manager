@@ -3,8 +3,8 @@ from typing import List
 from logging import getLogger
 from subprocess import check_call, CalledProcessError, Popen, DEVNULL
 from os.path import join
-from pr2modules.ndb.main import NDB
-from pr2modules.iproute import IPRoute
+from pyroute2.iproute import IPRoute
+from pyroute2.ndb.main import NDB
 from psutil import process_iter
 from tabulate import tabulate
 
