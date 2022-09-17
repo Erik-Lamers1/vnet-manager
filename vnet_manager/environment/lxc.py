@@ -7,7 +7,7 @@ from vnet_manager.operations.image import check_if_lxc_image_exists, create_lxc_
 from vnet_manager.operations.profile import check_if_lxc_profile_exists, create_vnet_lxc_profile, delete_vnet_lxc_profile
 from vnet_manager.operations.storage import check_if_lxc_storage_pool_exists, create_lxc_storage_pool, delete_lxc_storage_pool
 from vnet_manager.operations.machine import create_lxc_base_image_container, change_lxc_machine_status, destroy_lxc_machine
-from vnet_manager.environment.host import check_for_supported_os, check_for_installed_packages
+from vnet_manager.environment.host import check_for_supported_os
 from vnet_manager.providers.lxc import get_lxd_client
 from vnet_manager.conf import settings
 from vnet_manager.utils.user import request_confirmation
@@ -33,10 +33,6 @@ def ensure_vnet_lxc_environment(config: dict):
             f"{', '.join(settings['PROVIDERS']['lxc']['supported_operating_systems'])}",
             prompt="Continue anyway? (y/n) ",
         )
-
-    # Check if all required packages have been installed
-    if not check_for_installed_packages("lxc"):
-        request_confirmation(message="Missing APT packages detected, this might break operations", prompt="Continue anyway? (y/n) ")
 
     # Check if the storage pool exists
     if not check_if_lxc_storage_pool_exists(settings.LXC_STORAGE_POOL_NAME):

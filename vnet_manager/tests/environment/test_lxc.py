@@ -11,7 +11,6 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
     def setUp(self) -> None:
         self.config = deepcopy(settings.CONFIG)
         self.check_for_supported_os = self.set_up_patch("vnet_manager.environment.lxc.check_for_supported_os")
-        self.check_for_installed_packages = self.set_up_patch("vnet_manager.environment.lxc.check_for_installed_packages")
         self.check_if_lxc_storage_pool_exists = self.set_up_patch("vnet_manager.environment.lxc.check_if_lxc_storage_pool_exists")
         self.create_lxc_storage_pool = self.set_up_patch("vnet_manager.environment.lxc.create_lxc_storage_pool")
         self.check_if_lxc_profile_exists = self.set_up_patch("vnet_manager.environment.lxc.check_if_lxc_profile_exists")
@@ -36,13 +35,6 @@ class TestEnsureVNetLXCEnvironment(VNetTestCase):
         ensure_vnet_lxc_environment(self.config)
         self.confirm.assert_called_once_with(
             message="Unsupported OS detected, LXC is tested on the following systems; bionic, focal", prompt="Continue anyway? (y/n) "
-        )
-
-    def test_ensure_vnet_lxc_environment_displays_warning_when_missing_apt_packages_detected(self):
-        self.check_for_installed_packages.return_value = False
-        ensure_vnet_lxc_environment(self.config)
-        self.confirm.assert_called_once_with(
-            message="Missing APT packages detected, this might break operations", prompt="Continue anyway? (y/n) "
         )
 
     def test_ensure_vnet_lxc_environment_does_not_call_create_vnet_storage_pool_if_it_exists(self):
