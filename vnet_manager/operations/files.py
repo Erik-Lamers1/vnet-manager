@@ -89,7 +89,7 @@ def generate_vnet_hosts_file(config: dict):
                 vnet_hosts.append(f"{int_data['ipv4'].split('/')[0]}   {machine_name}")
             if "ipv6" in int_data:
                 vnet_hosts.append(f"{int_data['ipv6'].split('/')[0]}   {machine_name}")
-    vnet_etc_hosts_data = settings.VNET_STATIC_HOSTS_FILE_PART + "\n".join(vnet_hosts)
+    vnet_etc_hosts_data = settings.VNET_STATIC_HOSTS_FILE_PART + "\n".join(vnet_hosts) + "\n"
     write_file_to_disk(settings.VNET_ETC_HOSTS_FILE_PATH, vnet_etc_hosts_data)
 
 
