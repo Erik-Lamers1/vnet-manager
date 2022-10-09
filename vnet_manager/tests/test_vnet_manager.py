@@ -50,19 +50,25 @@ class TestVNetManagerMain(VNetTestCase):
 
     def test_main_calls_action_manager(self):
         main(default_args)
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=False)
+        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=False, provider="lxc")
 
     def test_main_calls_action_manager_with_base_image(self):
         main(["destroy", "config", "--base-image"])
-        self.action_manager.assert_called_once_with(base_image=True, config_path="config", no_hosts=False, sniffer=False)
+        self.action_manager.assert_called_once_with(base_image=True, config_path="config", no_hosts=False, sniffer=False, provider="lxc")
 
     def test_main_calls_action_manager_with_no_hosts(self):
         main(["create", "config", "--no-hosts"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=True, sniffer=False)
+        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=True, sniffer=False, provider="lxc")
 
     def test_main_calls_action_manager_with_sniffer(self):
         main(["start", "config", "--sniffer"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=True)
+        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=True, provider="lxc")
+
+    def test_main_calls_action_manager_with_provider(self):
+        main(["connect", "machine1", "--provider", "test"])
+        self.action_manager.assert_called_once_with(
+            base_image=False, config_path="machine1", no_hosts=False, sniffer=False, provider="test"
+        )
 
     def test_main_sets_manager_machine_attribute(self):
         main(default_args + ["--machines", "test1", "test2"])

@@ -13,24 +13,18 @@ class TestActionManager(VNetTestCase):
         self.validate = self.set_up_patch("vnet_manager.actions.manager.ValidateConfig")
         self.validate.return_value = self.validator
         self.validator.updated_config = {}
+        self.machine_op = self.set_up_patch("vnet_manager.actions.manager.machine_op")
         self.show_version = self.set_up_patch("vnet_manager.actions.manager.show_version")
-        self.show_status = self.set_up_patch("vnet_manager.actions.manager.show_status")
         self.show_status_interfaces = self.set_up_patch("vnet_manager.actions.manager.show_vnet_interface_status")
         self.show_status_interfaces_veth = self.set_up_patch("vnet_manager.actions.manager.show_vnet_veth_interface_status")
         self.bring_up_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.bring_up_vnet_interfaces")
-        self.change_machine_status = self.set_up_patch("vnet_manager.actions.manager.change_machine_status")
         self.bring_down_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.bring_down_vnet_interfaces")
         self.ensure_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.ensure_vnet_lxc_environment")
-        self.create_machines = self.set_up_patch("vnet_manager.actions.manager.create_machines")
         self.put_files_on_machine = self.set_up_patch("vnet_manager.actions.manager.put_files_on_machine")
         self.generate_vnet_hosts_file = self.set_up_patch("vnet_manager.actions.manager.generate_vnet_hosts_file")
         self.place_vnet_hosts_file_on_machines = self.set_up_patch("vnet_manager.actions.manager.place_vnet_hosts_file_on_machines")
-        self.enable_type_specific_machine_configuration = self.set_up_patch(
-            "vnet_manager.actions.manager.enable_type_specific_machine_configuration"
-        )
         self.request_confirmation = self.set_up_patch("vnet_manager.actions.manager.request_confirmation")
         self.destroy_lxc_image = self.set_up_patch("vnet_manager.actions.manager.destroy_lxc_image")
-        self.destroy_machines = self.set_up_patch("vnet_manager.actions.manager.destroy_machines")
         self.delete_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.delete_vnet_interfaces")
         self.cleanup_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.cleanup_vnet_lxc_environment")
         self.display_help_for_action = self.set_up_patch("vnet_manager.actions.manager.display_help_for_action")
@@ -76,12 +70,12 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap")
         ret = manager.execute("show")
         self.assertEqual(ret, EX_USAGE)
-        self.assertFalse(self.show_status.called)
+        self.assertFalse(self.machine_op.show_status.called)
 
     def test_action_manager_calls_show_status_with_list_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
-        self.show_status.assert_called_once_with(self.validator.updated_config)
+        self.machine_op.show_status.assert_called_once_with(self.validator.updated_config)
 
     def test_action_manager_calls_show_vnet_interface_status_with_list_action(self):
         manager = ActionManager(config_path="blaap")
@@ -110,7 +104,7 @@ class TestActionManager(VNetTestCase):
         self.isfile.return_value = False
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
-        self.assertEqual(3, self.show_status.call_count)
+        self.assertEqual(3, self.machine_op.show_status.call_count)
 
     def test_action_manager_does_nothing_when_not_file_and_not_dir_with_list_action(self):
         self.isfile.return_value = False
@@ -118,12 +112,12 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
         self.assertFalse(self.get_yaml_file_from_disk_path.called)
-        self.assertFalse(self.show_status.called)
+        self.assertFalse(self.machine_op.show_status.called)
 
     def test_action_manager_calls_show_status_with_show_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("show")
-        self.show_status.assert_called_once_with(self.validator.updated_config)
+        self.machine_op.show_status.assert_called_once_with(self.validator.updated_config)
 
     def test_action_manager_calls_show_vnet_interface_status_with_show_action(self):
         manager = ActionManager(config_path="blaap")
@@ -160,24 +154,24 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_change_machine_status_with_start_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("start")
-        self.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=None, status="start")
+        self.machine_op.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=None, status="start")
 
     def test_action_manager_calls_change_machine_status_with_start_action_and_machines(self):
         manager = ActionManager(config_path="blaap")
         manager.machines = ["machine"]
         manager.execute("start")
-        self.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=["machine"], status="start")
+        self.machine_op.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=["machine"], status="start")
 
     def test_action_manager_calls_change_machine_status_with_stop_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("stop")
-        self.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=None, status="stop")
+        self.machine_op.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=None, status="stop")
 
     def test_action_manager_calls_change_machine_status_with_stop_action_and_machines(self):
         manager = ActionManager(config_path="blaap")
         manager.machines = ["machine"]
         manager.execute("stop")
-        self.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=["machine"], status="stop")
+        self.machine_op.change_machine_status.assert_called_once_with(self.validator.updated_config, machines=["machine"], status="stop")
 
     def test_action_manager_calls_bring_down_vnet_interfaces_with_stop_action(self):
         manager = ActionManager(config_path="blaap")
@@ -198,13 +192,13 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_create_machines_with_create_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("create")
-        self.create_machines.assert_called_once_with(self.validator.updated_config, machines=None)
+        self.machine_op.create_machines.assert_called_once_with(self.validator.updated_config, machines=None)
 
     def test_action_manager_calls_create_machines_with_create_action_and_machines(self):
         manager = ActionManager(config_path="blaap")
         manager.machines = ["machine"]
         manager.execute("create")
-        self.create_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
+        self.machine_op.create_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
 
     def test_action_manager_calls_put_files_on_machine_with_create_action(self):
         manager = ActionManager(config_path="blaap")
@@ -224,7 +218,7 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_enable_type_specific_machine_configuration(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("create")
-        self.enable_type_specific_machine_configuration.assert_called_once_with(self.validator.updated_config)
+        self.machine_op.enable_type_specific_machine_configuration.assert_called_once_with(self.validator.updated_config)
 
     def test_action_manager_calls_ensure_vnet_lxc_environment_with_create_action_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
@@ -234,13 +228,13 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_create_machines_with_create_action_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
         manager.execute("create")
-        self.create_machines.assert_called_once_with(self.validator.updated_config, machines=None)
+        self.machine_op.create_machines.assert_called_once_with(self.validator.updated_config, machines=None)
 
     def test_action_manager_calls_create_machines_with_create_action_and_machines_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
         manager.machines = ["machine"]
         manager.execute("create")
-        self.create_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
+        self.machine_op.create_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
 
     def test_action_manager_calls_put_files_on_machine_with_create_action_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
@@ -260,12 +254,12 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_enable_type_specific_machine_configuration_and_nohosts(self):
         manager = ActionManager(config_path="blaap", no_hosts=True)
         manager.execute("create")
-        self.enable_type_specific_machine_configuration.assert_called_once_with(self.validator.updated_config)
+        self.machine_op.enable_type_specific_machine_configuration.assert_called_once_with(self.validator.updated_config)
 
     def test_action_manager_calls_destroy_machines_with_destroy_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("destroy")
-        self.destroy_machines.assert_called_once_with(self.validator.updated_config, machines=None)
+        self.machine_op.destroy_machines.assert_called_once_with(self.validator.updated_config, machines=None)
 
     def test_action_manager_calls_cleanup_vnet_lxc_environment_with_clean_action(self):
         manager = ActionManager()
@@ -276,7 +270,7 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap")
         manager.machines = ["machine"]
         manager.execute("destroy")
-        self.destroy_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
+        self.machine_op.destroy_machines.assert_called_once_with(self.validator.updated_config, machines=["machine"])
         self.assertFalse(self.destroy_lxc_image.called)
 
     def test_action_manager_calls_delete_vnet_interfaces_with_destroy_action(self):
@@ -294,7 +288,7 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap", base_image=True)
         manager.execute("destroy")
         self.destroy_lxc_image.assert_called_once_with(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
-        self.assertFalse(self.destroy_machines.called)
+        self.assertFalse(self.machine_op.destroy_machines.called)
 
     def test_action_manager_calls_request_confirmation_with_destroy_action_and_base_image(self):
         manager = ActionManager(config_path="blaap", base_image=True)
@@ -306,3 +300,13 @@ class TestActionManager(VNetTestCase):
         manager.machines = ["1", "2", "3"]
         self.assertEqual(manager.machines, ["1", "2", "3"])
         self.assertIsInstance(ActionManager.machines, property)
+
+    def test_action_manager_calls_connect_to_lxc_machine(self):
+        manager = ActionManager(config_path="machine1")
+        manager.execute("connect")
+        self.machine_op.connect_to_lxc_machine.assert_called_once_with("machine1")
+
+    def test_action_manager_raises_not_implemented_error_on_non_supported_provider(self):
+        manager = ActionManager(config_path="machine1", provider="test")
+        with self.assertRaises(NotImplementedError):
+            manager.execute("connect")
