@@ -5,6 +5,7 @@ from typing import List
 from tabulate import tabulate
 from yaml import safe_dump
 from pylxd.exceptions import NotFound, LXDAPIException
+from subprocess import call
 
 from vnet_manager.conf import settings
 from vnet_manager.operations.files import write_file_to_lxc_container
@@ -36,6 +37,25 @@ def check_if_lxc_machine_exists(machine: str) -> bool:
     :return: bool: True if it exists, false otherwise
     """
     return get_lxd_client().containers.exists(machine)
+
+
+def connect_to_lxc_machine(machine: str) -> bool:
+    """
+    Try to connect to a LXC machine using lxc exec -- <shell>
+    :param str machine: the machine name to connect to
+    :return: bool: Wheter the connection was successfully made
+    """
+    # We could use https://pylxd.readthedocs.io/en/latest/api.html#pylxd.models.Instance.raw_interactive_execute here
+    # But for our purposes it is simpler to just run lxc exec
+    # First make sure the machine is running
+    if get_lxc_machine_status(machine)[1] != "Running":
+        logger.error(f"Unable to connect to LXC machine {machine}, container not running")
+        return False
+    # Connect to it
+    logger.info(f"Connecting to LXC machine {machine}")
+    call(["lxc", "exec", machine, settings.SHELL])
+    logger.info("Connection closed, goodbye")
+    return True
 
 
 def get_lxc_machine_status(name: str) -> List[str]:

@@ -79,8 +79,9 @@ PROVIDERS = {
     }
 }
 # The 'list' action also requires a config, but because it is handled differently we don't add it to CONFIG_REQUIRED_ACTIONS
-CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "status", "create", "destroy"]
+CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "status", "create", "destroy", "connect"]
 VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["list", "clean", "version", "bash-completion"]
+SHELL = "/bin/bash"
 HELP_TEXT_ACTION_MAPPING = {
     "list": """Lists the status of the config files in a particular directory.
 Usage: vnet-manager list <dir>.
@@ -109,6 +110,9 @@ Only use this action when you wish to reset or uninstall VNet-manager.
     """,
     "create": """Builds a VNet configuration so it can be started using the 'start' action.
 This action will create a base image for all providers present in the configuration if they do not exist yet.
+    """,
+    "connect": f"""Usage: vnet-manager connect <machine> [-p <provider>]
+Drops you into a shell on the container, simple alias to <provider> exec {SHELL}
     """,
     "bash-completion": """Places the VNet-manager bash completion script""",
 }
