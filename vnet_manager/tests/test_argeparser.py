@@ -39,6 +39,12 @@ class TestParseArgs(VNetTestCase):
             parse_vnet_args(["list", "config", "--no-hosts"])
         self.assertTrue(stderr.getvalue().strip().endswith("The no_hosts option only makes sense with the 'create' action"))
 
+    @patch("sys.stderr", new_callable=StringIO)
+    def test_parse_args_exists_when_no_machine_name_passed_to_connect(self, stderr):
+        with self.assertRaises(SystemExit):
+            parse_vnet_args(["connect"])
+        self.assertTrue(stderr.getvalue().strip().endswith("This action requires a machine name to be passed"))
+
     def test_parse_args_sets_show_action_on_status_action(self):
         args = parse_vnet_args(["status", "config"])
         self.assertEqual(args.action, "show")

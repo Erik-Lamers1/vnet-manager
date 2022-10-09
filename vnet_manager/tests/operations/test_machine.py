@@ -21,6 +21,7 @@ from vnet_manager.operations.machine import (
     create_lxc_base_image_container,
     enable_type_specific_machine_configuration,
     configure_lxc_ip_forwarding,
+    connect_to_lxc_machine,
 )
 
 
@@ -486,3 +487,25 @@ class TestGenerateMachineNetplanConfig(VNetTestCase):
         del self.config["machines"][self.machine]["bridges"]
         del self.expected_config["network"]["bridges"]
         self.assertEqual(self.expected_config, generate_machine_netplan_config(self.config, self.machine))
+
+
+class TestConnectToLXCMachine(VNetTestCase):
+    def setUp(self) -> None:
+        self.call = self.set_up_patch("vnet_manager.operations.machine.call")
+        self.machine_status = self.set_up_patch("vnet_manager.operations.machine.get_lxc_machine_status")
+        self.machine_status.return_value = ["machine1", "Running", "LXC"]
+
+    def test_connect_to_lxc_machine_calls_get_lxc_machine_status(self):
+        connect_to_lxc_machine("machine1")
+        self.machine_status.assert_called_once_with("machine1")
+
+    def test_connect_to_lxc_machine_calls_subprocess_call(self):
+        connect_to_lxc_machine("machine1")
+        self.call.assert_called_once_with(["lxc", "exec", "machine1", settings.SHELL])
+
+    def test_connect_to_lxc_machine_returns_true_if_connection_successful(self):
+        self.assertTrue(connect_to_lxc_machine("machine1"))
+
+    def test_connect_to_lxc_machine_returns_false_if_machine_not_running(self):
+        self.machine_status.return_value = ["machine1", "Stopped", "LXC"]
+        self.assertFalse(connect_to_lxc_machine("machine1"))

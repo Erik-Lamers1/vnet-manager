@@ -29,6 +29,9 @@ def parse_vnet_args(args: Sequence = None) -> Namespace:
     destroy_group = parser.add_argument_group("Destroy options", "These options can be specified for the destroy action")
     destroy_group.add_argument("-b", "--base-image", action="store_true", help="Destroy the base image instead of the machines")
 
+    connect_group = parser.add_argument_group("Connect actions", "These options can be specified for the connect action")
+    connect_group.add_argument("-p", "--provider", default="lxc", help="The provider to use to connect to the container (default: lxc)")
+
     logging_group = parser.add_argument_group("Verbosity options", "Control output verbosity (can be supplied multiple times)")
     logging_group.add_argument("-v", "--verbose", action="count", default=0, help="Be more verbose")
     logging_group.add_argument("-q", "--quite", action="count", default=0, help="Be more quite")
@@ -48,7 +51,12 @@ def validate_argument_sanity(args: Namespace, parser: ArgumentParser) -> Namespa
         # For people who are used to status calls
         args.action = "show"
     if args.config == "default" and args.action in settings.CONFIG_REQUIRED_ACTIONS:
-        parser.error("This action requires a config file to be passed")
+        msg = (
+            "This action requires a machine name to be passed"
+            if args.action == "connect"
+            else "This action requires a config file to be passed"
+        )
+        parser.error(msg)
     if args.sniffer and not args.action == "start":
         parser.error("The sniffer option only makes sense with the 'start' action")
     if args.base_image and not args.action == "destroy":
