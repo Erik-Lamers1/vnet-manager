@@ -28,6 +28,7 @@ apt-get install gcc python3-dev python3-apt python3-pip git lxc bridge-utils tcp
 ```
 For Ubuntu 18.04;
 ```bash
+# Note that vnet-manager requires python3.8
 apt-get install lxd
 ```
 In later versions of Ubuntu;
@@ -103,7 +104,7 @@ apt-get install -y tox virtualenvwrapper libapt-pkg-dev intltool
 # Depending on your console setup, you might have to logout and in again to make sure virtualenvwrapper is loaded
 # cd to your development directory
 cd ~/vnet-manager
-mkvirtualenv -p /usr/bin/python3.6 -a $(pwd) vnet-manager
+mkvirtualenv -p /usr/bin/python3.8 -a $(pwd) vnet-manager
 pip install -U pip
 pip install -r requirements/development.txt
 pre-commit install

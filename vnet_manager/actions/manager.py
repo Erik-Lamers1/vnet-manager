@@ -14,7 +14,6 @@ from vnet_manager.utils.files import write_file_to_disk, get_yaml_files_from_dis
 from vnet_manager.environment.lxc import ensure_vnet_lxc_environment, cleanup_vnet_lxc_environment
 from vnet_manager.operations.image import destroy_lxc_image
 from vnet_manager.operations.files import put_files_on_machine, generate_vnet_hosts_file, place_vnet_hosts_file_on_machines
-from vnet_manager.actions.help import display_help_for_action
 from vnet_manager.operations.interface import (
     bring_up_vnet_interfaces,
     bring_down_vnet_interfaces,
@@ -33,7 +32,14 @@ class ActionManager:
     """
 
     def __init__(
-        self, config_path: str = None, sniffer: bool = False, base_image: bool = False, no_hosts: bool = False, provider: str = "lxc"
+        self,
+        config_path: Optional[str] = None,
+        machines: Optional[List[str]] = None,
+        sniffer: bool = False,
+        base_image: bool = False,
+        no_hosts: bool = False,
+        purge: bool = False,
+        provider: str = "lxc",
     ):
         """
         :param str config_path: The path to the config
@@ -46,21 +52,9 @@ class ActionManager:
         self.base_image = base_image
         self.no_hosts = no_hosts
         self.provider = provider
-        self._machines = None
+        self.machines = machines
+        self.purge = purge
         self._config_validated = False
-
-    @property
-    def machines(self) -> Optional[List[str]]:
-        return self._machines
-
-    @machines.setter
-    def machines(self, machines: List[str]):
-        """
-        Only preform actions on a certain amount of machines.
-        Note that this only applies to the machine actions, all general actions will ignore this value.
-        :param list machines: The machine names to preform actions on, defaults to all
-        """
-        self._machines = machines
 
     def execute(self, action: str) -> int:
         """
@@ -73,17 +67,9 @@ class ActionManager:
         # First do a sanity check on the action
         if action not in settings.VALID_ACTIONS:
             raise NotImplementedError(f"{action} is not a valid action")
-        # Check if the operator only wants to see the help text
-        if self.config_path and self.config_path.lower() == "help":
-            display_help_for_action(action)
-            return EX_OK
-        # Check if a config is required
-        if action in settings.CONFIG_REQUIRED_ACTIONS and action != "connect":
-            if not self.config_path:
-                raise RuntimeError(f"The {action} action requires a config to be passed, but it wasn't")
-            if not self.parse_config():
-                logger.critical("Config NOT OK, can't proceed")
-                return EX_USAGE
+        if self.config_path and not self.parse_config():
+            logger.critical("Config NOT OK, can't proceed")
+            return EX_USAGE
         # Preform the action
         logger.info(f"Initiating {action} action")
         getattr(self, f"preform_{action.replace('-', '_')}_action")()
@@ -126,12 +112,12 @@ class ActionManager:
 
     def preform_start_action(self):
         bring_up_vnet_interfaces(self.config, sniffer=self.sniffer)
-        machine_op.change_machine_status(self.config, machines=self._machines, status="start")
+        machine_op.change_machine_status(self.config, machines=self.machines, status="start")
 
     def preform_stop_action(self):
-        machine_op.change_machine_status(self.config, machines=self._machines, status="stop")
+        machine_op.change_machine_status(self.config, machines=self.machines, status="stop")
         # If specific machines are specified, we don't want to mess with the interfaces
-        if self._machines:
+        if self.machines:
             logger.warning("Not bringing down VNet interfaces as we are only stopping specific machines, this may leave lingering sniffers")
         else:
             bring_down_vnet_interfaces(self.config)
@@ -149,7 +135,7 @@ class ActionManager:
         # Make sure the provider environments are correct
         ensure_vnet_lxc_environment(self.config)
         # Make the machines
-        machine_op.create_machines(self.config, machines=self._machines)
+        machine_op.create_machines(self.config, machines=self.machines)
         # Put user requested file on the machines
         put_files_on_machine(self.config)
         if not self.no_hosts:
@@ -160,13 +146,15 @@ class ActionManager:
         machine_op.enable_type_specific_machine_configuration(self.config)
 
     def preform_destroy_action(self):
-        if self.base_image:
+        if self.purge:
+            self.preform_purge_action()
+        elif self.base_image:
             request_confirmation(prompt="Are you sure you want to delete the VNet base images (y/n)? ")
             destroy_lxc_image(settings.LXC_BASE_IMAGE_ALIAS, by_alias=True)
         else:
-            machine_op.destroy_machines(self.config, machines=self._machines)
+            machine_op.destroy_machines(self.config, machines=self.machines)
             # If specific machines are specified, we don't want to mess with the interfaces
-            if self._machines:
+            if self.machines:
                 logger.warning(
                     "Not deleting VNet interfaces as we are only destroying specific machines, this may leave lingering sniffers"
                 )
@@ -205,5 +193,5 @@ class ActionManager:
         logger.info("Bash completion generated and placed. Use ' . /etc/bash_completion' to load in this terminal")
 
     @staticmethod
-    def preform_clean_action():
+    def preform_purge_action():
         cleanup_vnet_lxc_environment()

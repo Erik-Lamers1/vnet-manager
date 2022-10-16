@@ -78,44 +78,7 @@ PROVIDERS = {
         },
     }
 }
-# The 'list' action also requires a config, but because it is handled differently we don't add it to CONFIG_REQUIRED_ACTIONS
-CONFIG_REQUIRED_ACTIONS = ["show", "start", "stop", "status", "create", "destroy", "connect"]
-VALID_ACTIONS = CONFIG_REQUIRED_ACTIONS + ["list", "clean", "version", "bash-completion"]
 SHELL = "/bin/bash"
-HELP_TEXT_ACTION_MAPPING = {
-    "list": """Lists the status of the config files in a particular directory.
-Usage: vnet-manager list <dir>.
-In which the <dir> contains vnet-manager user config yaml files.
-This command does a recursive search for all vnet-manager config in the supplied directory (so it also lists subdirectories).
-No interface status will be shown, as these might overlap for some configs.
-    """,
-    "show": """Show the current status of the supplied config file
-    """,
-    "start": """Starts up a previously built config.
-This action will also bring up/start required VNet interfaces and enable sniffers if the --sniffer option is passed.
-    """,
-    "stop": """Stops a previously started config.
-This action will also bring down the corresponding VNet interfaces.
-    """,
-    "status": """Shows the current status of the supplied config file.
-    """,
-    "destroy": """Destroys a previously built config.
-This action will delete the corresponding machines and VNet interfaces.
-Use this action in combination with the --base-image parameter to delete the VNet base images.
-When the --base-image parameter is given any config file can be passed.
-    """,
-    "clean": """Purge VNet specific provider configuration from the system.
-This action can only be executed if all VNet configs on the system are destroyed.
-Only use this action when you wish to reset or uninstall VNet-manager.
-    """,
-    "create": """Builds a VNet configuration so it can be started using the 'start' action.
-This action will create a base image for all providers present in the configuration if they do not exist yet.
-    """,
-    "connect": f"""Usage: vnet-manager connect <machine> [-p <provider>]
-Drops you into a shell on the container, simple alias to <provider> exec {SHELL}
-    """,
-    "bash-completion": """Places the VNet-manager bash completion script""",
-}
 VNET_BRIDGE_NAME = "vnet-br"
 VNET_SNIFFER_PCAP_DIR = getenv("VNET_SNIFFER_PCAP_DIR", "/tmp")
 SUPPORTED_MACHINE_TYPES = ["host", "router"]
