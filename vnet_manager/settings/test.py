@@ -3,6 +3,20 @@ from .base import *
 # /dev/log doesn't exist everywhere
 del LOGGING["handlers"]["syslog"]["address"]
 
+# Add one provider for testing
+PROVIDERS["test"] = {
+    "supported_operating_systems": ["sid"],
+    "dns-nameserver": "1.1.1.1",
+    "guest_packages": [
+        "man",  # List of packages to install on the guest
+    ],
+    "base_image": {  # Download info for the base image
+        "os": "20.04",
+        "server": "https://cloud-images.ubuntu.com/daily",
+        "protocol": "simplestreams",
+    },
+}
+
 # Fixture config
 CONFIG = {
     "switches": 2,

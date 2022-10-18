@@ -4,25 +4,32 @@ from typing import Sequence
 from vnet_manager.conf import settings
 
 
+class VNetParser(ArgumentParser):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Add verbosity args and force arg to each subparser
+        # Add force option
+        self.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions (force)")
+        # Verbosity
+        logging_group = self.add_argument_group("Verbosity options", "Control output verbosity (can be supplied multiple times)")
+        logging_group.add_argument("-v", "--verbose", action="count", default=0, help="Be more verbose")
+        logging_group.add_argument("-q", "--quite", action="count", default=0, help="Be more quite")
+
+
 def parse_vnet_args(args: Sequence = None) -> Namespace:
     parser = ArgumentParser(description="VNet-manager a virtual network manager - manages containers to create virtual networks")
-    # Add force option
-    parser.add_argument("-y", "--yes", action="store_true", help="Answer yes to all questions (force)")
-
     # Add parsers for all the possible user actions
     add_action_parsers(parser)
-
-    # Verbosity
-    logging_group = parser.add_argument_group("Verbosity options", "Control output verbosity (can be supplied multiple times)")
-    logging_group.add_argument("-v", "--verbose", action="count", default=0, help="Be more verbose")
-    logging_group.add_argument("-q", "--quite", action="count", default=0, help="Be more quite")
-
     return parser.parse_args(args=args)
 
 
 def add_action_parsers(parser: ArgumentParser) -> ArgumentParser:
     action_parser = parser.add_subparsers(
-        title="Actions", description="Which action to preform, each individual action has its own help menu", dest="action", required=True
+        title="Actions",
+        description="Which action to preform, each individual action has its own help menu",
+        dest="action",
+        required=True,
+        parser_class=VNetParser,
     )
 
     # Let's try to keep this list in alphabetical order
@@ -38,6 +45,7 @@ def add_action_parsers(parser: ArgumentParser) -> ArgumentParser:
     )
 
     connect_parser = action_parser.add_parser("connect", help="Open a shell on a machine")
+    connect_parser.add_argument("config", help="Which machine to connect to", metavar="machine")
     connect_parser.add_argument(
         "-p",
         "--provider",
@@ -54,7 +62,8 @@ def add_action_parsers(parser: ArgumentParser) -> ArgumentParser:
         "-p",
         "--purge",
         action="store_true",
-        help="Purge the VNet-manager provider specific configurations from this machine. All previously build configs must have been destroyed. (This operation was previously called 'clean'",
+        help="Purge the VNet-manager provider specific configurations from this machine. "
+        "All previously build configs must have been destroyed. (This operation was previously called 'clean'",
     )
 
     list_parser = action_parser.add_parser("list", help="Recursive search for all configs in the supplied directory")

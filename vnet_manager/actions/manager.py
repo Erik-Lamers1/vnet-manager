@@ -65,14 +65,15 @@ class ActionManager:
         :return: int: returncode of the action
         """
         # First do a sanity check on the action
-        if action not in settings.VALID_ACTIONS:
+        action_func = action.replace("-", "_")
+        if not hasattr(self, f"preform_{action_func}_action"):
             raise NotImplementedError(f"{action} is not a valid action")
-        if self.config_path and not self.parse_config():
+        if self.config_path and not action == "list" and not self.parse_config():
             logger.critical("Config NOT OK, can't proceed")
             return EX_USAGE
         # Preform the action
         logger.info(f"Initiating {action} action")
-        getattr(self, f"preform_{action.replace('-', '_')}_action")()
+        getattr(self, f"preform_{action_func}_action")()
         return EX_OK
 
     def parse_config(self) -> bool:

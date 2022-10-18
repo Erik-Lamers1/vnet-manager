@@ -18,22 +18,26 @@ def main(args: Sequence = None) -> int:
     :param list args: The pre-cooked arguments to pass to the ArgParser
     :return int: exit_code
     """
-    args = parse_vnet_args(args)
+    args = vars(parse_vnet_args(args))
     # Set the VNET_FORCE variable, if --yes is given this will answer yes to all questions
-    environ[settings.VNET_FORCE_ENV_VAR] = "true" if args.yes else "false"
+    environ[settings.VNET_FORCE_ENV_VAR] = "true" if args.get("yes") else "false"
     # Setup logging
-    setup_console_logging(verbosity=get_logging_verbosity(args))
+    setup_console_logging(verbosity=get_logging_verbosity(verbose=args["verbose"], quite=args["quite"]))
     # Most VNet operation require root. So, do a root check
     if not check_for_root_user():
         logger.critical("This program should only be run as root")
         return EX_NOPERM
     # Let the action manager handle the rest
     manager = ActionManager(
-        config_path=args.config, sniffer=args.sniffer, base_image=args.base_image, no_hosts=args.no_hosts, provider=args.provider
+        config_path=args.get("config"),
+        sniffer=args.get("sniffer", False),
+        base_image=args.get("base_image", False),
+        no_hosts=args.get("no_hosts", False),
+        provider=args.get("provider"),
     )
-    if args.machines:
-        manager.machines = args.machines
-    return manager.execute(args.action)
+    if args.get("machines"):
+        manager.machines = args["machines"]
+    return manager.execute(args["action"])
 
 
 if __name__ == "__main__":

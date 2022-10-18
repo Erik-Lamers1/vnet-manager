@@ -27,8 +27,8 @@ class TestActionManager(VNetTestCase):
         self.destroy_lxc_image = self.set_up_patch("vnet_manager.actions.manager.destroy_lxc_image")
         self.delete_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.delete_vnet_interfaces")
         self.cleanup_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.cleanup_vnet_lxc_environment")
-        self.display_help_for_action = self.set_up_patch("vnet_manager.actions.manager.display_help_for_action")
         self.isfile = self.set_up_patch("vnet_manager.actions.manager.isfile")
+        self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
         self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
         self.get_yaml_file_from_disk_path = self.set_up_patch("vnet_manager.actions.manager.get_yaml_files_from_disk_path")
         self.get_yaml_file_from_disk_path.return_value = ["file1"]
@@ -42,12 +42,6 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager()
         ret = manager.execute("version")
         self.show_version.assert_called_once_with()
-        self.assertEqual(ret, EX_OK)
-
-    def test_action_manager_calls_display_help_for_action_when_action_has_been_called_with_help_as_second_parameter(self):
-        manager = ActionManager(config_path="help")
-        ret = manager.execute("start")
-        self.display_help_for_action.assert_called_once_with("start")
         self.assertEqual(ret, EX_OK)
 
     def test_action_manager_calls_get_config(self):
@@ -261,11 +255,6 @@ class TestActionManager(VNetTestCase):
         manager.execute("destroy")
         self.machine_op.destroy_machines.assert_called_once_with(self.validator.updated_config, machines=None)
 
-    def test_action_manager_calls_cleanup_vnet_lxc_environment_with_clean_action(self):
-        manager = ActionManager()
-        manager.execute("clean")
-        self.cleanup_vnet_lxc_environment.assert_called_once_with()
-
     def test_action_manager_calls_destroy_machines_with_destroy_action_and_machines(self):
         manager = ActionManager(config_path="blaap")
         manager.machines = ["machine"]
@@ -299,7 +288,6 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager()
         manager.machines = ["1", "2", "3"]
         self.assertEqual(manager.machines, ["1", "2", "3"])
-        self.assertIsInstance(ActionManager.machines, property)
 
     def test_action_manager_calls_connect_to_lxc_machine(self):
         manager = ActionManager(config_path="machine1")
@@ -307,6 +295,6 @@ class TestActionManager(VNetTestCase):
         self.machine_op.connect_to_lxc_machine.assert_called_once_with("machine1")
 
     def test_action_manager_raises_not_implemented_error_on_non_supported_provider(self):
-        manager = ActionManager(config_path="machine1", provider="test")
+        manager = ActionManager(config_path="machine1", provider="test123")
         with self.assertRaises(NotImplementedError):
             manager.execute("connect")

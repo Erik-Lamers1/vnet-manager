@@ -6,7 +6,7 @@ from vnet_manager.tests import VNetTestCase
 from vnet_manager.conf import settings
 from vnet_manager.vnet_manager import main
 
-default_args = ["list", "config"]
+default_args = ["create", "config"]
 
 
 class TestVNetManagerMain(VNetTestCase):
@@ -50,19 +50,23 @@ class TestVNetManagerMain(VNetTestCase):
 
     def test_main_calls_action_manager(self):
         main(default_args)
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=False, provider="lxc")
+        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=False, provider=None)
 
     def test_main_calls_action_manager_with_base_image(self):
-        main(["destroy", "config", "--base-image"])
-        self.action_manager.assert_called_once_with(base_image=True, config_path="config", no_hosts=False, sniffer=False, provider="lxc")
+        main(["destroy", "--base-image"])
+        self.action_manager.assert_called_once_with(base_image=True, config_path=None, no_hosts=False, sniffer=False, provider=None)
 
     def test_main_calls_action_manager_with_no_hosts(self):
         main(["create", "config", "--no-hosts"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=True, sniffer=False, provider="lxc")
+        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=True, sniffer=False, provider=None)
 
     def test_main_calls_action_manager_with_sniffer(self):
         main(["start", "config", "--sniffer"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=True, provider="lxc")
+        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=True, provider=None)
+
+    def test_main_calls_action_manager_with_default_provider_on_connect(self):
+        main(["connect", "machine1"])
+        self.action_manager.assert_called_once_with(base_image=False, config_path="machine1", no_hosts=False, sniffer=False, provider="lxc")
 
     def test_main_calls_action_manager_with_provider(self):
         main(["connect", "machine1", "--provider", "test"])
@@ -78,3 +82,7 @@ class TestVNetManagerMain(VNetTestCase):
         self.manager.execute.return_value = 42
         ret = main(default_args)
         self.assertEqual(ret, 42)
+
+    def test_main_executes_status_action_with_show_call(self):
+        main(["show", "config"])
+        self.manager.execute.assert_called_once_with("show")
