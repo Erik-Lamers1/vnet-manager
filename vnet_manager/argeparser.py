@@ -67,7 +67,7 @@ def add_action_parsers(parser: ArgumentParser) -> ArgumentParser:
     )
 
     list_parser = action_parser.add_parser("list", help="Recursive search for all configs in the supplied directory")
-    list_parser.add_argument("directory", help="The directory in which to list the machines statuses")
+    list_parser.add_argument("config", help="The directory in which to list the machines statuses", metavar="directory")
 
     show_parser = action_parser.add_parser("show", help="Show the current status of the supplied config file", aliases=["status"])
     show_parser.add_argument("config", help="The config (YAML) to get the status for")

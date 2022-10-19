@@ -84,5 +84,5 @@ class TestVNetManagerMain(VNetTestCase):
         self.assertEqual(ret, 42)
 
     def test_main_executes_status_action_with_show_call(self):
-        main(["show", "config"])
+        main(["status", "config"])
         self.manager.execute.assert_called_once_with("show")

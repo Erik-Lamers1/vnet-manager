@@ -68,7 +68,7 @@ class ActionManager:
         action_func = action.replace("-", "_")
         if not hasattr(self, f"preform_{action_func}_action"):
             raise NotImplementedError(f"{action} is not a valid action")
-        if self.config_path and not action == "list" and not self.parse_config():
+        if self.config_path and action not in ("connect", "list") and not self.parse_config():
             logger.critical("Config NOT OK, can't proceed")
             return EX_USAGE
         # Preform the action

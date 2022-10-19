@@ -37,6 +37,9 @@ def main(args: Sequence = None) -> int:
     )
     if args.get("machines"):
         manager.machines = args["machines"]
+    # Status is renamed to show to make sure we execute the right action
+    if args["action"] == "status":
+        args["action"] = "show"
     return manager.execute(args["action"])
 
 

@@ -69,3 +69,9 @@ class TestParseArgs(VNetTestCase):
 
     def test_parse_args_accepts_yes_after_action(self):
         self.assertIsInstance(parse_vnet_args(["create", "connect", "--yes"]), Namespace)
+
+    def test_parse_args_returns_config_for_list_action(self):
+        self.assertIsNotNone(parse_vnet_args(["list", "config"]).config)
+
+    def test_parse_args_returns_config_for_connect_action(self):
+        self.assertIsNotNone(parse_vnet_args(["connect", "machine1"]).config)
