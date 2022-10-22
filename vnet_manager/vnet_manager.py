@@ -33,6 +33,7 @@ def main(args: Sequence = None) -> int:
         sniffer=args.get("sniffer", False),
         base_image=args.get("base_image", False),
         no_hosts=args.get("no_hosts", False),
+        purge=args.get("purge", False),
         provider=args.get("provider"),
         pcap_dir=args.get("pcap_dir", settings.VNET_SNIFFER_PCAP_DIR),
     )
