@@ -348,7 +348,7 @@ class TestBringUpVNetInterfaces(VNetTestCase):
 
     def test_bring_up_vnet_interfaces_calls_sniffer_when_sniffer_argument_passed(self):
         bring_up_vnet_interfaces(self.config, sniffer=True)
-        self.start_tcpdump_on_interface.assert_has_calls(self.expected_vnet_interface_calls)
+        self.start_tcpdump_on_interface.assert_has_calls([call(ifname=i, path="/tmp") for i in self.get_vnet_interface_names.return_value])
 
     def test_bring_up_vnet_interfaces_calls_check_if_sniffer_exists(self):
         bring_up_vnet_interfaces(self.config, sniffer=True)
@@ -533,3 +533,7 @@ class TestStartTcpdumpOnVNetInterface(VNetTestCase):
     def test_start_tcpdump_on_vnet_interface_makes_correct_popen_call(self):
         start_tcpdump_on_vnet_interface("dev1")
         self.popen.assert_called_once_with(shlex.split(f"tcpdump -i dev1 -U -w {join(settings.VNET_SNIFFER_PCAP_DIR, 'dev1.pcap')}"))
+
+    def test_start_tcpdump_on_vnet_interface_makes_correct_popen_call_with_path(self):
+        start_tcpdump_on_vnet_interface(ifname="dev1", path="/test")
+        self.popen.assert_called_once_with(shlex.split(f"tcpdump -i dev1 -U -w /test/dev1.pcap"))

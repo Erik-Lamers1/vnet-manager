@@ -137,13 +137,17 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_bring_up_vnet_interfaces_with_start_action(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("start")
-        self.bring_up_vnet_interfaces.assert_called_once_with(self.validator.updated_config, sniffer=False)
+        self.bring_up_vnet_interfaces.assert_called_once_with(
+            self.validator.updated_config, sniffer=False, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
         self.assertFalse(self.bring_down_vnet_interfaces.called)
 
     def test_action_manager_calls_bring_up_vnet_interfaces_with_start_action_and_sniffer(self):
         manager = ActionManager(config_path="blaap", sniffer=True)
         manager.execute("start")
-        self.bring_up_vnet_interfaces.assert_called_once_with(self.validator.updated_config, sniffer=True)
+        self.bring_up_vnet_interfaces.assert_called_once_with(
+            self.validator.updated_config, sniffer=True, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
 
     def test_action_manager_calls_change_machine_status_with_start_action(self):
         manager = ActionManager(config_path="blaap")

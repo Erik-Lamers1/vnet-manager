@@ -39,6 +39,7 @@ class ActionManager:
         base_image: bool = False,
         no_hosts: bool = False,
         purge: bool = False,
+        pcap_dir: str = settings.VNET_SNIFFER_PCAP_DIR,
         provider: str = "lxc",
     ):
         """
@@ -54,6 +55,7 @@ class ActionManager:
         self.provider = provider
         self.machines = machines
         self.purge = purge
+        self.pcap_dir = pcap_dir
         self._config_validated = False
 
     def execute(self, action: str) -> int:
@@ -112,7 +114,7 @@ class ActionManager:
             show_vnet_veth_interface_status(self.config)
 
     def preform_start_action(self):
-        bring_up_vnet_interfaces(self.config, sniffer=self.sniffer)
+        bring_up_vnet_interfaces(self.config, sniffer=self.sniffer, pcap_dir=self.pcap_dir)
         machine_op.change_machine_status(self.config, machines=self.machines, status="start")
 
     def preform_stop_action(self):

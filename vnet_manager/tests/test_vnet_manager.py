@@ -50,28 +50,43 @@ class TestVNetManagerMain(VNetTestCase):
 
     def test_main_calls_action_manager(self):
         main(default_args)
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=False, provider=None)
+        self.action_manager.assert_called_once_with(
+            base_image=False, config_path="config", no_hosts=False, sniffer=False, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
 
     def test_main_calls_action_manager_with_base_image(self):
         main(["destroy", "--base-image"])
-        self.action_manager.assert_called_once_with(base_image=True, config_path=None, no_hosts=False, sniffer=False, provider=None)
+        self.action_manager.assert_called_once_with(
+            base_image=True, config_path=None, no_hosts=False, sniffer=False, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
 
     def test_main_calls_action_manager_with_no_hosts(self):
         main(["create", "config", "--no-hosts"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=True, sniffer=False, provider=None)
+        self.action_manager.assert_called_once_with(
+            base_image=False, config_path="config", no_hosts=True, sniffer=False, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
 
     def test_main_calls_action_manager_with_sniffer(self):
         main(["start", "config", "--sniffer"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="config", no_hosts=False, sniffer=True, provider=None)
+        self.action_manager.assert_called_once_with(
+            base_image=False, config_path="config", no_hosts=False, sniffer=True, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
 
     def test_main_calls_action_manager_with_default_provider_on_connect(self):
         main(["connect", "machine1"])
-        self.action_manager.assert_called_once_with(base_image=False, config_path="machine1", no_hosts=False, sniffer=False, provider="lxc")
+        self.action_manager.assert_called_once_with(
+            base_image=False, config_path="machine1", no_hosts=False, sniffer=False, provider="lxc", pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+        )
 
     def test_main_calls_action_manager_with_provider(self):
         main(["connect", "machine1", "--provider", "test"])
         self.action_manager.assert_called_once_with(
-            base_image=False, config_path="machine1", no_hosts=False, sniffer=False, provider="test"
+            base_image=False,
+            config_path="machine1",
+            no_hosts=False,
+            sniffer=False,
+            provider="test",
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
 
     def test_main_sets_manager_machine_attribute(self):

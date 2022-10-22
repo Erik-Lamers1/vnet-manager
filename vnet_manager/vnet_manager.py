@@ -34,6 +34,7 @@ def main(args: Sequence = None) -> int:
         base_image=args.get("base_image", False),
         no_hosts=args.get("no_hosts", False),
         provider=args.get("provider"),
+        pcap_dir=args.get("pcap_dir", settings.VNET_SNIFFER_PCAP_DIR),
     )
     if args.get("machines"):
         manager.machines = args["machines"]
