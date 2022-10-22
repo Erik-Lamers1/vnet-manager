@@ -30,6 +30,7 @@ class TestActionManager(VNetTestCase):
         self.isfile = self.set_up_patch("vnet_manager.actions.manager.isfile")
         self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
         self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
+        self.write_file = self.set_up_patch("vnet_manager.actions.manager.write_file_to_disk")
         self.get_yaml_file_from_disk_path = self.set_up_patch("vnet_manager.actions.manager.get_yaml_files_from_disk_path")
         self.get_yaml_file_from_disk_path.return_value = ["file1"]
 
@@ -302,3 +303,19 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="machine1", provider="test123")
         with self.assertRaises(NotImplementedError):
             manager.execute("connect")
+
+    def test_action_manager_calls_cleanup_lxc_environment_with_purge_action_on_destroy(self):
+        manager = ActionManager(purge=True)
+        manager.execute("destroy")
+        self.cleanup_vnet_lxc_environment.assert_called_once_with()
+
+    def test_action_manager_writes_bash_completion_file(self):
+        manager = ActionManager()
+        manager.execute("bash_completion")
+        actions = ("create", "connect", "destroy", "list", "show", "status", "start", "stop")
+        self.write_file.assert_called_once_with(
+            settings.VNET_BASH_COMPLETION_PATH,
+            settings.VNET_BASH_COMPLETION_TEMPLATE.format(
+                options=" ".join(actions), name=settings.get("PYTHON_PACKAGE_NAME", "vnet-manager")
+            ),
+        )
