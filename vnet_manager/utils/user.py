@@ -72,4 +72,5 @@ def generate_bash_completion_script() -> str:
     """
     logger.info("Generating bash completion script")
     template = settings.VNET_BASH_COMPLETION_TEMPLATE
-    return template.format(options=" ".join(settings.get("VALID_ACTIONS", "")), name=settings.get("PYTHON_PACKAGE_NAME", "vnet-manager"))
+    actions = ("create", "connect", "destroy", "list", "show", "status", "start", "stop")
+    return template.format(options=" ".join(actions), name=settings.get("PYTHON_PACKAGE_NAME", "vnet-manager"))
