@@ -51,31 +51,61 @@ class TestVNetManagerMain(VNetTestCase):
     def test_main_calls_action_manager(self):
         main(default_args)
         self.action_manager.assert_called_once_with(
-            base_image=False, config_path="config", no_hosts=False, sniffer=False, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+            base_image=False,
+            config_path="config",
+            no_hosts=False,
+            sniffer=False,
+            purge=False,
+            provider=None,
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
 
     def test_main_calls_action_manager_with_base_image(self):
         main(["destroy", "--base-image"])
         self.action_manager.assert_called_once_with(
-            base_image=True, config_path=None, no_hosts=False, sniffer=False, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+            base_image=True,
+            config_path=None,
+            no_hosts=False,
+            sniffer=False,
+            purge=False,
+            provider=None,
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
 
     def test_main_calls_action_manager_with_no_hosts(self):
         main(["create", "config", "--no-hosts"])
         self.action_manager.assert_called_once_with(
-            base_image=False, config_path="config", no_hosts=True, sniffer=False, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+            base_image=False,
+            config_path="config",
+            no_hosts=True,
+            sniffer=False,
+            purge=False,
+            provider=None,
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
 
     def test_main_calls_action_manager_with_sniffer(self):
         main(["start", "config", "--sniffer"])
         self.action_manager.assert_called_once_with(
-            base_image=False, config_path="config", no_hosts=False, sniffer=True, provider=None, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+            base_image=False,
+            config_path="config",
+            no_hosts=False,
+            sniffer=True,
+            purge=False,
+            provider=None,
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
 
     def test_main_calls_action_manager_with_default_provider_on_connect(self):
         main(["connect", "machine1"])
         self.action_manager.assert_called_once_with(
-            base_image=False, config_path="machine1", no_hosts=False, sniffer=False, provider="lxc", pcap_dir=settings.VNET_SNIFFER_PCAP_DIR
+            base_image=False,
+            config_path="machine1",
+            no_hosts=False,
+            sniffer=False,
+            purge=False,
+            provider="lxc",
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
 
     def test_main_calls_action_manager_with_provider(self):
@@ -85,6 +115,7 @@ class TestVNetManagerMain(VNetTestCase):
             config_path="machine1",
             no_hosts=False,
             sniffer=False,
+            purge=False,
             provider="test",
             pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
@@ -101,3 +132,16 @@ class TestVNetManagerMain(VNetTestCase):
     def test_main_executes_status_action_with_show_call(self):
         main(["status", "config"])
         self.manager.execute.assert_called_once_with("show")
+
+    def test_main_calls_vnet_manager_with_purge(self):
+        main(["destroy", "--purge"])
+        self.action_manager.assert_called_once_with(
+            base_image=False,
+            config_path=None,
+            no_hosts=False,
+            sniffer=False,
+            purge=True,
+            provider=None,
+            pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
+        )
+        self.manager.execute.assert_called_once_with("destroy")
