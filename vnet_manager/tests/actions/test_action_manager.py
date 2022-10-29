@@ -1,4 +1,4 @@
-from os import EX_OK, EX_USAGE
+from os import EX_OK, EX_USAGE, EX_OSERR
 from unittest.mock import MagicMock
 
 from vnet_manager.tests import VNetTestCase
@@ -27,17 +27,14 @@ class TestActionManager(VNetTestCase):
         self.destroy_lxc_image = self.set_up_patch("vnet_manager.actions.manager.destroy_lxc_image")
         self.delete_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.delete_vnet_interfaces")
         self.cleanup_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.cleanup_vnet_lxc_environment")
-        self.isfile = self.set_up_patch("vnet_manager.actions.manager.isfile")
-        self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
         self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
         self.write_file = self.set_up_patch("vnet_manager.actions.manager.write_file_to_disk")
         self.get_yaml_file_from_disk_path = self.set_up_patch("vnet_manager.actions.manager.get_yaml_files_from_disk_path")
         self.get_yaml_file_from_disk_path.return_value = ["file1"]
 
-    def test_action_raises_not_implemented_error_if_unsupported_action(self):
-        manager = ActionManager()
-        with self.assertRaises(NotImplementedError):
-            manager.execute("not_working")
+    def test_action_manager_returns_usage_exit_code_if_action_does_not_exist(self):
+        ret = ActionManager().execute("blaap")
+        self.assertEqual(ret, EX_USAGE)
 
     def test_action_manager_calls_show_version_with_version_action(self):
         manager = ActionManager()
@@ -48,7 +45,7 @@ class TestActionManager(VNetTestCase):
     def test_action_manager_calls_get_config(self):
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
-        self.get_config.assert_called_once_with("blaap")
+        self.get_config.assert_called_once_with("file1")
 
     def test_action_manager_calls_validate_config(self):
         manager = ActionManager(config_path="blaap")
@@ -59,6 +56,13 @@ class TestActionManager(VNetTestCase):
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
         self.validator.validate.assert_called_once()
+
+    def test_action_manager_does_not_show_status_of_non_valid_config_files(self):
+        self.validator.config_validation_successful = False
+        self.get_yaml_file_from_disk_path.return_value = ["file1", "file2"]
+        manager = ActionManager(config_path="blaap")
+        manager.execute("list")
+        self.assertFalse(self.machine_op.show_status.called)
 
     def test_action_manager_returns_usage_exit_code_if_validator_unsuccessful(self):
         self.validator.config_validation_successful = False
@@ -72,42 +76,29 @@ class TestActionManager(VNetTestCase):
         manager.execute("list")
         self.machine_op.show_status.assert_called_once_with(self.validator.updated_config)
 
-    def test_action_manager_calls_show_vnet_interface_status_with_list_action(self):
-        manager = ActionManager(config_path="blaap")
-        manager.execute("list")
-        self.show_status_interfaces.assert_called_once_with(self.validator.updated_config)
-
-    def test_action_manager_does_not_call_vnet_veth_interface_status_with_list_action_if_veths_config_not_present(self):
-        manager = ActionManager(config_path="blaap")
-        manager.execute("list")
-        self.assertFalse(self.show_status_interfaces_veth.called)
-
-    def test_action_manager_calls_show_vnet_veth_interface_status_with_list_action(self):
-        self.validator.updated_config["veths"] = "jajaja"
-        manager = ActionManager(config_path="blaap")
-        manager.execute("list")
-        self.show_status_interfaces_veth.assert_called_once_with(self.validator.updated_config)
-
     def test_action_manager_calls_get_yaml_file_from_disk_path_with_list_action(self):
-        self.isfile.return_value = False
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
         self.get_yaml_file_from_disk_path.assert_called_once_with("blaap")
 
     def test_action_manager_calls_show_status_with_return_values_of_get_yaml_files(self):
         self.get_yaml_file_from_disk_path.return_value = ["file1", "file2", "file3"]
-        self.isfile.return_value = False
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
         self.assertEqual(3, self.machine_op.show_status.call_count)
 
     def test_action_manager_does_nothing_when_not_file_and_not_dir_with_list_action(self):
-        self.isfile.return_value = False
         self.isdir.return_value = False
         manager = ActionManager(config_path="blaap")
         manager.execute("list")
         self.assertFalse(self.get_yaml_file_from_disk_path.called)
         self.assertFalse(self.machine_op.show_status.called)
+
+    def test_action_manager_returns_os_error_exit_code_when_not_dir_with_list_action(self):
+        self.isdir.return_value = False
+        manager = ActionManager(config_path="blaap")
+        ret = manager.execute("list")
+        self.assertEqual(ret, EX_OSERR)
 
     def test_action_manager_calls_show_status_with_show_action(self):
         manager = ActionManager(config_path="blaap")
@@ -299,10 +290,10 @@ class TestActionManager(VNetTestCase):
         manager.execute("connect")
         self.machine_op.connect_to_lxc_machine.assert_called_once_with("machine1")
 
-    def test_action_manager_raises_not_implemented_error_on_non_supported_provider(self):
-        manager = ActionManager(config_path="machine1", provider="test123")
-        with self.assertRaises(NotImplementedError):
-            manager.execute("connect")
+    def test_action_manager_returns_usage_exit_code_with_non_supported_provider(self):
+        manager = ActionManager(config_path="machine1", provider="blaap133")
+        ret = manager.execute("connect")
+        self.assertEqual(ret, EX_USAGE)
 
     def test_action_manager_calls_cleanup_lxc_environment_with_purge_action_on_destroy(self):
         manager = ActionManager(purge=True)

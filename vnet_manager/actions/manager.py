@@ -1,7 +1,6 @@
 from logging import getLogger
-from os import EX_OK, EX_USAGE
-from os.path import isdir, isfile
-from warnings import warn
+from os import EX_OK, EX_USAGE, EX_OSERR
+from os.path import isdir
 from typing import Optional, Tuple, List
 
 import vnet_manager.operations.machine as machine_op
@@ -62,21 +61,20 @@ class ActionManager:
         """
         Execute an action
         :param str action: The name of the action to execute
-        :raises NotImplementedError: If the action is unknown
-        :raises RuntimeError
         :return: int: returncode of the action
         """
         # First do a sanity check on the action
         action_func = action.replace("-", "_")
         if not hasattr(self, f"preform_{action_func}_action"):
-            raise NotImplementedError(f"{action} is not a valid action")
+            logger.critical(f"{action} is not a valid action")
+            return EX_USAGE
         if self.config_path and action not in ("connect", "list") and not self.parse_config():
             logger.critical("Config NOT OK, can't proceed")
             return EX_USAGE
         # Preform the action
         logger.info(f"Initiating {action} action")
-        getattr(self, f"preform_{action_func}_action")()
-        return EX_OK
+        # Return the exit code provided by the execute function or exit EX_OK if no exit code is provided
+        return getattr(self, f"preform_{action_func}_action")() or EX_OK
 
     def parse_config(self) -> bool:
         """
@@ -128,11 +126,11 @@ class ActionManager:
     def preform_connect_action(self):
         # Make the provider exists
         if self.provider not in settings.PROVIDERS.keys():
-            msg = f"Provider {self.provider} not supported"
-            logger.error(msg)
-            raise NotImplementedError(msg)
+            logger.error(f"Provider {self.provider} not supported")
+            return EX_USAGE
         # Connect to it
         getattr(machine_op, f"connect_to_{self.provider}_machine")(self.config_path)
+        return EX_OK
 
     def preform_create_action(self):
         # Make sure the provider environments are correct
@@ -165,25 +163,18 @@ class ActionManager:
                 delete_vnet_interfaces(self.config)
 
     def preform_list_action(self):
-        # First check if we have been passed a file or directory
-        if isfile(self.config_path):
-            dep_msg = "List action with a regular config file is deprecated, use the 'show' action instead"
-            logger.warning(dep_msg)
-            warn(dep_msg)
-            # Execute the show action instead
-            self.execute("show")
-        elif isdir(self.config_path):
-            # We exclude the default.yaml config file because it is not a valid user config
-            yaml_files = get_yaml_files_from_disk_path(self.config_path)
-            for path in yaml_files:
-                self.config_path = path
-                if not self.parse_config():
-                    logger.error(f"Config {path} does not seem to be a valid config, skipping")
-                    continue
-                logger.info(f"Showing machine status for {path}")
-                machine_op.show_status(self.config)
-        else:
-            logger.error(f"Path {self.config_path} does not seem to be a file or a directory, did you forget to pass a config directory?")
+        if not isdir(self.config_path):
+            logger.error(f"Provided path {self.config_path} does not seem to be a directory")
+            return EX_OSERR
+        yaml_files = get_yaml_files_from_disk_path(self.config_path)
+        for path in yaml_files:
+            self.config_path = path
+            if not self.parse_config():
+                logger.error(f"Config {path} does not seem to be a valid config, skipping")
+                continue
+            logger.info(f"Showing machine status for {path}")
+            machine_op.show_status(self.config)
+        return EX_OK
 
     @staticmethod
     def preform_version_action():
