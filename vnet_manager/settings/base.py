@@ -41,7 +41,7 @@ LOGGING = {
             "level": "INFO",
         },
         "ws4py": {
-            "level": "WARNING",
+            "level": "CRITICAL",
         },
         "pyroute2": {"level": "INFO"},
         "pyroute2.ndb": {"level": "WARNING"},
