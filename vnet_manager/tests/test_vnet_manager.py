@@ -30,6 +30,10 @@ class TestVNetManagerMain(VNetTestCase):
         main(default_args + ["--yes"])
         self.assertEqual(environ[settings.VNET_FORCE_ENV_VAR], "true")
 
+    def test_main_sets_pylxd_warnings_env_variable(self):
+        main(default_args)
+        self.assertEqual(environ["PYLXD_WARNINGS"], "none")
+
     def test_main_calls_setup_console_logging(self):
         main(default_args)
         self.setup_console_logging.assert_called_once_with(verbosity=INFO)

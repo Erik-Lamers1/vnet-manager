@@ -27,6 +27,8 @@ def main(args: Sequence = None) -> int:
     if not check_for_root_user():
         logger.critical("This program should only be run as root")
         return EX_NOPERM
+    # Silence the unknown attribute warnings from PyLXD
+    environ["PYLXD_WARNINGS"] = "none"
     # Let the action manager handle the rest
     manager = ActionManager(
         config_path=args.get("config"),
