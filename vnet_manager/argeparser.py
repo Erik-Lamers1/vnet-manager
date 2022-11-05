@@ -91,4 +91,6 @@ def add_action_parsers(parser: ArgumentParser) -> ArgumentParser:
         "-m", "--machines", nargs="*", help="Only stop the following machines (defaults to all machines in the config file)"
     )
 
+    action_parser.add_parser("version", help="Show the current version and exit")
+
     return parser

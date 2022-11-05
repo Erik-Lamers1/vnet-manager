@@ -149,3 +149,7 @@ class TestVNetManagerMain(VNetTestCase):
             pcap_dir=settings.VNET_SNIFFER_PCAP_DIR,
         )
         self.manager.execute.assert_called_once_with("destroy")
+
+    def test_main_calls_manager_with_version(self):
+        main(["version"])
+        self.manager.execute.assert_called_once_with("version")
