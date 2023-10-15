@@ -72,7 +72,7 @@ PROVIDERS = {
             "avahi-utils",
         ],
         "base_image": {  # Download info for the base image
-            "os": "20.04",
+            "os": "22.04",
             "server": "https://cloud-images.ubuntu.com/daily",
             "protocol": "simplestreams",
         },
