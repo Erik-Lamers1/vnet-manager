@@ -19,6 +19,7 @@ class TestActionManager(VNetTestCase):
         self.show_status_interfaces_veth = self.set_up_patch("vnet_manager.actions.manager.show_vnet_veth_interface_status")
         self.bring_up_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.bring_up_vnet_interfaces")
         self.bring_down_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.bring_down_vnet_interfaces")
+        self.bring_down_vnet_interfaces.return_value = False
         self.ensure_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.ensure_vnet_lxc_environment")
         self.put_files_on_machine = self.set_up_patch("vnet_manager.actions.manager.put_files_on_machine")
         self.generate_vnet_hosts_file = self.set_up_patch("vnet_manager.actions.manager.generate_vnet_hosts_file")
@@ -26,6 +27,9 @@ class TestActionManager(VNetTestCase):
         self.request_confirmation = self.set_up_patch("vnet_manager.actions.manager.request_confirmation")
         self.destroy_lxc_image = self.set_up_patch("vnet_manager.actions.manager.destroy_lxc_image")
         self.delete_vnet_interfaces = self.set_up_patch("vnet_manager.actions.manager.delete_vnet_interfaces")
+        self.kill_tcpdump_processes_on_vnet_interfaces = self.set_up_patch(
+            "vnet_manager.actions.manager.kill_tcpdump_processes_on_vnet_interfaces"
+        )
         self.cleanup_vnet_lxc_environment = self.set_up_patch("vnet_manager.actions.manager.cleanup_vnet_lxc_environment")
         self.isdir = self.set_up_patch("vnet_manager.actions.manager.isdir")
         self.write_file = self.set_up_patch("vnet_manager.actions.manager.write_file_to_disk")
@@ -173,6 +177,17 @@ class TestActionManager(VNetTestCase):
         manager.machines = ["machine"]
         manager.execute("stop")
         self.assertFalse(self.bring_down_vnet_interfaces.called)
+
+    def test_action_manager_does_not_call_kill_tcpdump_processes_when_no_lingering_sniffers_are_found(self):
+        manager = ActionManager(config_path="blaap")
+        manager.execute("stop")
+        self.assertFalse(self.kill_tcpdump_processes_on_vnet_interfaces.called)
+
+    def test_action_manager_calls_kill_tcpdump_processes_when_lingering_sniffers_are_found(self):
+        self.bring_down_vnet_interfaces.return_value = True
+        manager = ActionManager(config_path="blaap")
+        manager.execute("stop")
+        self.kill_tcpdump_processes_on_vnet_interfaces.assert_called_once_with(self.validator.updated_config)
 
     def test_action_manager_calls_ensure_vnet_lxc_environment_with_create_action(self):
         manager = ActionManager(config_path="blaap")

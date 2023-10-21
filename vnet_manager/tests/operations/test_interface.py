@@ -22,6 +22,7 @@ from vnet_manager.operations.interface import (
     bring_down_vnet_interfaces,
     delete_vnet_interfaces,
     start_tcpdump_on_vnet_interface,
+    kill_tcpdump_processes_on_vnet_interfaces,
 )
 from vnet_manager.conf import settings
 
@@ -444,6 +445,8 @@ class TestBringDownVNetInterfaces(VNetTestCase):
         self.iproute_obj = Mock()
         self.iproute.return_value = self.iproute_obj
         self.check_if_interface_exists = self.set_up_patch("vnet_manager.operations.interface.check_if_interface_exists")
+        self.check_if_sniffer_exsits = self.set_up_patch("vnet_manager.operations.interface.check_if_sniffer_exists")
+        self.check_if_sniffer_exsits.return_value = False
         self.config = deepcopy(settings.CONFIG)
 
     def test_bring_down_vnet_interfaces_calls_iproute(self):
@@ -480,6 +483,13 @@ class TestBringDownVNetInterfaces(VNetTestCase):
         self.check_if_interface_exists.return_value = False
         bring_down_vnet_interfaces(self.config)
         self.assertFalse(self.iproute_obj.link.called)
+
+    def test_bring_down_vnet_interfaces_return_false_if_no_sniffers_exist(self):
+        self.assertFalse(bring_down_vnet_interfaces(self.config))
+
+    def test_bring_down_vnet_interfaces_returns_true_if_sniffers_exist(self):
+        self.check_if_sniffer_exsits.return_value = True
+        self.assertTrue(bring_down_vnet_interfaces(self.config))
 
 
 class TestDeleteVNetInterfaces(VNetTestCase):
@@ -537,3 +547,21 @@ class TestStartTcpdumpOnVNetInterface(VNetTestCase):
     def test_start_tcpdump_on_vnet_interface_makes_correct_popen_call_with_path(self):
         start_tcpdump_on_vnet_interface(ifname="dev1", path="/test")
         self.popen.assert_called_once_with(shlex.split(f"tcpdump -i dev1 -U -w /test/dev1.pcap"))
+
+
+class TestKillTCPDumpProcessesOnVNetInterfaces(VNetTestCase):
+    def setUp(self) -> None:
+        self.config = deepcopy(settings.CONFIG)
+        self.process = Mock()
+        self.process_iter = self.set_up_patch("vnet_manager.operations.interface.process_iter")
+        self.process_iter.return_value = [self.process]
+        self.process.cmdline.return_value = "testprocess testargs"
+
+    def test_kill_tcpdump_processes_on_vnet_interfaces_doesnt_kill_anything_if_no_interfaces_found(self):
+        kill_tcpdump_processes_on_vnet_interfaces(self.config)
+        self.assertFalse(self.process.kill.called)
+
+    def test_kill_tcpdump_processes_on_vnet_interfaces_kills_tcpdump_process_on_vnet_interface(self):
+        self.process.cmdline.return_value = f"/usr/sbin/tcpdump -i {settings.VNET_BRIDGE_NAME}0 -n"
+        kill_tcpdump_processes_on_vnet_interfaces(self.config)
+        self.process.kill.assert_called_once_with()
