@@ -3,6 +3,7 @@ from typing import List
 from logging import getLogger
 from subprocess import check_call, CalledProcessError, Popen, DEVNULL
 from os.path import join
+from datetime import datetime
 from pyroute2.iproute import IPRoute
 from pyroute2.ndb.main import NDB
 from psutil import process_iter
@@ -282,7 +283,7 @@ def start_tcpdump_on_vnet_interface(ifname: str, path: str = settings.VNET_SNIFF
     Starts a tcpdump process on a vnet interface
     :param str ifname: The interface to start the tcpdump on
     """
-    path = join(path, f"{ifname}.pcap")
+    path = join(path, f"{ifname}.{datetime.now().strftime('%y%m%d%H%M')}.pcap")
     logger.info(f"Starting sniffer on VNet interface {ifname}, PCAP location: {path}")
     Popen(shlex.split(f"tcpdump -i {ifname} -U -w {path}"))  # pylint: disable=consider-using-with
 
