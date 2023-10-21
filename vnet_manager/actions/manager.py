@@ -19,6 +19,7 @@ from vnet_manager.operations.interface import (
     delete_vnet_interfaces,
     show_vnet_interface_status,
     show_vnet_veth_interface_status,
+    kill_tcpdump_processes_on_vnet_interfaces,
 )
 
 logger = getLogger(__name__)
@@ -121,7 +122,13 @@ class ActionManager:
         if self.machines:
             logger.warning("Not bringing down VNet interfaces as we are only stopping specific machines, this may leave lingering sniffers")
         else:
-            bring_down_vnet_interfaces(self.config)
+            # Bring down VNet interfaces and check with user if we should kill any lingering sniffers
+            if bring_down_vnet_interfaces(self.config):
+                request_confirmation(
+                    message="Lingering sniffers have been found for the VNet interfaces that have been brought down",
+                    prompt="Kill lingering sniffers? (y/n) ",
+                )
+                kill_tcpdump_processes_on_vnet_interfaces(self.config)
 
     def preform_connect_action(self):
         # Make the provider exists
