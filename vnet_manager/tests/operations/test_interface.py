@@ -359,9 +359,13 @@ class TestBringUpVNetInterfaces(VNetTestCase):
         bring_up_vnet_interfaces(self.config, sniffer=True)
         self.assertFalse(self.start_tcpdump_on_interface.called)
 
-    def test_bring_up_vnet_interfaces_calls_ensure_vnet_veth_interfaces(self):
+    def test_bring_up_vnet_interfaces_calls_ensure_vnet_veth_interfaces_with_default_values(self):
         bring_up_vnet_interfaces(self.config)
-        self.ensure_vnet_veth_interfaces.assert_called_once_with(self.config)
+        self.ensure_vnet_veth_interfaces.assert_called_once_with(config=self.config, sniffer=False, pcap_dir=settings.VNET_SNIFFER_PCAP_DIR)
+
+    def test_bring_up_vnet_interfaces_calls_ensure_vnet_veth_interfaces_with_sniffer(self):
+        bring_up_vnet_interfaces(self.config, sniffer=True, pcap_dir="/test")
+        self.ensure_vnet_veth_interfaces.assert_called_once_with(config=self.config, sniffer=True, pcap_dir="/test")
 
     def test_bring_up_vnet_interfaces_does_not_calls_ensure_vnet_veth_interface_if_no_veth_interfaces_present_in_config(self):
         del self.config["veths"]
@@ -378,6 +382,7 @@ class TestEnsureVNetVethInterfaces(VNetTestCase):
         self.create_veth_interface = self.set_up_patch("vnet_manager.operations.interface.create_veth_interface")
         self.configure_veth_interface = self.set_up_patch("vnet_manager.operations.interface.configure_veth_interface")
         self.configure_vnet_interface = self.set_up_patch("vnet_manager.operations.interface.configure_vnet_interface")
+        self.start_tcpdump = self.set_up_patch("vnet_manager.operations.interface.start_tcpdump_on_vnet_interface")
 
     def test_ensure_vnet_veth_interfaces_calls_ndb(self):
         ensure_vnet_veth_interfaces(self.config)
@@ -421,6 +426,20 @@ class TestEnsureVNetVethInterfaces(VNetTestCase):
         ensure_vnet_veth_interfaces(self.config)
         calls = [call(i) for i in self.config["veths"]]
         self.configure_vnet_interface.assert_has_calls(calls)
+
+    def test_ensure_vnet_veth_interfaces_does_not_start_sniffers_by_default(self):
+        ensure_vnet_veth_interfaces(self.config)
+        self.assertFalse(self.start_tcpdump.called)
+
+    def test_ensure_vnet_veth_interfaces_calls_start_tcpdump_on_sniffer_with_default_path(self):
+        ensure_vnet_veth_interfaces(self.config, sniffer=True)
+        calls = [call(ifname=i, path=settings.VNET_SNIFFER_PCAP_DIR) for i in self.config["veths"]]
+        self.start_tcpdump.assert_has_calls(calls)
+
+    def test_ensure_vnet_veth_interfaces_call_start_tcpdump_on_sniffer_with_custom_path(self):
+        ensure_vnet_veth_interfaces(self.config, sniffer=True, pcap_dir="/test")
+        calls = [call(ifname=i, path="/test") for i in self.config["veths"]]
+        self.start_tcpdump.assert_has_calls(calls)
 
 
 class TestCheckIfSnifferExists(VNetTestCase):
@@ -558,5 +577,10 @@ class TestKillTCPDumpProcessesOnVNetInterfaces(VNetTestCase):
 
     def test_kill_tcpdump_processes_on_vnet_interfaces_kills_tcpdump_process_on_vnet_interface(self):
         self.process.cmdline.return_value = f"/usr/sbin/tcpdump -i {settings.VNET_BRIDGE_NAME}0 -n"
+        kill_tcpdump_processes_on_vnet_interfaces(self.config)
+        self.process.kill.assert_called_once_with()
+
+    def test_kill_tcpdump_processes_on_vnet_interfaces_kills_tcpdump_process_on_vnet_veth_interface(self):
+        self.process.cmdline.return_value = f"/usr/sbin/tcpdump -i vnet-veth0 -n"
         kill_tcpdump_processes_on_vnet_interfaces(self.config)
         self.process.kill.assert_called_once_with()
