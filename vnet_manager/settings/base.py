@@ -60,20 +60,24 @@ PROVIDERS = {
         "guest_packages": [
             "man",  # List of packages to install on the guest
             "net-tools",
+            "dnsutils",
             "traceroute",
             "nano",
             "vim",
             "bridge-utils",
             "radvd",
-            "frr",
-            "frr-pythontools",
             "vlan",
             "avahi-daemon",
             "avahi-utils",
+            "curl",
+        ],
+        "frr_packages": [
+            "frr",
+            "frr-pythontools",
         ],
         "base_image": {  # Download info for the base image
-            "os": "20.04",
-            "server": "https://cloud-images.ubuntu.com/daily",
+            "os": "debian/12/cloud",
+            "server": "https://images.linuxcontainers.org/",
             "protocol": "simplestreams",
         },
     }

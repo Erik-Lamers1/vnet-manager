@@ -91,7 +91,7 @@ def configure_lxc_base_machine():
     logger.debug("Checking for DNS connectivity")
     dns = False
     for _ in range(0, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
-        if execute_and_log("host -t A google.com")[0] == 0:
+        if execute_and_log("ping -w 2 -c 1 google.com > /dev/null")[0] == 0:
             dns = True
             break
         # No DNS connectivity (yet), try again
@@ -102,14 +102,7 @@ def configure_lxc_base_machine():
         machine.stop()
         raise RuntimeError("Base machine started without working DNS, unable to continue")
 
-    # Set the FRR routing source and key
-    execute_and_log("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'")
-    execute_and_log(
-        f"bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {settings.FRR_RELEASE} "
-        f"| tee -a /etc/apt/sources.list.d/frr.list'"
-    )
-
-    # Update and install packages
+    # Update and install base packages
     execute_and_log("apt-get update")
     execute_and_log(
         "apt-get upgrade -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'",
@@ -118,6 +111,19 @@ def configure_lxc_base_machine():
     execute_and_log(
         f"apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' "
         f"{' '.join(settings['PROVIDERS']['lxc']['guest_packages'])}",
+        environment={"DEBIAN_FRONTEND": "noninteractive"},
+    )
+
+    # Set the FRR routing source and key
+    execute_and_log("bash -c 'curl -s https://deb.frrouting.org/frr/keys.asc | apt-key add'")
+    execute_and_log(
+        f"bash -c 'echo deb https://deb.frrouting.org/frr $(lsb_release -s -c) {settings.FRR_RELEASE} "
+        f"| tee -a /etc/apt/sources.list.d/frr.list'"
+    )
+    # Install FRR packages
+    execute_and_log(
+        f"apt-get install -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' "
+        f"{' '.join(settings['PROVIDERS']['lxc']['frr_packages'])}",
         environment={"DEBIAN_FRONTEND": "noninteractive"},
     )
 
