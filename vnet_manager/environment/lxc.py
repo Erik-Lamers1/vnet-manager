@@ -88,10 +88,10 @@ def configure_lxc_base_machine():
         return result
 
     # Check for DNS
-    logger.debug("Checking for DNS connectivity")
+    logger.debug("Checking for internet connectivity")
     dns = False
     for _ in range(0, settings.LXC_MAX_STATUS_WAIT_ATTEMPTS):
-        if execute_and_log("ping -w 2 -c 1 google.com > /dev/null")[0] == 0:
+        if execute_and_log("ping -w 2 -c 1 google.com")[0] == 0:
             dns = True
             break
         # No DNS connectivity (yet), try again

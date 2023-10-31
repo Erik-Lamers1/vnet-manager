@@ -60,6 +60,9 @@ PROVIDERS = {
         "guest_packages": [
             "man",  # List of packages to install on the guest
             "net-tools",
+            # We use Netplan since we build the config here in YAML for the old Ubuntu images
+            # TODO: Refactor this to systemd-networkd
+            "netplan.io",
             "dnsutils",
             "traceroute",
             "nano",
@@ -70,6 +73,8 @@ PROVIDERS = {
             "avahi-daemon",
             "avahi-utils",
             "curl",
+            "apt-utils",
+            "networkd-dispatcher",
         ],
         "frr_packages": [
             "frr",
