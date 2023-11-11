@@ -21,10 +21,10 @@ See the [README](config/README.md) for a more detailed explanation on how to cre
 
 ## Setup
 
-#### Install the required packages
+1. **Install the required packages**
 ```bash
 apt-get update
-apt-get install gcc python3-dev python3-apt python3-pip git lxc bridge-utils tcpdump net-tools curl
+apt-get install gcc python3-dev python3-apt python3-pip python3-venv git lxc bridge-utils tcpdump net-tools curl
 ```
 For Ubuntu 18.04;
 ```bash
@@ -37,7 +37,26 @@ snap install lxd
 ```
 
 
-#### Clone the repo
+2. **Clone the repo, with virtualenv**  
+This install method will create a local Python environment for vnet-manager to run in. This is recommended on older versions of Ubuntu.
+```bash
+git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
+cd ~/vnet-manager
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install vnet-manager
+```
+When using this install method you can optionally create a alias to easily enter the virtualenv;
+```bash
+# For Bash
+echo "alias vnet-venv='cd ~/vnet-manager; source .venv/bin/activate'" >> ~/.bashrc
+# For ZSH
+echo "alias vnet-venv='cd ~/vnet-manager; source .venv/bin/activate'" >> ~/.zshrc
+```
+
+2. **Clone the repo, global install**  
+This install method will make the vnet-manager command available system-wide. Please note that system Python packages may interfere with usage. See; [PyopenSSL issue](https://github.com/Erik-Lamers1/vnet-manager/issues/60)
 ```bash
 git clone https://github.com/Erik-Lamers1/vnet-manager.git ~/vnet-manager
 pip3 install vnet-manager
@@ -48,7 +67,9 @@ Optionally, vnet-manager can be installed from the cloned repo directly if you w
 python3 setup.py install
 ```
 
-#### Setup LXD
+
+
+3. **Setup LXD**  
 If you are running a clean LXD install you can import the provided preseed file;
 ```bash
 source /etc/os-release
