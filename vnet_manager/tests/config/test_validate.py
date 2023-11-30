@@ -197,6 +197,24 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once()
 
+    def test_validate_interface_config_sexagesimal_mac_address(self):
+        # 0d33212743741 is the sexagesimal representation of 42:42:42:42:09:01
+        # cf. https://github.com/Erik-Lamers1/vnet-manager/issues/62
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["mac"] = 33212743741
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            f"MAC 33212743741 for interface eth12 on machine router100 was parsed as a sexagesimal integer. Please wrap the MAC address in 'quotes'"
+        )
+
+    def test_validate_interface_config_invalid_mac_address(self):
+        self.validator.config["machines"]["router100"]["interfaces"]["eth12"]["mac"] = "gg:hh:ii:jj:kk:ll"
+        self.validator.validate_interface_config("router100")
+        self.assertFalse(self.validator.config_validation_successful)
+        self.logger.error.assert_called_once_with(
+            f"MAC gg:hh:ii:jj:kk:ll for interface eth12 on machine router100, does not seem to be valid. Please check your settings"
+        )
+
 
 class TestValidateConfigValidateMachineFilesParameters(VNetTestCase):
     def setUp(self) -> None:
