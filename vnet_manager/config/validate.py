@@ -247,7 +247,7 @@ class ValidateConfig:
             elif isinstance(int_vals["mac"], int):
                 logger.error(
                     f"MAC {int_vals['mac']} for interface {int_name} on machine {machine} was parsed as a sexagesimal integer. "
-                    "Please wrap the MAC address between 'quotes'"
+                    "Please wrap the MAC address in 'quotes'"
                 )
                 self._all_ok = False
             # From: https://stackoverflow.com/a/7629690/8632038

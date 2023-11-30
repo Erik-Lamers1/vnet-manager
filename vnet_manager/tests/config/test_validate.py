@@ -204,7 +204,7 @@ class TestValidateConfigValidateMachineConfig(VNetTestCase):
         self.validator.validate_interface_config("router100")
         self.assertFalse(self.validator.config_validation_successful)
         self.logger.error.assert_called_once_with(
-            f"MAC 33212743741 for interface eth12 on machine router100 was parsed as a sexagesimal integer. Please wrap the MAC address between 'quotes'"
+            f"MAC 33212743741 for interface eth12 on machine router100 was parsed as a sexagesimal integer. Please wrap the MAC address in 'quotes'"
         )
 
     def test_validate_interface_config_invalid_mac_address(self):
