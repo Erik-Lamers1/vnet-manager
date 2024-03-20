@@ -3,7 +3,7 @@
 # These requirements are only needed when running the tests (Pytest atm)
 pytest==7.1.2
 pylint==2.15.4
-black==22.8.0
+black==24.3.0
 codecov==2.1.13
 pytest-cov==2.12.1
 yamllint==1.26.3
