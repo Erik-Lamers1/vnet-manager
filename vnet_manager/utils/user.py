@@ -59,7 +59,7 @@ def request_confirmation(
             return
         if response in ("n", "no"):
             func(*args, **kwargs)
-            return
+            return  # pylint: disable=W0101
         if response is not None:
             print("Please answer yes or no.")
         response = input(prompt).lower()
