@@ -244,6 +244,12 @@ class ValidateConfig:
             if "mac" not in int_vals:
                 logger.debug(f"MAC not found for interface {int_name} on machine {machine}, generating a random one")
                 self._new_config["machines"][machine]["interfaces"][int_name]["mac"] = random_mac_generator()
+            elif isinstance(int_vals["mac"], int):
+                logger.error(
+                    f"MAC {int_vals['mac']} for interface {int_name} on machine {machine} was parsed as a sexagesimal integer. "
+                    "Please wrap the MAC address in 'quotes'"
+                )
+                self._all_ok = False
             # From: https://stackoverflow.com/a/7629690/8632038
             elif not fullmatch(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", int_vals["mac"]):
                 logger.error(
